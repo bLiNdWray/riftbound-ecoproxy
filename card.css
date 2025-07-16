@@ -1,4 +1,4 @@
-/* card.css — now referencing real icon names */
+/* card.css — Unified styles with force & color icons */
 
 /* Page layout */
 body {
@@ -47,33 +47,40 @@ body {
   height: 12px;
 }
 
-/* Cost */
+/* Casting cost with force icon */
 .top-bar .cost {
   position: absolute;
   right: 6px;
   top: 4px;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #333;
-  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 2px;
   font-size: 10px;
-  background: #fff;
+}
+.force-icon {
+  width: 12px;
+  height: 12px;
 }
 
-/* Unit/Spell background colors */
+/* Unit/Spell bar colors */
 .card.unit .top-bar { background: #f9f9f9; }
 .card.spell .top-bar { background: #cceeff; }
 
-/* Middle */
+/* Middle text area with color icon */
 .middle {
   flex: 1;
   padding: 4px 6px;
   font-size: 8pt;
   line-height: 1.2;
+  position: relative;
   overflow: auto;
+}
+.color-icon {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
 }
 
 /* Bottom bar */
