@@ -2,22 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Riftbound Proxy Generator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>Riftbound Proxy Generator</h1>
+    <p>An ink-saving proxy generator to print and test your Riftbound cards.</p>
+    <form id="id-form">
+      <label for="id-input" class="visually-hidden">Card IDs (comma-separated)</label>
+      <input
+        type="text"
+        id="id-input"
+        name="id"
+        placeholder="Enter card IDs, e.g. RB001,RB002"
+      />
+      <button type="submit">Generate Proxies</button>
+    </form>
   </header>
-  <main id="card-container">
-    <!-- Cards will be injected here -->
-  </main>
+  <main id="card-container"></main>
   <footer>
-    <p>Pass IDs via `?id=RB001,RB002,…`</p>
+    <p>Pass card IDs via <code>?id=RB001,RB002,…</code></p>
   </footer>
-
   <script src="script.js"></script>
 </body>
 </html>
-
