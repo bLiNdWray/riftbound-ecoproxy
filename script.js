@@ -2,7 +2,7 @@
 (() => {
   // Config: update to your new Apps Script exec URL and sheet name
   const API_BASE =
-    'https://script.google.com/macros/s/AKfycbzjps0P-SEz_mJM722Mb_Gym7qinNaNwHznm3jdlHlBrFZmHKflMPAl5wbAWb-GlUDZKg/exec';
+    'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
   const SHEET_NAME = 'Riftbound Cards';
 
   // Elements
