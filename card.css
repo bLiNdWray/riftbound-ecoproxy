@@ -53,15 +53,6 @@ body {
 }
 
 .bf-col.side.left .bf-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);      /* flip so top reads toward left edge */
-  text-align: right;              /* align text to right (nearest edge) */
-  font-size: 7pt;
-  line-height: 1.2;
-}
-
-.bf-col.side.right .bf-text {
   writing-mode: vertical-lr;       /* flip flow so top reads toward right edge */
   text-orientation: mixed;
   text-align: left;               /* align text to left (nearest edge) */
@@ -69,6 +60,14 @@ body {
   line-height: 1.2;
 }
 
+.bf-col.side.right .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);      /* flip so top reads toward left edge */
+  text-align: right;              /* align text to right (nearest edge) */
+  font-size: 7pt;
+  line-height: 1.2;
+}
 
 /* Center column */
 .bf-col.center {
