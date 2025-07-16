@@ -34,6 +34,12 @@ body {
 .card.unit .top-bar { background: #f9f9f9; }
 .card.spell .top-bar { background: #cceeff; }
 
+/* Card name size */
+.top-bar .name {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
 /* Resource icons */
 .top-bar .resources {
   position: absolute;
@@ -47,7 +53,7 @@ body {
   height: 12px;
 }
 
-/* Cost + force icon */
+/* Cost + force icon (now matching name size) */
 .top-bar .cost {
   position: absolute;
   right: 6px;
@@ -55,7 +61,8 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  font-size: 10px;
+  font-size: 12pt;
+  font-weight: bold;
 }
 .force-icon {
   width: 12px;
