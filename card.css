@@ -1,5 +1,10 @@
-/* Base card dimensions and styling */
+/* card.css: Combined RNG for Units, Spells, and Battlefields */
+
+/* Global resets and container styles omitted for brevity */
+
 .card {
+  --bar-color: #333;
+  --cost-color: var(--bar-color);
   width: 63mm;
   height: 88mm;
   background: #fff;
@@ -9,55 +14,25 @@
   font-family: Arial, sans-serif;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  margin: 0 20px;
 }
 
-/* --- Top Bar --- */
+/* Top bar common to Units/Spells */
 .card .top-bar {
   position: relative;
   padding: 6px;
   padding-top: 14px;
-  border-top: 4px solid var(--bar-color, #333);
+  border-top: 4px solid var(--bar-color);
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
 }
-.card .top-bar .resources {
-  position: absolute;
-  top: 4px;
-  left: 6px;
-  display: flex;
-  gap: 2px;
-}
-.card .resources .icon {
-  width: 12px;
-  height: 12px;
-  background: var(--bar-color, #333);
-  border-radius: 50%;
-}
-.card .top-bar .name {
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-  flex: 1;
-}
-.card .top-bar .cost {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--cost-color, #333);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  background: #fff;
-}
+.card .top-bar .resources { position: absolute; top: 4px; left: 6px; display: flex; gap: 2px; }
+.card .top-bar .resources .icon { width: 12px; height: 12px; background: var(--bar-color); border-radius: 50%; }
+.card .top-bar .name { font-size: 12px; font-weight: bold; text-align: center; flex: 1; }
+.card .top-bar .cost { position: absolute; top: 4px; right: 6px; width: 18px; height: 18px; border: 2px solid var(--cost-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background: #fff; }
 
-/* --- Middle Text --- */
+/* Middle effect text common */
 .card .middle {
   flex: 1;
   padding: 6px;
@@ -66,7 +41,7 @@
   overflow: auto;
 }
 
-/* --- Bottom Bar --- */
+/* Bottom bar common */
 .card .bottom-bar {
   border-top: 1px solid #333;
   padding: 6px;
@@ -75,51 +50,49 @@
   align-items: center;
   font-size: 8pt;
   box-sizing: border-box;
-  height: 12mm;
 }
-.card .type-line {
-  text-align: left;
-}
-.card .might {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.card .might .icon {
-  width: 12px;
-  height: 12px;
-  background: black;
-  border-radius: 50%;
-}
+.card .bottom-bar .type-line { text-align: left; }
 
-/* --- Card-type overrides --- */
+/* Unit-specific might */
 .card.unit { --bar-color: red; --cost-color: red; }
+.card.unit .bottom-bar .might { display: flex; align-items: center; gap: 4px; }
+.card.unit .might .icon { width: 12px; height: 12px; background: black; border-radius: 50%; }
+
+/* Spell-specific */
 .card.spell { --bar-color: blue; --cost-color: blue; }
+
+/* Battlefield-specific layout: fully text, no icons, vertical orientation retained */
 .card.battlefield {
-  --bar-color: gray;
-  --cost-color: gray;
+  --bar-color: #555;
+  --cost-color: #555;
   background: #fafafa;
 }
+.card.battlefield .top-bar {
+  border-top-color: var(--bar-color);
+}
 .card.battlefield .top-bar .resources,
-.card.battlefield .top-bar .cost {
-  display: none;
+.card.battlefield .top-bar .cost { display: none; }
+.card.battlefield .top-bar .name {
+  font-size: 10pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--bar-color);
 }
-.card.battlefield .bottom-bar .might {
-  display: none;
+.card.battlefield .middle {
+  padding: 10px;
+  font-size: 8pt;
+  text-align: center;
 }
-.card.battlefield .bottom-bar .page-num {
-  font-size: 7pt;
+.card.battlefield .bottom-bar {
+  justify-content: space-between;
+  font-size: 6pt;
 }
+.card.battlefield .bottom-bar .type-line {
+  font-style: italic;
+}
+.card.battlefield .bottom-bar .might { display: none; }
 
-/* Layout for preview */
-body {
-  background: #eee;
-  display: flex;
-  padding: 20px;
-  align-items: flex-start;
-}
-
+/* Print adjustments */
 @media print {
-  body { background: none; }
-  .card { box-shadow: none; margin: 0; }
+  .card { box-shadow: none; }
 }
