@@ -1,54 +1,60 @@
 (async function() {
-  // 1. Read the `id` query param
-  const params = new URLSearchParams(location.search);
+  // 1. Parse the `?id=` query parameter into an array of IDs
+  const params = new URLSearchParams(window.location.search);
   const idsParam = params.get('id') || '';
-  const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
-
-  if (ids.length === 0) {
-    document.getElementById('card-container').innerHTML =
-      '<p>No card IDs provided. Use ?id=RB001,RB002,…</p>';
-    return;
-  }
+  const ids = idsParam
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
 
   const container = document.getElementById('card-container');
 
-  // 2. For each ID, fetch data from your Riftbound API
-  //    Adjust `API_BASE` to point to your database endpoint
-  const API_BASE = 'https://api.riftboundtcg.com/cards';
+  // 2. If no IDs, show a message and exit
+  if (ids.length === 0) {
+    container.innerHTML = '<p>No card IDs provided. Use ?id=RB001,RB002,…</p>';
+    return;
+  }
 
+  // 3. Point this at your Apps Script exec URL
+  const API_BASE =
+    'https://script.google.com/macros/s/AKfycbzjps0P-SEz_mJM722Mb_Gym7qinNaNwHznm3jdlHlBrFZmHKflMPAl5wbAWb-GlUDZKg/exec';
+
+  // 4. For each ID, fetch exactly that row from the sheet
   for (let id of ids) {
+    // Create a card container
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    container.appendChild(cardEl);
+
     try {
-      const res = await fetch(`${API_BASE}/${encodeURIComponent(id)}`);
+      // Fetch only the matching card by passing id + sheet name
+      const url = `${API_BASE}?sheet=Cards&id=${encodeURIComponent(id)}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const card = await res.json();
+      const data = await res.json();
 
-      // 3. Render the card “proxy”
-      const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+      // data is an array; take the first element
+      const card = data[0];
+      if (!card) throw new Error('No card found');
 
-      // if your card JSON has an image URL:
+      // 5. Render the image
       const img = document.createElement('img');
       img.src = card.imageUrl;
       img.alt = card.name;
       cardEl.appendChild(img);
 
-      // overlay info
+      // 6. Overlay the name/type/cost
       const info = document.createElement('div');
       info.className = 'info';
       info.innerHTML = `
         <strong>${card.name}</strong><br/>
-        ${card.type} &mdash; ${card.cost || ''}
+        ${card.type || ''} ${card.cost ? `— ${card.cost}` : ''}
       `;
       cardEl.appendChild(info);
 
-      container.appendChild(cardEl);
-
     } catch (err) {
       console.error(`Failed to load ${id}:`, err);
-      const errorEl = document.createElement('div');
-      errorEl.className = 'card';
-      errorEl.innerHTML = `<div class="info">Error loading ${id}</div>`;
-      container.appendChild(errorEl);
+      cardEl.innerHTML = `<div class="info">Error loading ${id}</div>`;
     }
   }
 })();
