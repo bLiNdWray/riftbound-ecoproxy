@@ -69,39 +69,70 @@
     closeModal(importModal);
   });
 
-  // Generate proxies
+    // Generate proxies
   async function generateProxies(ids) {
     container.innerHTML = '';
     for (let id of ids) {
-      console.log(`Fetching ${id}`);
       const cardEl = document.createElement('div');
       cardEl.className = 'card';
       container.appendChild(cardEl);
+
       try {
         const url = `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(id)}`;
-        console.log('URL:', url);
+        console.log('Fetching:', url);
         const res = await fetch(url);
         const data = await res.json();
-        console.log('Data for', id, data);
+        console.log('Response for', id, data);
+
         const card = data[0];
-        if (!card) throw new Error('Not found');
-        const img = document.createElement('img');
-        img.src = card.imageUrl || card.ImageUrl || card['Image URL'];
-        img.alt = card.Name || card.name || '';
-        cardEl.appendChild(img);
+        if (!card) throw new Error('No data for ' + id);
+
+        // Helper to pick the first matching key
+        function pick(obj, candidates) {
+          for (let k of candidates) {
+            if (k in obj && obj[k] != null && obj[k] !== '') return obj[k];
+          }
+          return '';
+        }
+
+        // Identify fields (adjust these if your headers differ)
+        const imgUrl    = pick(card, ['imageUrl','ImageUrl','Image URL','image','img']);
+        const nameText  = pick(card, ['Name','name','Card Name','cardName']);
+        const typeText  = pick(card, ['Type','type','Card Type','cardType']);
+        const costText  = pick(card, ['Cost','cost','Mana','mana']);
+        
+        // Append image if found
+        if (imgUrl) {
+          const img = document.createElement('img');
+          img.src = imgUrl;
+          img.alt = nameText;
+          cardEl.appendChild(img);
+        }
+
+        // Build info overlay
         const info = document.createElement('div');
         info.className = 'info';
-        const nameText = card.Name || card.name || '';
-        const typeText = card.Type || card.type || '';
-        const costText = card.Cost || card.cost ? ` — ${card.Cost || card.cost}` : '';
-        info.innerHTML = `<strong>${nameText}</strong><br/>${typeText}${costText}`;
+        let html = `<strong>${nameText || id}</strong>`;
+        if (typeText) html += `<br/>${typeText}`;
+        if (costText) html += ` — ${costText}`;
+        info.innerHTML = html;
         cardEl.appendChild(info);
+
+        // If no image and no name, dump JSON for debugging
+        if (!imgUrl && !nameText) {
+          const pre = document.createElement('pre');
+          pre.textContent = JSON.stringify(card, null, 2);
+          pre.style.color = '#900';
+          cardEl.appendChild(pre);
+        }
+
       } catch (e) {
         console.error(`Error loading ${id}:`, e);
-        cardEl.innerHTML = `<div class="info">Error: ${id}</div>`;
+        cardEl.innerHTML = `<div class="info">Error: ${e.message}</div>`;
       }
     }
   }
+
 
   // Handle form submission
   idForm.addEventListener('submit', e => {
