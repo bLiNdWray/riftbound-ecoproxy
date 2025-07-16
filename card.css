@@ -91,3 +91,61 @@ body {
   body { background: none; padding: 0; }
   .card { box-shadow: none; margin: 0; }
 }
+
+/* Battlefield–style card (vertical, text-only) */
+.card.battlefield {
+  --bar-color: #555;      /* gray top border */
+  --cost-color: #555;
+  background: #fafafa;
+}
+
+/* Top bar with “Battlefield” label */
+.card.battlefield .top-bar {
+  border-top: 4px solid var(--bar-color);
+  padding: 6px 8px;
+  position: relative;
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+/* Instead of resource dots, print the word */
+.card.battlefield .top-bar .resources {
+  position: static;
+  display: none;
+}
+
+.card.battlefield .top-bar .name {
+  text-align: left;
+  margin: 0;
+}
+
+/* Hide the cost circle */
+.card.battlefield .top-bar .cost {
+  display: none;
+}
+
+/* Middle is your flavor text */
+.card.battlefield .middle {
+  padding: 6px 8px;
+  font-size: 8pt;
+  line-height: 1.3;
+}
+
+/* Bottom bar: small type label and page number */
+.card.battlefield .bottom-bar {
+  border-top: 1px solid #333;
+  padding: 6px 8px;
+  font-size: 7pt;
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+}
+
+/* Optional: smaller type-line if you want */
+.card.battlefield .type-line {
+  font-style: italic;
+}
+.card.battlefield .might {
+  display: none;
+}
+
