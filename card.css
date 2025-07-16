@@ -1,6 +1,6 @@
 /* Page layout */
 body {
-  background: #eee;
+  background: #fff;
   padding: 20px;
   display: flex;
   gap: 20px;
@@ -12,64 +12,38 @@ body {
   width: 63mm;
   height: 88mm;
   background: #fff;
-  border: 1px solid #333;
+  border: 1px solid #000;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   font-family: Arial, sans-serif;
   overflow: hidden;
 }
 
-/* Top bar */
+/* Top bar: name + cost */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 4px 6px;
-  position: relative;
+  border-bottom: 1px solid #000;
   height: 12mm;
   box-sizing: border-box;
-  background: #ddd;
 }
-.card.unit .top-bar { background: #f9f9f9; }
-.card.spell .top-bar { background: #cceeff; }
-
-/* Card name size */
-.top-bar .name {
-  font-size: 12pt;
+.name, .cost {
+  font-size: 12px;        /* match the name size */
   font-weight: bold;
 }
-
-/* Resource icons */
-.top-bar .resources {
-  position: absolute;
-  left: 6px;
-  top: 4px;
-  display: flex;
-  gap: 2px;
-}
-.res-icon {
-  width: 12px;
-  height: 12px;
-}
-
-/* Cost + force icon (now matching name size) */
-.top-bar .cost {
-  position: absolute;
-  right: 6px;
-  top: 4px;
+.cost {
   display: flex;
   align-items: center;
   gap: 2px;
-  font-size: 12pt;
-  font-weight: bold;
 }
 .force-icon {
   width: 12px;
   height: 12px;
 }
 
-/* Middle */
+/* Middle section */
 .middle {
   position: relative;
   flex: 1;
@@ -78,7 +52,7 @@ body {
   line-height: 1.2;
   overflow: auto;
 }
-/* Color indicator */
+/* Color indicator bottom-right */
 .color-indicator {
   position: absolute;
   bottom: 4px;
@@ -97,19 +71,29 @@ body {
   text-transform: capitalize;
 }
 
-/* Bottom bar */
+/* Bottom bar: type and might */
 .bottom-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #333;
+  border-top: 1px solid #000;
   padding: 4px 6px;
   font-size: 8pt;
   height: 10mm;
   box-sizing: border-box;
 }
-.card.spell .bottom-bar { background: #eef9ff; }
-.card.unit .bottom-bar { background: #f9f9f9; }
+.type-line {
+  font-weight: bold;
+}
+.might {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.might-icon {
+  width: 12px;
+  height: 12px;
+}
 
 /* Battlefield three-column */
 .bf-columns {
@@ -125,15 +109,15 @@ body {
   align-items: center;
   padding: 4px;
 }
-.bf-col.side { width: 20%; background: #fafafa; }
+.bf-col.side { width: 20%; }
 .bf-col.center {
   width: 60%;
-  background: #ddd;
   flex-direction: column;
 }
-/* Battlefield text in center */
+/* Battlefield center text */
 .bf-type-text {
   font-size: 8pt;
+  font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
@@ -143,7 +127,7 @@ body {
   text-align: center;
 }
 
-/* Side column text (mirrored) */
+/* Side-column text (mirrored) */
 .bf-col.side.left .bf-text {
   writing-mode: vertical-lr;
   text-orientation: mixed;
@@ -160,8 +144,8 @@ body {
   line-height: 1.2;
 }
 
-/* Print */
+/* Print styling */
 @media print {
   body { background: none; padding: 0; }
-  .card { box-shadow: none; margin: 0; }
+  .card { border-color: #000; box-shadow: none; margin: 0; }
 }
