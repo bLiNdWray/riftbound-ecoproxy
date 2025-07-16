@@ -1,4 +1,6 @@
-/* Make the page background light so we can see card edges */
+/* card.css */
+
+/* Page background */
 body {
   background: #eee;
   padding: 20px;
@@ -6,88 +8,120 @@ body {
   gap: 20px;
 }
 
-/* Base card */
+/* Base card: 63mm x 88mm */
 .card {
+  --bar-color: #333;
+  --cost-color: var(--bar-color);
+
   width: 63mm;
   height: 88mm;
   background: #fff;
   border: 1px solid #333;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   font-family: Arial, sans-serif;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Top bar: name + cost */
-.top-bar {
+/* Top bar with colored border */
+.card .top-bar {
+  position: relative;
+  padding: 6px;
+  padding-top: 14px; /* space for icons */
+  border-top: 4px solid var(--bar-color);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: #ddd;
-  padding: 4px 6px;
-  font-weight: bold;
-  font-size: 10pt;
-  height: 12mm;
+  justify-content: center;
   box-sizing: border-box;
 }
 
-/* Middle text area */
-.middle {
+/* Resource icons (top-left) */
+.card .top-bar .resources {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  display: flex;
+  gap: 2px;
+}
+.card .resources .icon {
+  width: 12px;
+  height: 12px;
+  background: var(--bar-color);
+  border-radius: 50%;
+}
+
+/* Card name centered */
+.card .top-bar .name {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
   flex: 1;
-  padding: 4px 6px;
+}
+
+/* Cost circle (top-right) */
+.card .top-bar .cost {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--cost-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  background: #fff;
+}
+
+/* Middle: effect text */
+.card .middle {
+  flex: 1;
+  padding: 6px;
   font-size: 8pt;
   line-height: 1.2;
   overflow: auto;
 }
 
-/* Bottom bar: type/number/super + might */
-.bottom-bar {
+/* Bottom bar divider */
+.card .bottom-bar {
+  border-top: 1px solid #333;
+  padding: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #333;
-  padding: 4px 6px;
   font-size: 8pt;
-  height: 10mm;
   box-sizing: border-box;
+  height: 12mm;
 }
 
-/* Specific styling per card type */
-.card.unit .bottom-bar {
-  background: #f9f9f9;
-}
-
-.card.spell .top-bar {
-  background: #cceeff;
-}
-
-.card.spell .bottom-bar {
-  background: #eef9ff;
-}
-
-/* Elements */
-.name {
+/* Bottom bar type & super (left) */
+.card .bottom-bar .type-line {
   text-align: left;
 }
 
-.cost {
-  text-align: right;
-}
-
-.type-line {
-  text-align: left;
-}
-
-.might {
+/* Unit-specific might (right) */
+.card.unit .bottom-bar .might {
   display: flex;
   align-items: center;
-  gap: 2px;
-  font-weight: bold;
+  gap: 4px;
+}
+.card.unit .might .icon {
+  width: 12px;
+  height: 12px;
+  background: black;
+  border-radius: 50%;
 }
 
-/* For print preview */
+/* Color overrides */
+.card.unit { --bar-color: red; }
+.card.unit { --cost-color: red; }
+.card.spell { --bar-color: blue; }
+.card.spell { --cost-color: blue; }
+
+/* Print adjustments */
 @media print {
   body { background: none; padding: 0; }
-  .card { box-shadow: none; margin: 0; }
+  .card { box-shadow: none; }
 }
