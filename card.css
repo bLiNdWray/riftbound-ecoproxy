@@ -1,5 +1,3 @@
-/* card.css — Unified styles with force & color icons */
-
 /* Page layout */
 body {
   background: #eee;
@@ -27,12 +25,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #ddd;
   padding: 4px 6px;
   position: relative;
   height: 12mm;
   box-sizing: border-box;
+  background: #ddd;
 }
+.card.unit .top-bar { background: #f9f9f9; }
+.card.spell .top-bar { background: #cceeff; }
 
 /* Resource icons */
 .top-bar .resources {
@@ -47,7 +47,7 @@ body {
   height: 12px;
 }
 
-/* Casting cost with force icon */
+/* Cost + force icon */
 .top-bar .cost {
   position: absolute;
   right: 6px;
@@ -62,25 +62,34 @@ body {
   height: 12px;
 }
 
-/* Unit/Spell bar colors */
-.card.unit .top-bar { background: #f9f9f9; }
-.card.spell .top-bar { background: #cceeff; }
-
-/* Middle text area with color icon */
+/* Middle */
 .middle {
+  position: relative;
   flex: 1;
   padding: 4px 6px;
   font-size: 8pt;
   line-height: 1.2;
-  position: relative;
   overflow: auto;
 }
+
+/* Color symbol (larger) */
 .color-icon {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 12px;
-  height: 12px;
+  bottom: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+}
+
+/* Plain-text type label */
+.type-label {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 /* Bottom bar */
@@ -131,9 +140,11 @@ body {
   background: #ddd;
   flex-direction: column;
 }
-.center-icon {
-  width: 24px;
-  height: 24px;
+/* Battlefield center: use text instead of icon */
+.bf-col.center .type-label {
+  font-size: 10pt;
+  font-weight: bold;
+  text-transform: uppercase;
   margin-bottom: 4px;
 }
 .bf-name {
@@ -161,6 +172,4 @@ body {
 
 /* Print */
 @media print {
-  body { background: none; padding: 0; }
-  .card { box-shadow: none; margin: 0; }
-}
+  body { background: none
