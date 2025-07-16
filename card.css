@@ -40,19 +40,35 @@ body {
   overflow: hidden;
 }
 
-/* Side columns */
-.bf-col.side {
-  width: 20%;       /* narrower side panels */
+/* Side columns share .bf-text but differ in writing-mode and alignment */
+.bf-col.side { 
+  width: 20%; 
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: #fafafa;
+  padding: 4px;
+  box-sizing: border-box;
 }
-.bf-col.side .bf-text {
+
+.bf-col.side.left .bf-text {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  transform: rotate(180deg); /* flip so text reads outward */
+  transform: rotate(180deg);      /* flip so top reads toward left edge */
+  text-align: right;              /* align text to right (nearest edge) */
   font-size: 7pt;
   line-height: 1.2;
-  text-align: center;
 }
+
+.bf-col.side.right .bf-text {
+  writing-mode: vertical-lr;       /* flip flow so top reads toward right edge */
+  text-orientation: mixed;
+  text-align: left;               /* align text to left (nearest edge) */
+  font-size: 7pt;
+  line-height: 1.2;
+}
+
 
 /* Center column */
 .bf-col.center {
