@@ -156,62 +156,82 @@ body {
 }
 /* Legend card overrides */
 .card.legend {
-  border-color: #000;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Top bar: keep height but clear background */
+/* Top-bar: remove default justify, allow colors left and label right */
 .card.legend .top-bar {
-  background: #fff;
-  border-bottom: 1px solid #000;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 4px 6px;
+  border-bottom: 1px solid #000;
+  height: 12mm;
+  box-sizing: border-box;
+  background: #fff;
 }
 
-/* Legend icon (color) prominent top-left */
-.legend-icon {
+/* Two color icons in top-left */
+.legend-colors {
+  display: flex;
+  gap: 2px;
+}
+.legend-color-icon {
   width: 32px;
   height: 32px;
 }
 
-/* Tags centered in top-bar */
-.legend-tag {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 8pt;
-  font-style: italic;
-}
-
-/* Middle: name centered and bold */
-.card.legend .middle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-.legend-name {
-  font-size: 12pt;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Bottom-bar: ability text */
-.card.legend .bottom-bar {
-  padding: 6px;
-  font-size: 8pt;
-  position: relative;
-}
-.legend-ability {
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* “Legend” label in top-right of bottom-bar */
+/* “Legend” label top-right */
 .legend-label {
-  position: absolute;
-  top: -1.2em;    /* sits just above the bottom-bar */
-  right: 6px;
   font-size: 8pt;
   font-weight: bold;
   text-transform: uppercase;
 }
+
+/* Middle area: tag and name centered */
+.card.legend .middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+.legend-tag {
+  font-size: 8pt;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+.legend-name {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Bottom-bar enlarged for ability text */
+.bottom-bar.legend-bottom {
+  border-top: 1px solid #000;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 30mm; /* increased height */
+}
+.legend-ability {
+  margin: 0;
+  font-size: 8pt;
+  line-height: 1.3;
+}
+.legend-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7pt;
+  margin-top: 4px;
+}
+.legend-footer .page { }
+/* you can style .rarity if needed */
