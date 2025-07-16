@@ -154,3 +154,64 @@ body {
   body { background: none; padding: 0; }
   .card { border-color: #000; box-shadow: none; margin: 0; }
 }
+/* Legend card overrides */
+.card.legend {
+  border-color: #000;
+}
+
+/* Top bar: keep height but clear background */
+.card.legend .top-bar {
+  background: #fff;
+  border-bottom: 1px solid #000;
+  position: relative;
+  padding: 4px 6px;
+}
+
+/* Legend icon (color) prominent top-left */
+.legend-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* Tags centered in top-bar */
+.legend-tag {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8pt;
+  font-style: italic;
+}
+
+/* Middle: name centered and bold */
+.card.legend .middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+.legend-name {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Bottom-bar: ability text */
+.card.legend .bottom-bar {
+  padding: 6px;
+  font-size: 8pt;
+  position: relative;
+}
+.legend-ability {
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* “Legend” label in top-right of bottom-bar */
+.legend-label {
+  position: absolute;
+  top: -1.2em;    /* sits just above the bottom-bar */
+  right: 6px;
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
