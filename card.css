@@ -1,93 +1,83 @@
-/* Make the page background light so we can see card edges */
+/* Page layout */
 body {
   background: #eee;
   padding: 20px;
   display: flex;
-  gap: 20px;
+  justify-content: center;
 }
 
-/* Base card */
+/* Base card (portrait) */
 .card {
   width: 63mm;
   height: 88mm;
-  background: #fff;
+  background: #fafafa;
   border: 1px solid #333;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  overflow: hidden;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Battlefield-specific overrides */
+.card.battlefield {
+  --bar-color: #333;
+}
+
+/* Container for three columns */
+.bf-columns {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Common for all columns */
+.bf-col {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
-/* Top bar: name + cost */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #ddd;
-  padding: 4px 6px;
-  font-weight: bold;
-  font-size: 10pt;
-  height: 12mm;
-  box-sizing: border-box;
+/* Side columns */
+.bf-col.side {
+  width: 20%;       /* narrower side panels */
+  background: #fafafa;
 }
-
-/* Middle text area */
-.middle {
-  flex: 1;
-  padding: 4px 6px;
-  font-size: 8pt;
+.bf-col.side .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg); /* flip so text reads outward */
+  font-size: 7pt;
   line-height: 1.2;
-  overflow: auto;
+  text-align: center;
 }
 
-/* Bottom bar: type/number/super + might */
-.bottom-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #333;
-  padding: 4px 6px;
+/* Center column */
+.bf-col.center {
+  width: 60%;       /* wider middle panel */
+  background: #ddd;
+  flex-direction: column;
+  justify-content: center;
+}
+.bf-col.center .bf-type {
   font-size: 8pt;
-  height: 10mm;
-  box-sizing: border-box;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
-
-/* Specific styling per card type */
-.card.unit .bottom-bar {
-  background: #f9f9f9;
-}
-
-.card.spell .top-bar {
-  background: #cceeff;
-}
-
-.card.spell .bottom-bar {
-  background: #eef9ff;
-}
-
-/* Elements */
-.name {
-  text-align: left;
-}
-
-.cost {
-  text-align: right;
-}
-
-.type-line {
-  text-align: left;
-}
-
-.might {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+.bf-col.center .bf-name {
+  font-size: 10pt;
   font-weight: bold;
+  text-align: center;
 }
 
-/* For print preview */
+/* Remove side flex shrink/grow conflicts */
+.bf-col.left  { flex: 0 0 20%; }
+.bf-col.center{ flex: 1;    }
+.bf-col.right { flex: 0 0 20%; }
+
+/* No print shadows */
 @media print {
-  body { background: none; padding: 0; }
   .card { box-shadow: none; margin: 0; }
 }
