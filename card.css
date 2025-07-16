@@ -82,17 +82,22 @@ body {
   height: 10mm;
   box-sizing: border-box;
 }
+
 .type-line {
   font-weight: bold;
 }
+
+/* Bump the might number and icon size */
 .might {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;         /* a bit more breathing room */
+  font-size: 15px;  /* increased from 8pt */
+  font-weight: bold;
 }
 .might-icon {
-  width: 12px;
-  height: 12px;
+  width: 18px;      /* larger icon */
+  height: 18px;
 }
 
 /* Battlefield three-column */
