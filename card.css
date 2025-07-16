@@ -1,4 +1,4 @@
-/* card.css — Unified styles for Unit, Spell, and Battlefield */
+/* card.css — Unified styles with image icons */
 
 /* Page layout */
 body {
@@ -22,25 +22,36 @@ body {
   overflow: hidden;
 }
 
-/* Top bar: name + cost */
+/* Top bar: name + cost + resources */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #ddd;
   padding: 4px 6px;
-  font-weight: bold;
-  font-size: 10pt;
+  position: relative;
   height: 12mm;
   box-sizing: border-box;
 }
 
-/* Unit and Spell bar colors */
-.card.unit .top-bar { background: #f9f9f9; }
-.card.spell .top-bar { background: #cceeff; }
+/* Resource icons container */
+.top-bar .resources {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  display: flex;
+  gap: 2px;
+}
+.top-bar .res-icon {
+  width: 12px;
+  height: 12px;
+}
 
 /* Cost circle */
 .top-bar .cost {
+  position: absolute;
+  right: 6px;
+  top: 4px;
   width: 18px;
   height: 18px;
   border: 2px solid #333;
@@ -51,6 +62,10 @@ body {
   font-size: 10px;
   background: #fff;
 }
+
+/* Unit and Spell bar colors */
+.card.unit .top-bar { background: #f9f9f9; }
+.card.spell .top-bar { background: #cceeff; }
 
 /* Middle text area */
 .middle {
@@ -72,31 +87,13 @@ body {
   height: 10mm;
   box-sizing: border-box;
 }
+
+/* Spell bottom bar color */
 .card.spell .bottom-bar { background: #eef9ff; }
 
 /* Might icon for Units */
 .card.unit .bottom-bar { background: #f9f9f9; }
-.card.unit .might {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
 .card.unit .might img { width: 12px; height: 12px; }
-
-/* Elements */
-.name {
-  text-align: left;
-}
-.cost {
-  text-align: right;
-}
-.type-line {
-  text-align: left;
-}
-.page-num {
-  font-size: 7pt;
-  text-align: right;
-}
 
 /* Battlefield three-column layout */
 .bf-columns {
@@ -117,7 +114,7 @@ body {
 .bf-type { font-size: 8pt; text-transform: uppercase; margin-bottom: 4px; }
 .bf-name { font-size: 10pt; font-weight: bold; text-align: center; }
 
-/* Side columns share .bf-text but differ in writing-mode and alignment */
+/* Side columns: updated working code */
 .bf-col.side.left .bf-text {
   writing-mode: vertical-lr;
   text-orientation: mixed;
