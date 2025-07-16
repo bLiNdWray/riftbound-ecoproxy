@@ -10,21 +10,48 @@
   <header>
     <h1>Riftbound Proxy Generator</h1>
     <p>An ink-saving proxy generator to print and test your Riftbound cards.</p>
-    <form id="id-form">
-      <label for="id-input" class="visually-hidden">Card IDs (comma-separated)</label>
-      <input
-        type="text"
-        id="id-input"
-        name="id"
-        placeholder="Enter card IDs, e.g. RB001,RB002"
-      />
-      <button type="submit">Generate Proxies</button>
-    </form>
+    <div class="controls">
+      <button id="add-cards-btn">Add Cards</button>
+      <button id="import-list-btn">Import List</button>
+      <form id="id-form">
+        <label for="id-input" class="visually-hidden">Card IDs (comma-separated)</label>
+        <input
+          type="text"
+          id="id-input"
+          name="id"
+          placeholder="Enter card IDs, e.g. RB001,RB002"
+        />
+        <button type="submit">Generate Proxies</button>
+      </form>
+    </div>
   </header>
+
   <main id="card-container"></main>
+
   <footer>
     <p>Pass card IDs via <code>?id=RB001,RB002,…</code></p>
   </footer>
+
+  <!-- Add Cards Modal -->
+  <div id="add-cards-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-modal" data-target="add-cards-modal">×</button>
+      <h2>Add Cards</h2>
+      <input type="text" id="search-input" placeholder="Search card name..." />
+      <ul id="search-results"></ul>
+    </div>
+  </div>
+
+  <!-- Import List Modal -->
+  <div id="import-list-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-modal" data-target="import-list-modal">×</button>
+      <h2>Import List</h2>
+      <textarea id="import-text" rows="5" placeholder="Enter one card ID per line"></textarea>
+      <button id="import-submit">Import</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
