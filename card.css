@@ -1,4 +1,4 @@
-/* card.css — Unified styles with image icons */
+/* card.css — now referencing real icon names */
 
 /* Page layout */
 body {
@@ -22,7 +22,7 @@ body {
   overflow: hidden;
 }
 
-/* Top bar: name + cost + resources */
+/* Top bar */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -34,7 +34,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Resource icons container */
+/* Resource icons */
 .top-bar .resources {
   position: absolute;
   left: 6px;
@@ -42,12 +42,12 @@ body {
   display: flex;
   gap: 2px;
 }
-.top-bar .res-icon {
+.res-icon {
   width: 12px;
   height: 12px;
 }
 
-/* Cost circle */
+/* Cost */
 .top-bar .cost {
   position: absolute;
   right: 6px;
@@ -63,11 +63,11 @@ body {
   background: #fff;
 }
 
-/* Unit and Spell bar colors */
+/* Unit/Spell background colors */
 .card.unit .top-bar { background: #f9f9f9; }
 .card.spell .top-bar { background: #cceeff; }
 
-/* Middle text area */
+/* Middle */
 .middle {
   flex: 1;
   padding: 4px 6px;
@@ -76,7 +76,7 @@ body {
   overflow: auto;
 }
 
-/* Bottom bar: type/number/super + might */
+/* Bottom bar */
 .bottom-bar {
   display: flex;
   justify-content: space-between;
@@ -87,15 +87,24 @@ body {
   height: 10mm;
   box-sizing: border-box;
 }
-
-/* Spell bottom bar color */
 .card.spell .bottom-bar { background: #eef9ff; }
-
-/* Might icon for Units */
 .card.unit .bottom-bar { background: #f9f9f9; }
-.card.unit .might img { width: 12px; height: 12px; }
 
-/* Battlefield three-column layout */
+/* Type icons */
+.type-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
+
+/* Might icon */
+.might-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Battlefield three-column */
 .bf-columns {
   display: flex;
   width: 100%;
@@ -110,11 +119,23 @@ body {
   padding: 4px;
 }
 .bf-col.side { width: 20%; background: #fafafa; }
-.bf-col.center { width: 60%; background: #ddd; flex-direction: column; }
-.bf-type { font-size: 8pt; text-transform: uppercase; margin-bottom: 4px; }
-.bf-name { font-size: 10pt; font-weight: bold; text-align: center; }
+.bf-col.center {
+  width: 60%;
+  background: #ddd;
+  flex-direction: column;
+}
+.center-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+.bf-name {
+  font-size: 10pt;
+  font-weight: bold;
+  text-align: center;
+}
 
-/* Side columns: updated working code */
+/* Side column text (mirrored) */
 .bf-col.side.left .bf-text {
   writing-mode: vertical-lr;
   text-orientation: mixed;
@@ -131,7 +152,7 @@ body {
   line-height: 1.2;
 }
 
-/* Print adjustments */
+/* Print */
 @media print {
   body { background: none; padding: 0; }
   .card { box-shadow: none; margin: 0; }
