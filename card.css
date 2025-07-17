@@ -5,6 +5,7 @@ body {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  font-family: Arial, sans-serif;
 }
 
 /* Base card */
@@ -13,300 +14,18 @@ body {
   height: 88mm;
   background: #fff;
   border: 1px solid #000;
-  display: flex;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-}
-
-/* Top bar: name + cost */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 6px;
-  border-bottom: 1px solid #000;
-  height: 12mm;
-  box-sizing: border-box;
-  /* background removed */
-}
-.name, .cost {
-  font-size: 12px;        /* match the name size */
-  font-weight: bold;
-}
-.cost {
-  font-size: 18px;       /* increased from 12px */
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.force-icon {
-  width: 18px;           /* increased from 12px */
-  height: 18px;
-}
-
-
-/* Middle section */
-.middle {
-  position: relative;
-  flex: 1;
-  padding: 4px 6px;
-  font-size: 8pt;
-  line-height: 1.2;
-  overflow: auto;
-}
-/* Color indicator bottom-right */
-.color-indicator {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.color-icon {
-  width: 32px;
-  height: 32px;
-}
-.color-text {
-  font-size: 8pt;
-  font-weight: bold;
-  text-transform: capitalize;
-}
-
-/* Bottom bar: type and might */
-.bottom-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #000;
-  padding: 4px 6px;
-  font-size: 8pt;
-  height: 10mm;
-  box-sizing: border-box;
-}
-
-.type-line {
-  font-weight: bold;
-}
-
-/* Bump the might number and icon size */
-.might {
-  display: flex;
-  align-items: center;
-  gap: 4px;         /* a bit more breathing room */
-  font-size: 15px;  /* increased from 8pt */
-  font-weight: bold;
-}
-.might-icon {
-  width: 18px;      /* larger icon */
-  height: 18px;
-}
-
-/* Battlefield three-column */
-.bf-columns {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-.bf-col {
-  box-sizing: border-box;
   overflow: hidden;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4px;
-}
-.bf-col.side { width: 20%; }
-.bf-col.center {
-  width: 60%;
   flex-direction: column;
-}
-/* Battlefield center text */
-.bf-type-text {
-  font-size: 8pt;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.bf-name {
-  font-size: 10pt;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Side-column text (mirrored) */
-.bf-col.side.left .bf-text {
-  writing-mode: vertical-lr;
-  text-orientation: mixed;
-  text-align: left;
-  font-size: 7pt;
-  line-height: 1.2;
-}
-.bf-col.side.right .bf-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  text-align: right;
-  font-size: 7pt;
-  line-height: 1.2;
-}
-
-/* Print styling */
-@media print {
-  body { background: none; padding: 0; }
-  .card { border-color: #000; box-shadow: none; margin: 0; }
-}
-/* Legend card overrides */
-.card.legend {
-  border: 1px solid #000;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Top-bar: remove default justify, allow colors left and label right */
-.card.legend .top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px;
-  border-bottom: 1px solid #000;
-  height: 12mm;
-  box-sizing: border-box;
-  background: #fff;
-}
-
-/* Two color icons in top-left */
-.legend-colors {
-  display: flex;
-  gap: 2px;
-}
-.legend-color-icon {
-  width: 32px;
-  height: 32px;
-}
-
-/* “Legend” label top-right */
-.legend-label {
-  font-size: 8pt;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-/* Middle area: tag and name centered */
-.card.legend .middle {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 4px 6px;
   box-sizing: border-box;
 }
-.legend-tag {
-  font-size: 8pt;
-  font-style: italic;
-  margin-bottom: 2px;
-}
-.legend-name {
-  font-size: 14pt;
-  font-weight: bold;
-  text-align: center;
-}
 
-/* Bottom-bar enlarged for ability text */
-.bottom-bar.legend-bottom {
-  border-top: 1px solid #000;
-  padding: 6px 8px;
-  box-sizing: border-box;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 30mm; /* increased height */
-}
-.legend-ability {
-  margin: 0;
-  font-size: 8pt;
-  line-height: 1.3;
-}
-.legend-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 7pt;
-  margin-top: 4px;
-}
-.legend-footer .page { }
-/* you can style .rarity if needed */
-
-/* --- Rune Card Template Adjustments --- */
-.card.rune {
-  /* unchanged */
-}
-
-/* Top bar for Rune: add padding to move name down */
-.card.rune .rune-top {
-  height: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;  /* align at top, so padding works */
-  padding-top: 4px;         /* pushes the name down */
-}
-
-/* Rune name styling */
-.card.rune .rune-name {
-  font-size: 12pt;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Middle: center the icon */
-.card.rune .rune-middle {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Large color symbol at 180×180px */
-.card.rune .rune-icon {
-  width: 180px;
-  height: 180px;
-}
-
-/* Remove any default inner borders (unchanged) */
-.card.rune .rune-top,
-.card.rune .rune-middle {
-  border: none;
-}
-
-
-/* --- Alternate layout for Unit/Spell, restored info --- */
-
+/* — Alternate Unit/Spell Layout — */
 .card.unit-alt,
 .card.spell-alt {
-  display: flex;
-  flex-direction: column;
-  width: 63mm;
-  height: 88mm;
-  border: 1px solid #000;
-  background: #fff;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
+  /* inherits base */
 }
-/* Cost + force styling */
-.cost-alt {
-  display: flex;
-  align-items: center;
-  font-size: 18px;   /* increased from 12px */
-  font-weight: bold;
-}
-.force-icon-alt {
-  width: 18px;       /* increased from 12px */
-  height: 18px;
-  margin-left: 4px;  /* a bit more space */
-}
+
 /* Top bar: cost/force left, might right */
 .top-bar-alt {
   display: flex;
@@ -316,35 +35,29 @@ body {
   border-bottom: 1px solid #000;
   height: 12mm;
   box-sizing: border-box;
-  /* background removed */
 }
-.card.unit-alt .top-bar-alt { background: #f9f9f9; }
-.card.spell-alt .top-bar-alt { background: #cceeff; }
-
 .cost-alt {
-  font-size: 18px;       /* increased from 12px */
+  font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 .force-icon-alt {
-  width: 18px;           /* increased from 12px */
+  width: 18px;
   height: 18px;
 }
-
-/* Might in alt (no change except gap if needed) */
 .might-alt {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 .might-icon-alt {
-  width: 18px;           /* already enlarged */
+  width: 18px;
   height: 18px;
 }
 
-/* Name immediately under top bar */
+/* Name under top bar */
 .name-alt {
   text-align: center;
   font-size: 12px;
@@ -352,7 +65,7 @@ body {
   margin: 4px 0;
 }
 
-/* Centered effect text + color indicator */
+/* Centered effect text + color */
 .middle-alt {
   position: relative;
   flex: 1;
@@ -373,7 +86,8 @@ body {
   gap: 4px;
 }
 .color-icon-alt {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
 }
 .color-text-alt {
   font-size: 8pt;
@@ -381,7 +95,7 @@ body {
   text-transform: capitalize;
 }
 
-/* Bottom bar with type/super only */
+/* Bottom bar with type-line only */
 .bottom-bar-alt {
   padding: 4px 6px;
   border-top: 1px solid #000;
@@ -395,14 +109,147 @@ body {
   font-weight: bold;
 }
 
-/* Print */
-@media print {
-  .card.unit-alt, .card.spell-alt { border-color: #000; }
+/* — Battlefield — */
+.bf-columns {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.bf-col {
+  flex: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+}
+.bf-col.side { width: 20%; }
+.bf-col.center {
+  width: 60%;
+  flex-direction: column;
+}
+.bf-type-text {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.bf-name {
+  font-size: 10pt;
+  font-weight: bold;
+  text-align: center;
+}
+.bf-col.side.left .bf-text {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  text-align: left;
+  font-size: 7pt;
+  line-height: 1.2;
+}
+.bf-col.side.right .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  text-align: right;
+  font-size: 7pt;
+  line-height: 1.2;
 }
 
-.card.unit .top-bar,
-.card.spell .top-bar,
-.card.unit-alt .top-bar-alt,
-.card.spell-alt .top-bar-alt {
-  background: none !important;
+/* — Legend — */
+.card.legend {
+  /* inherits base */
+}
+/* Top bar: colors left, label right */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid #000;
+  height: 12mm;
+  box-sizing: border-box;
+}
+.legend-colors {
+  display: flex;
+  gap: 2px;
+}
+.legend-color-icon {
+  width: 32px;
+  height: 32px;
+}
+.legend-label {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+/* Center tag + name */
+.legend-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+.legend-tag {
+  font-size: 8pt;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+.legend-name {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+}
+/* Centered ability, no footer */
+.legend-bottom {
+  padding: 6px 8px;
+  border-top: 1px solid #000;
+  height: 30mm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.legend-ability {
+  margin: 0;
+  font-size: 8pt;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* — Rune — */
+.card.rune {
+  /* inherits base */
+}
+.rune-top {
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+.rune-name {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+.rune-middle {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rune-icon {
+  width: 180px;
+  height: 180px;
+  border: none;
+}
+
+/* Print */
+@media print {
+  body { background: none; padding: 0; }
+  .card { border-color: #000; box-shadow: none; margin: 0; }
 }
