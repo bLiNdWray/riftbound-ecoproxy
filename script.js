@@ -1,6 +1,6 @@
 // script.js
 (async () => {
-  const API_BASE   = 'https://script.google.com/macros/s/AKfycbxUnVQhHZSJmBTalByDCe9UJsW7GDGxVxD4pis-MhfdEhitsoV2hRQnVpkuA6mqWmtSiA/exec';
+  const API_BASE   = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
   const openBtn    = document.getElementById('open-search');
@@ -13,9 +13,9 @@
   let allCards = [];
 
   /**
-   * JSONP fetch helper
-   * @param {Object} params  query parameters for the request
-   * @param {Function} cb    callback to receive the parsed JSON data
+   * JSONP fetch helper.
+   * params: object of query-params (e.g. { sheet, id })
+   * cb: callback(dataArray)
    */
   function jsonpFetch(params, cb) {
     const callbackName = 'jsonp_cb_' + Date.now();
@@ -24,34 +24,31 @@
       document.head.removeChild(script);
       cb(data);
     };
-
     const qs = Object.entries(params)
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
     const script = document.createElement('script');
     script.src = `${API_BASE}?${qs}&callback=${callbackName}`;
     document.head.appendChild(script);
   }
 
-  // 1) Load all cards for search via JSONP
-  function loadAllCards(cb) {
+  // 1) Load all cards for search
+  await new Promise(resolve => {
     jsonpFetch({ sheet: SHEET_NAME }, data => {
-      console.log('⚡︎ [loadAllCards] got', data.length, 'cards');
-      allCards = Array.isArray(data) ? data : Object.values(data);
-      cb();
+      allCards = Array.isArray(data) ? data : [];
+      resolve();
     });
-  }
-  await new Promise(resolve => loadAllCards(resolve));
+  });
 
-  // 2) Initial render when page loads (reads ?id=variantNumber)
+  // 2) Initial render from URL (?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
     renderCards(initialIds, true);
-    initialIds.forEach(vn => { addedCounts[vn] = (addedCounts[vn]||0) + 1; });
+    initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
   }
 
-  // 3) Description formatter for bracketed tokens
+  // 3) Description formatter
   function formatDescription(text = '', colorCode) {
     let out = text
       .replace(/\[Tap\]:/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
@@ -71,7 +68,6 @@
     if (clear) container.innerHTML = '';
     ids.forEach(vn => {
       jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
-        console.log(`⚡︎ [renderCards] for "${vn}" got:`, data);
         if (!Array.isArray(data) || data.length === 0) return;
         const c = data[0];
         let el;
@@ -101,7 +97,8 @@
     }
   }
 
-  // 5) Card builder functions (with multi-color support)
+  // 5) Card builder functions
+
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const forceHTML = c.power
@@ -175,7 +172,7 @@
     const colors   = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags||'';
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`).join(' ');
 
     return build('legend', c.variantNumber, `
       <div class="top-bar">
@@ -196,7 +193,7 @@
       <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
   }
 
-  // 6) Generic builder that adds +/– buttons and badge
+  // Generic builder: adds +/– buttons and count badge
   function build(cssClass, variantNumber, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
@@ -219,7 +216,7 @@
     return el;
   }
 
-  // 7) Search modal logic (filters on name & variantNumber)
+  // 6) Search modal logic (filter by name or variantNumber)
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
