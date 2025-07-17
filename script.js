@@ -27,16 +27,16 @@
 
   // --- Placeholder replacement helper ---
   function formatEffect(text, code) {
-    return text
-      // T: token (must include colon)
-      .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
-      // A: token (must include colon)
-      .replace(/A:/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="A">`)
-      // standalone S
-      .replace(/\bS\b/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      // standalone C
-      .replace(/\bC\b/g, `<img src="images/${code}2.png" class="inline-icon" alt="C">`);
-  }
+  return text
+    // T: must include the colon
+    .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
+    // standalone A (no colon)
+    .replace(/\bA\b/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="A">`)
+    // standalone S
+    .replace(/\bS\b/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+    // standalone C
+    .replace(/\bC\b/g, `<img src="images/${code}2.png" class="inline-icon" alt="C">`);
+}
 
   // --- Render & manipulate cards ---
   async function renderCards(ids, clear = true) {
