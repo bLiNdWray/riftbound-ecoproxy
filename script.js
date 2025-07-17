@@ -1,158 +1,151 @@
 // script.js
-(() => {
-  // Config: update to your new Apps Script exec URL and sheet name
-  const API_BASE =
-    'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
-  const SHEET_NAME = 'Riftbound Cards';
+ (async () => {
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
+  const SHEET = 'Riftbound Cards';
 
-  // Elements
   const container = document.getElementById('card-container');
-  const idForm = document.getElementById('id-form');
-  const idInput = document.getElementById('id-input');
-  const addBtn = document.getElementById('add-cards-btn');
-  const importBtn = document.getElementById('import-list-btn');
-  const addModal = document.getElementById('add-cards-modal');
-  const importModal = document.getElementById('import-list-modal');
-  const closeButtons = document.querySelectorAll('.close-modal');
-  const searchInput = document.getElementById('search-input');
-  const searchResults = document.getElementById('search-results');
-  const importText = document.getElementById('import-text');
-  const importSubmit = document.getElementById('import-submit');
 
+  // 1. Load all cards once (for search & import)
   let allCards = [];
-
-  // Modal controls
-  function openModal(modal) { modal.classList.remove('hidden'); }
-  function closeModal(modal) { modal.classList.add('hidden'); }
-  addBtn.addEventListener('click', () => openModal(addModal));
-  importBtn.addEventListener('click', () => openModal(importModal));
-  closeButtons.forEach(btn => btn.addEventListener('click', () => closeModal(document.getElementById(btn.dataset.target))));
-
-  // Load all cards for search
-  async function loadAllCards() {
-    try {
-      const res = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
-      allCards = await res.json();
-    } catch (e) {
-      console.error('Failed to load all cards:', e);
-    }
+  async function loadAll() {
+    const res = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET)}`);
+    allCards = await res.json();
   }
+  await loadAll();
 
-  // Search handler
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase();
-    const matches = allCards
-      .filter(c => c.Name.toLowerCase().includes(query) || (c.name && c.name.toLowerCase().includes(query)))
-      .slice(0, 10);
-    searchResults.innerHTML = '';
-    matches.forEach(c => {
-      const li = document.createElement('li');
-      const displayId = c.Number || c.id || c.ID;
-      const displayName = c.Name || c.name || '';
-      li.textContent = `${displayId} — ${displayName}`;
-      li.addEventListener('click', () => {
-        const current = idInput.value.split(',').map(s => s.trim()).filter(Boolean);
-        if (!current.includes(displayId)) {
-          current.push(displayId);
-          idInput.value = current.join(',');
-        }
-        closeModal(addModal);
-      });
-      searchResults.appendChild(li);
-    });
-  });
+  // 2. Read URL ids or form submission…
+  const params = new URLSearchParams(window.location.search);
+  const ids = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if (ids.length) renderCards(ids);
 
-  // Import list handler
-  importSubmit.addEventListener('click', () => {
-    const lines = importText.value.split('\n').map(s => s.trim().toUpperCase()).filter(Boolean);
-    idInput.value = Array.from(new Set(lines)).join(',');
-    closeModal(importModal);
-  });
-
-    // Generate proxies
-  async function generateProxies(ids) {
+  // 3. Main render function
+  async function renderCards(ids) {
     container.innerHTML = '';
     for (let id of ids) {
-      const cardEl = document.createElement('div');
-      cardEl.className = 'card';
-      container.appendChild(cardEl);
+      const res = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET)}&id=${encodeURIComponent(id)}`);
+      const [card] = await res.json();
+      if (!card) continue;
 
-      try {
-        const url = `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(id)}`;
-        console.log('Fetching:', url);
-        const res = await fetch(url);
-        const data = await res.json();
-        console.log('Response for', id, data);
-
-        const card = data[0];
-        if (!card) throw new Error('No data for ' + id);
-
-        // Helper to pick the first matching key
-        function pick(obj, candidates) {
-          for (let k of candidates) {
-            if (k in obj && obj[k] != null && obj[k] !== '') return obj[k];
-          }
-          return '';
-        }
-
-        // Identify fields (adjust these if your headers differ)
-        const imgUrl    = pick(card, ['imageUrl','ImageUrl','Image URL','image','img']);
-        const nameText  = pick(card, ['Name','name','Card Name','cardName']);
-        const typeText  = pick(card, ['Type','type','Card Type','cardType']);
-        const costText  = pick(card, ['Cost','cost','Mana','mana']);
-        
-        // Append image if found
-        if (imgUrl) {
-          const img = document.createElement('img');
-          img.src = imgUrl;
-          img.alt = nameText;
-          cardEl.appendChild(img);
-        }
-
-        // Build info overlay
-        const info = document.createElement('div');
-        info.className = 'info';
-        let html = `<strong>${nameText || id}</strong>`;
-        if (typeText) html += `<br/>${typeText}`;
-        if (costText) html += ` — ${costText}`;
-        info.innerHTML = html;
-        cardEl.appendChild(info);
-
-        // If no image and no name, dump JSON for debugging
-        if (!imgUrl && !nameText) {
-          const pre = document.createElement('pre');
-          pre.textContent = JSON.stringify(card, null, 2);
-          pre.style.color = '#900';
-          cardEl.appendChild(pre);
-        }
-
-      } catch (e) {
-        console.error(`Error loading ${id}:`, e);
-        cardEl.innerHTML = `<div class="info">Error: ${e.message}</div>`;
+      let cardEl;
+      switch (card.Type || card.type) {
+        case 'Unit':
+          cardEl = makeUnitCard(card);
+          break;
+        case 'Spell':
+          cardEl = makeSpellCard(card);
+          break;
+        case 'Battlefield':
+          cardEl = makeBattlefieldCard(card);
+          break;
+        case 'Legend':
+          cardEl = makeLegendCard(card);
+          break;
+        case 'Rune':
+          cardEl = makeRuneCard(card);
+          break;
+        default:
+          continue;
       }
+      container.appendChild(cardEl);
     }
   }
 
+  // 4. Template builders
+  function makeUnitCard(card) {
+    const el = document.createElement('div');
+    el.className = 'card unit-alt';
+    el.innerHTML = `
+      <div class="top-bar-alt">
+        <span class="cost-alt">
+          ${card.Cost} <img src="images/${card.Color}2.png" class="force-icon-alt" />
+        </span>
+        <span class="might-alt">
+          <img src="images/SwordIconRB.png" class="might-icon-alt" /> ${card.Might}
+        </span>
+      </div>
+      <div class="name-alt">${card.Name}</div>
+      <div class="middle-alt">
+        <p>${card.Effect}</p>
+        <div class="color-indicator-alt">
+          <img src="images/${card.Color}.png" class="color-icon-alt" />
+          <span class="color-text-alt">${card.Color}</span>
+        </div>
+      </div>
+      <div class="bottom-bar-alt">
+        <span class="type-line-alt">${card.Type} — ${card.Subtype}${card.Super !== 'None' ? ' • '+card.Super : ''}</span>
+      </div>`;
+    return el;
+  }
 
-  // Handle form submission
-  idForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const ids = idInput.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-    if (ids.length) {
-      history.replaceState(null, '', `${location.pathname}?id=${ids.join(',')}`);
-      generateProxies(ids);
-    }
-  });
+  function makeSpellCard(card) {
+    const el = document.createElement('div');
+    el.className = 'card spell-alt';
+    el.innerHTML = `
+      <div class="top-bar-alt">
+        <span class="cost-alt">
+          ${card.Cost} <img src="images/${card.Color}2.png" class="force-icon-alt" />
+        </span>
+        <span class="might-alt"></span>
+      </div>
+      <div class="name-alt">${card.Name}</div>
+      <div class="middle-alt">
+        <p>${card.Effect}</p>
+        <div class="color-indicator-alt">
+          <img src="images/${card.Color}.png" class="color-icon-alt" />
+          <span class="color-text-alt">${card.Color}</span>
+        </div>
+      </div>
+      <div class="bottom-bar-alt">
+        <span class="type-line-alt">${card.Type} — ${card.Subtype}</span>
+      </div>`;
+    return el;
+  }
 
-  // Init
-  (async () => {
-    await loadAllCards();
-    const params = new URLSearchParams(window.location.search);
-    const idsParam = params.get('id');
-    if (idsParam) {
-      const ids = idsParam.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-      idInput.value = ids.join(',');
-      generateProxies(ids);
-    }
-  })();
+  function makeBattlefieldCard(card) {
+    const el = document.createElement('div');
+    el.className = 'card battlefield';
+    el.innerHTML = `
+      <div class="bf-columns">
+        <div class="bf-col side left"><div class="bf-text">${card.Effect}</div></div>
+        <div class="bf-col center">
+          <div class="bf-type-text">${card.Type}</div>
+          <div class="bf-name">${card.Name}</div>
+        </div>
+        <div class="bf-col side right"><div class="bf-text">${card.Effect}</div></div>
+      </div>`;
+    return el;
+  }
+
+  function makeLegendCard(card) {
+    const colors = card.Colors.split(','); // e.g. "Red,Orange"
+    const el = document.createElement('div');
+    el.className = 'card legend';
+    el.innerHTML = `
+      <div class="top-bar">
+        <div class="legend-colors">
+          ${colors.map(c => `<img src="images/${c}.png" class="legend-color-icon" />`).join('')}
+        </div>
+        <span class="legend-label">Legend</span>
+      </div>
+      <div class="middle legend-middle">
+        <div class="legend-tag">${card.Tag}</div>
+        <div class="legend-name">${card.Name}</div>
+      </div>
+      <div class="bottom-bar legend-bottom">
+        <p class="legend-ability">${card.Effect}</p>
+      </div>`;
+    return el;
+  }
+
+  function makeRuneCard(card) {
+    const el = document.createElement('div');
+    el.className = 'card rune';
+    el.innerHTML = `
+      <div class="rune-top"><span class="rune-name">${card.Name}</span></div>
+      <div class="rune-middle">
+        <img src="images/${card.Color}.png" class="rune-icon" />
+      </div>`;
+    return el;
+  }
+
 })();
