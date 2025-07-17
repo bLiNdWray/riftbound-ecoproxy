@@ -181,7 +181,7 @@
   results.innerHTML = '';
   list.forEach(c => {
     const id = c.NUMBER;
-    // Build the card template (without controls)
+    // Build the card template (styled via card.css)
     let cardEl;
     const t = (c.TYPE||'').toLowerCase();
     if (t === 'unit')           cardEl = makeUnit(c);
@@ -191,16 +191,17 @@
     else if (t === 'rune')        cardEl = makeRune(c);
     else return;
 
-    // Create add/remove buttons
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-btn';
-    addBtn.textContent = '+';
-    const remBtn = document.createElement('button');
-    remBtn.className = 'remove-btn';
-    remBtn.textContent = '–';
+    // Remove any leftover controls/badges
+    cardEl.querySelectorAll('.add-btn, .remove-btn, .count-badge')
+      .forEach(el => el.remove());
+    cardEl.style.position = 'relative';
 
-    // Create and append count badge
-    const badge = document.createElement('div');
+    // Create new add/remove buttons and badge
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn'; addBtn.textContent = '+';
+    const remBtn = document.createElement('button');
+    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
+    const badge  = document.createElement('div');
     badge.className = 'count-badge';
     badge.textContent = `Added: ${addedCounts[id]||0}`;
 
@@ -210,20 +211,17 @@
       badge.textContent = `Added: ${addedCounts[id]}`;
     });
     remBtn.addEventListener('click', () => {
-      removeCard(id, /*el=*/cardEl);
+      removeCard(id, cardEl);
       badge.textContent = `Added: ${addedCounts[id]||0}`;
     });
 
-    // Append controls into the card element
-    cardEl.style.position = 'relative';
+    // Append controls
     cardEl.appendChild(addBtn);
     cardEl.appendChild(remBtn);
     cardEl.appendChild(badge);
 
-    // Finally, append to results grid
+    // Finally, show it
     results.appendChild(cardEl);
   });
 }
-
-
 })();
