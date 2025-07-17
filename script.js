@@ -135,7 +135,7 @@
     return d;
   }
 
-  // --- Search modal logic ---
+ // --- Search modal logic ---
   const openBtn = document.getElementById('open-search');
   const closeBtn = document.getElementById('close-search');
   const modal    = document.getElementById('search-modal');
@@ -145,45 +145,79 @@
   const prevAdd  = document.getElementById('preview-add');
   let currentId  = null;
 
-  openBtn.addEventListener('click', ()=>{
+  openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
-    renderSearch(allCards);
+    // start blank
+    results.innerHTML = '';
+    preview.innerHTML = '<em>Type to search…</em>';
+    prevAdd.disabled = true;
     input.focus();
   });
-  closeBtn.addEventListener('click', ()=>modal.classList.add('hidden'));
-  input.addEventListener('input', ()=>{
-    const q = input.value.toLowerCase();
-    renderSearch(allCards.filter(c=>c.NAME.toLowerCase().includes(q)||c.NUMBER.toLowerCase().includes(q)));
+
+  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 1) {
+      // clear until at least one character
+      results.innerHTML = '';
+      preview.innerHTML = '<em>Type to search…</em>';
+      prevAdd.disabled = true;
+      currentId = null;
+      return;
+    }
+    // otherwise show filtered results
+    const filtered = allCards.filter(c =>
+      c.NAME.toLowerCase().includes(q) ||
+      c.NUMBER.toLowerCase().includes(q)
+    );
+    renderSearch(filtered);
   });
 
-  function renderSearch(list){
+  function renderSearch(list) {
     results.innerHTML = '';
-    preview.innerHTML = '<em>Select a card to preview</em>';
+    preview.innerHTML = '<em>Hover to preview…</em>';
     prevAdd.disabled = true;
     currentId = null;
-    list.forEach(c=>{
+
+    list.forEach(c => {
       const id = c.NUMBER;
       const div = document.createElement('div');
       div.className = 'search-card';
+      div.dataset.id = id;
       div.innerHTML = `
         <div class="name">${c.NAME}</div>
         <button class="btn-add">Add</button>
-        <div class="count-badge">Added: ${addedCounts[id]||0}</div>`;
+        <div class="count-badge">Added: ${addedCounts[id]||0}</div>
+      `;
+      // add handler
       div.querySelector('.btn-add')
-         .addEventListener('click', ()=>addCard(id));
-      div.addEventListener('mouseover', ()=>{
+         .addEventListener('click', () => addCard(id));
+
+      // live preview on hover
+      div.addEventListener('mouseover', () => {
         currentId = id;
+        // build appropriate preview template
+        let previewEl;
+        const t = (c.TYPE||'').toLowerCase();
+        if (t==='unit') previewEl = makeUnit(c);
+        else if (t==='spell'||t==='gear') previewEl = makeSpell(c);
+        else if (t==='battlefield') previewEl = makeBF(c);
+        else if (t==='legend') previewEl = makeLegend(c);
+        else if (t==='rune') previewEl = makeRune(c);
+        else previewEl = document.createTextNode('No preview');
+
         preview.innerHTML = '';
-        preview.appendChild(build('unit-alt', makeUnit(c).innerHTML));
+        preview.appendChild(previewEl);
         prevAdd.disabled = false;
       });
+
       results.appendChild(div);
     });
   }
 
-  prevAdd.addEventListener('click', ()=>{
-    if(currentId) addCard(currentId);
+  prevAdd.addEventListener('click', () => {
+    if (currentId) addCard(currentId);
   });
-
 })();
