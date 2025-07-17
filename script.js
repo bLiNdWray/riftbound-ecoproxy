@@ -1,31 +1,33 @@
 // script.js
 (async () => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
-  const SHEET_NAME = 'piltover_cards';  // your new sheet
+  const SHEET_NAME = 'piltover_cards';  
   const container  = document.getElementById('card-container');
 
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards for search, and ensure it's always an array
-async function loadAll() {
-  const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
-  const data = await res.json();
-  // If it’s already an array, great; otherwise take its values
-  allCards = Array.isArray(data) ? data : Object.values(data);
-}
+  // 1) Load all cards for search, ensure it's always an array
+  async function loadAll() {
+    const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
+    const data = await res.json();
+    allCards = Array.isArray(data) ? data : Object.values(data);
+  }
   await loadAll();
 
-  // 2) On load, render any ?id=
+  // 2) Initial render from URL (?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
-  const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const initialIds = (params.get('id') || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
   if (initialIds.length) {
     await renderCards(initialIds, true);
     initialIds.forEach(id => { addedCounts[id] = (addedCounts[id]||0) + 1 });
   }
 
-  // 3) Placeholder → icon helper
-  function formatDescription(text, colorCode) {
+  // 3) Placeholder→icon helper
+  function formatDescription(text = '', colorCode) {
     return text
       .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
       .replace(/\bA\b/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="A">`)
@@ -33,21 +35,21 @@ async function loadAll() {
       .replace(/\bC\b/g, `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
   }
 
-  // 4) Core render loop — now using &id=
+  // 4) Core render loop (fetches by variantNumber)
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
-    for (let id of ids) {
-      const res = await fetch(
-  `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(id)}`
-);
+    for (let variant of ids) {
+      const res  = await fetch(
+        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(variant)}`
+      );
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
 
       let cardEl;
-      switch ((c.type||'').toLowerCase()) {
+      switch ((c.type || '').toLowerCase()) {
         case 'unit':        cardEl = makeUnit(c);        break;
-        case 'spell': 
+        case 'spell':
         case 'gear':        cardEl = makeSpell(c);       break;
         case 'battlefield': cardEl = makeBattlefield(c); break;
         case 'legend':      cardEl = makeLegend(c);      break;
@@ -70,10 +72,10 @@ async function loadAll() {
     }
   }
 
-  // 5) Builders (using your CSV headers)
+  // 5) Card builders using new CSV headers
   function makeUnit(c) {
-    const colors       = c.colors.split(',').map(s=>s.trim());
-    const primaryColor = colors[0];
+    const colors       = (c.colors || '').split(',').map(s => s.trim());
+    const primaryColor = colors[0] || '';
     const forceHTML    = c.power ? `<img src="images/${primaryColor}2.png" class="force-icon-alt">` : '';
     const mightHTML    = c.might ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}` : '';
     const descHTML     = formatDescription(c.description, primaryColor);
@@ -98,8 +100,8 @@ async function loadAll() {
   }
 
   function makeSpell(c) {
-    const colors       = c.colors.split(',').map(s=>s.trim());
-    const primaryColor = colors[0];
+    const colors       = (c.colors || '').split(',').map(s => s.trim());
+    const primaryColor = colors[0] || '';
     const forceHTML    = c.power ? `<img src="images/${primaryColor}2.png" class="force-icon-alt">` : '';
     const descHTML     = formatDescription(c.description, primaryColor);
 
@@ -135,7 +137,7 @@ async function loadAll() {
   }
 
   function makeLegend(c) {
-    const colors   = c.colors.split(',').map(s=>s.trim());
+    const colors   = (c.colors || '').split(',').map(s => s.trim());
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags || '';
     return build('legend', c.variantNumber, `
@@ -155,7 +157,7 @@ async function loadAll() {
   }
 
   function makeRune(c) {
-    const primaryColor = c.colors.split(',')[0].trim();
+    const primaryColor = (c.colors || '').split(',')[0]?.trim() || '';
     return build('rune', c.variantNumber, `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
@@ -163,8 +165,8 @@ async function loadAll() {
       </div>`);
   }
 
-  // 6) Generic builder appends controls
-  function build(cssClass, id, innerHTML) {
+  // 6) Generic builder: appends controls and badge
+  function build(cssClass, variantNumber, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
     el.innerHTML = innerHTML;
@@ -172,21 +174,21 @@ async function loadAll() {
 
     const addBtn = document.createElement('button');
     addBtn.className = 'add-btn'; addBtn.textContent = '+';
-    addBtn.onclick = () => addCard(id);
+    addBtn.onclick = () => addCard(variantNumber);
 
     const remBtn = document.createElement('button');
     remBtn.className = 'remove-btn'; remBtn.textContent = '–';
-    remBtn.onclick = () => removeCard(id, el);
+    remBtn.onclick = () => removeCard(variantNumber, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
-    badge.textContent = `Added: ${addedCounts[id]||0}`;
+    badge.textContent = `Added: ${addedCounts[variantNumber]||0}`;
 
     el.append(addBtn, remBtn, badge);
     return el;
   }
 
-  // 7) Search modal wiring
+  // 7) Search modal wiring with guarded filter
   const openBtn  = document.getElementById('open-search');
   const closeBtn = document.getElementById('close-search');
   const modal    = document.getElementById('search-modal');
@@ -199,19 +201,22 @@ async function loadAll() {
     results.innerHTML = '';
     input.focus();
   });
+
   closeBtn.addEventListener('click', () => {
     modal.classList.add('hidden');
   });
+
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (q.length < 1) {
       results.innerHTML = '';
       return;
     }
-    const filtered = allCards.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.variantNumber.toLowerCase().includes(q)
-    );
+    const filtered = allCards.filter(c => {
+      const nm = (c.name           || '').toString().toLowerCase();
+      const vn = (c.variantNumber || '').toString().toLowerCase();
+      return nm.includes(q) || vn.includes(q);
+    });
     renderSearch(filtered);
   });
 
