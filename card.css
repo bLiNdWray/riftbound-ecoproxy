@@ -1,3 +1,10 @@
+/* inline icon styling for placeholders */
+.inline-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: text-bottom;
+}
+
 /* === Layout Mode (horizontal) === */
 #card-container.layout-horizontal {
   display: grid;
