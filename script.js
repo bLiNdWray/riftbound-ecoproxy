@@ -1,6 +1,6 @@
 // script.js
 (async () => {
-  const API_BASE   = 'https://script.google.com/macros/s/AKfycby_eyzE0aUCtvOOHP_Cd8j_Z-dzsuP41yVna-eknQOd6ZsXN8HItwrbu5UTQtffmhD7Tg/exec';
+  const API_BASE   = 'https://script.google.com/macros/s/AKfycbxUnVQhHZSJmBTalByDCe9UJsW7GDGxVxD4pis-MhfdEhitsoV2hRQnVpkuA6mqWmtSiA/exec';
   const SHEET_NAME = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
   const openBtn    = document.getElementById('open-search');
@@ -12,31 +12,52 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load entire sheet for search
-  async function loadAllCards() {
-    const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
-    const data = await res.json();
-    allCards   = Array.isArray(data) ? data : Object.values(data);
-  }
-  await loadAllCards();
+  /**
+   * JSONP fetch helper
+   * @param {Object} params  query parameters for the request
+   * @param {Function} cb    callback to receive the parsed JSON data
+   */
+  function jsonpFetch(params, cb) {
+    const callbackName = 'jsonp_cb_' + Date.now();
+    window[callbackName] = data => {
+      delete window[callbackName];
+      document.head.removeChild(script);
+      cb(data);
+    };
 
-  // 2) On page load, read ?id=variantNumber
+    const qs = Object.entries(params)
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&');
+    const script = document.createElement('script');
+    script.src = `${API_BASE}?${qs}&callback=${callbackName}`;
+    document.head.appendChild(script);
+  }
+
+  // 1) Load all cards for search via JSONP
+  function loadAllCards(cb) {
+    jsonpFetch({ sheet: SHEET_NAME }, data => {
+      allCards = Array.isArray(data) ? data : Object.values(data);
+      cb();
+    });
+  }
+  await new Promise(resolve => loadAllCards(resolve));
+
+  // 2) Initial render when page loads (reads ?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
-    await renderCards(initialIds, true);
-    initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
+    renderCards(initialIds, true);
+    initialIds.forEach(vn => { addedCounts[vn] = (addedCounts[vn]||0) + 1; });
   }
 
-  // 3) Replace bracketed tokens with icons
+  // 3) Description formatter for bracketed tokens
   function formatDescription(text = '', colorCode) {
     let out = text
-      .replace(/\[Tap\]:/g, `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\[Might\]/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[Rune\]/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-      .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
-
+      .replace(/\[Tap\]:/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\[Might\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
+      .replace(/\[Rune\]/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
+      .replace(/\[S\]/g,         `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+      .replace(/\[C\]/g,         `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
       out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
         `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
@@ -44,35 +65,33 @@
     return out;
   }
 
-  // 4) Fetch & render cards by variantNumber (passed as id)
-  async function renderCards(ids, clear = true) {
+  // 4) Render cards by variantNumber via JSONP
+  function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
-    for (let vn of ids) {
-      const res  = await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(vn)}`
-      );
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) continue;
-      const c = data[0];
-
-      let el;
-      switch ((c.type||'').toLowerCase()) {
-        case 'unit':        el = makeUnit(c);        break;
-        case 'spell':
-        case 'gear':        el = makeSpell(c);       break;
-        case 'battlefield': el = makeBattlefield(c); break;
-        case 'legend':      el = makeLegend(c);      break;
-        case 'rune':        el = makeRune(c);        break;
-        default: continue;
-      }
-      container.appendChild(el);
-    }
+    ids.forEach(vn => {
+      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
+        if (!Array.isArray(data) || data.length === 0) return;
+        const c = data[0];
+        let el;
+        switch ((c.type||'').toLowerCase()) {
+          case 'unit':        el = makeUnit(c);        break;
+          case 'spell':
+          case 'gear':        el = makeSpell(c);       break;
+          case 'battlefield': el = makeBattlefield(c); break;
+          case 'legend':      el = makeLegend(c);      break;
+          case 'rune':        el = makeRune(c);        break;
+          default: return;
+        }
+        container.appendChild(el);
+      });
+    });
   }
 
   function addCard(vn) {
     renderCards([vn], false);
     addedCounts[vn] = (addedCounts[vn]||0) + 1;
   }
+
   function removeCard(vn, el) {
     if ((addedCounts[vn]||0) > 0) {
       addedCounts[vn]--;
@@ -80,8 +99,7 @@
     }
   }
 
-  // 5) Card builder functions (multi-color support)
-
+  // 5) Card builder functions (with multi-color support)
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const forceHTML = c.power
@@ -176,30 +194,30 @@
       <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
   }
 
-  // Generic builder: uses variantNumber as the card ID
-  function build(cssClass, variantNumber, html) {
+  // 6) Generic builder that adds +/– buttons and badge
+  function build(cssClass, variantNumber, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
-    el.innerHTML = html;
+    el.innerHTML = innerHTML;
     el.style.position = 'relative';
 
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-btn'; addBtn.textContent = '+';
-    addBtn.onclick = () => addCard(variantNumber);
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'add-btn'; btnAdd.textContent = '+';
+    btnAdd.onclick = () => addCard(variantNumber);
 
-    const remBtn = document.createElement('button');
-    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
-    remBtn.onclick = () => removeCard(variantNumber, el);
+    const btnRem = document.createElement('button');
+    btnRem.className = 'remove-btn'; btnRem.textContent = '–';
+    btnRem.onclick = () => removeCard(variantNumber, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
     badge.textContent = `Added: ${addedCounts[variantNumber]||0}`;
 
-    el.append(addBtn, remBtn, badge);
+    el.append(btnAdd, btnRem, badge);
     return el;
   }
 
-  // 7) Search modal logic (searches name & variantNumber)
+  // 7) Search modal logic (filters on name & variantNumber)
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -223,12 +241,12 @@
     list.forEach(c => {
       let el;
       switch ((c.type||'').toLowerCase()) {
-        case 'unit': el = makeUnit(c); break;
+        case 'unit':        el = makeUnit(c);        break;
         case 'spell':
-        case 'gear': el = makeSpell(c); break;
+        case 'gear':        el = makeSpell(c);       break;
         case 'battlefield': el = makeBattlefield(c); break;
-        case 'legend': el = makeLegend(c); break;
-        case 'rune': el = makeRune(c); break;
+        case 'legend':      el = makeLegend(c);      break;
+        case 'rune':        el = makeRune(c);        break;
         default: return;
       }
       results.appendChild(el);
