@@ -210,8 +210,9 @@ body {
   height: 30mm;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center;    /* vertical centering */
+  justify-content: center; /* horizontal centering */
+  text-align: center;      /* center the paragraph text itself */
 }
 .legend-ability {
   margin: 0;
