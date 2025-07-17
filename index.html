@@ -1,76 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Riftbound Proxy Generator</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="card.css" />
+  <link rel="stylesheet" href="card.css">
 </head>
 <body>
 
-  <header>
-    <h1>Riftbound Proxy Generator</h1>
-    <p>An ink-saving proxy generator to print and test your Riftbound cards.</p>
-    <div class="controls">
- <!-- Add Cards Button -->
-<button id="open-search">Add Cards</button>
+  <!-- Add Cards Button -->
+  <button id="open-search" class="fab-btn">Add Cards</button>
 
-<!-- Search Modal -->
-<div id="search-modal" class="hidden">
-  <div class="modal-backdrop"></div>
-  <div class="modal-content">
-    <button id="close-search" class="close-btn">×</button>
-    <input
-      type="text"
-      id="card-search-input"
-      placeholder="Search by name or set ID…"
-      autofocus
-    />
-    <div id="search-results"></div>
-  </div>
-</div>
-      <button id="import-list-btn">Import List</button>
-      <form id="id-form">
-        <label for="id-input" class="visually-hidden">Card IDs (comma-separated)</label>
-        <input
-          type="text"
-          id="id-input"
-          name="id"
-          placeholder="Enter card IDs, e.g. RB001,RB002"
-        />
-        <button type="submit">Generate Proxies</button>
-      </form>
-    </div>
-  </header>
+  <!-- Main card container -->
+  <main id="card-container" class="layout-horizontal"></main>
 
-  <!-- For a row-by-row layout (most cards per row) -->
-<main id="card-container" class="layout-horizontal"></main>
-
-<!-- Or, for a column-by-column layout (most cards per column) -->
-<main id="card-container" class="layout-vertical"></main>
-  
-  <footer>
-    <p>Pass card IDs via <code>?id=RB001,RB002,…</code></p>
-  </footer>
-
-  <!-- Add Cards Modal -->
-  <div id="add-cards-modal" class="modal hidden">
+  <!-- Full-screen Search & Preview Modal -->
+  <div id="search-modal" class="modal hidden">
     <div class="modal-content">
-      <button class="close-modal" data-target="add-cards-modal">×</button>
-      <h2>Add Cards</h2>
-      <input type="text" id="search-input" placeholder="Search card name..." />
-      <ul id="search-results"></ul>
-    </div>
-  </div>
-
-  <!-- Import List Modal -->
-  <div id="import-list-modal" class="modal hidden">
-    <div class="modal-content">
-      <button class="close-modal" data-target="import-list-modal">×</button>
-      <h2>Import List</h2>
-      <textarea id="import-text" rows="5" placeholder="Enter one card ID per line"></textarea>
-      <button id="import-submit">Import</button>
+      <button id="close-search" class="modal-close">×</button>
+      <div class="modal-body">
+        <!-- Left: search + results -->
+        <section class="search-panel">
+          <input type="text" id="card-search-input" placeholder="Search by name or ID…" />
+          <div id="search-results" class="results-grid"></div>
+        </section>
+        <!-- Right: preview -->
+        <section class="preview-panel">
+          <div id="card-preview" class="card-preview">
+            <em>Select a card to preview</em>
+          </div>
+          <button id="preview-add" class="btn-add-preview" disabled>Add This Card</button>
+        </section>
+      </div>
     </div>
   </div>
 
