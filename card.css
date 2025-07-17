@@ -1,21 +1,23 @@
 /* card.css — Scoped under #card-container */
 
-/* Base card dimensions */
+/* Grid container: as many 63mm columns as fit; each row 88mm tall */
 #card-container {
   display: grid;
-  /* auto-fit as many 63 mm columns as will fit, then wrap */
-  grid-template-columns: repeat(auto-fit, minmax(63mm, 1fr));
+  grid-template-columns: repeat(auto-fill, 63mm);
   grid-auto-rows: 88mm;
-  gap: 0;               /* no gutter */
-  padding: 20px;        /* page padding */
+  justify-content: start;   /* pack cards to the left */
+  align-content: start;     /* pack rows to the top */
+  gap: 0;                   /* no space between cells */
+  padding: 20px;
   box-sizing: border-box;
 }
 
-/* Ensure each card stays fixed at 63×88 mm */
+/* Cards fill their grid cell exactly */
 #card-container .card {
-  width: 63mm;
-  height: 88mm;
-  margin: 0;
+  width: 100%;              /* fill cell width */
+  height: 100%;             /* fill cell height */
+  margin: 0;                /* no extra margins */
+  box-sizing: border-box;
 }
 
 /* Base card */
