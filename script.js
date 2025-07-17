@@ -1,29 +1,36 @@
 // script.js
 (async () => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
-  const SHEET_NAME = 'Riftbound Cards';
+  const SHEET_NAME = 'piltover_cards';
   const container  = document.getElementById('card-container');
+  const openBtn    = document.getElementById('open-search');
+  const closeBtn   = document.getElementById('close-search');
+  const modal      = document.getElementById('search-modal');
+  const input      = document.getElementById('card-search-input');
+  const results    = document.getElementById('search-results');
 
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load entire sheet for search
+  // 1) Load all cards
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
     allCards   = Array.isArray(data) ? data : Object.values(data);
   }
   await loadAllCards();
-console.log('Loaded cards:', allCards.length, allCards);
-  // 2) On load, render any ?id=variantNumber
+  console.log('Loaded cards:', allCards.length);
+
+  // 2) Initial render from URL
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  console.log('Query IDs:', initialIds);
   if (initialIds.length) {
     await renderCards(initialIds, true);
     initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0) + 1);
   }
 
-  // 3) Format description placeholders
+  // 3) Icon formatter
   function formatDescription(text = '', colorCode) {
     return text
       .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
@@ -32,28 +39,30 @@ console.log('Loaded cards:', allCards.length, allCards);
       .replace(/\bC\b/g, `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
   }
 
-  // 4) Render function (lookup by variantNumber)
+  // 4) Render cards by variantNumber
   async function renderCards(ids, clear = true) {
+    console.log('renderCards called with:', ids, clear);
     if (clear) container.innerHTML = '';
     for (let variant of ids) {
       const res  = await fetch(
         `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(variant)}`
       );
       const data = await res.json();
+      console.log('Fetch data for', variant, data);
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
 
-      let el;
+      let cardEl;
       switch ((c.type||'').toLowerCase()) {
-        case 'unit':        el = makeUnit(c);        break;
+        case 'unit':        cardEl = makeUnit(c);        break;
         case 'spell':
-        case 'gear':        el = makeSpell(c);       break;
-        case 'battlefield': el = makeBattlefield(c); break;
-        case 'legend':      el = makeLegend(c);      break;
-        case 'rune':        el = makeRune(c);        break;
+        case 'gear':        cardEl = makeSpell(c);       break;
+        case 'battlefield': cardEl = makeBattlefield(c); break;
+        case 'legend':      cardEl = makeLegend(c);      break;
+        case 'rune':        cardEl = makeRune(c);        break;
         default: continue;
       }
-      container.appendChild(el);
+      container.appendChild(cardEl);
     }
   }
 
@@ -69,16 +78,14 @@ console.log('Loaded cards:', allCards.length, allCards);
     }
   }
 
-  // 5) Card builder functions
-
+  // 5) Card builders
   function makeUnit(c) {
     const colors       = (c.colors||'').split(',').map(s=>s.trim());
-    const colorCode    = colors[0] || '';
-    const forceHTML    = c.power ? `<img src="images/${colorCode}2.png" class="force-icon-alt">` : '';
+    const code         = colors[0] || '';
+    const forceHTML    = c.power ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
     const mightHTML    = c.might ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}` : '';
-    const descHTML     = formatDescription(c.description, colorCode);
+    const descHTML     = formatDescription(c.description, code);
     const tagText      = c.tags ? ` • ${c.tags}` : '';
-
     return build('unit-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -88,8 +95,8 @@ console.log('Loaded cards:', allCards.length, allCards);
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${colorCode}.png" class="color-icon-alt">
-          <span class="color-text-alt">${colorCode}</span>
+          <img src="images/${code}.png" class="color-icon-alt">
+          <span class="color-text-alt">${code}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -98,10 +105,9 @@ console.log('Loaded cards:', allCards.length, allCards);
   }
 
   function makeSpell(c) {
-    const colorCode = (c.colors||'').split(',')[0].trim();
-    const forceHTML = c.power ? `<img src="images/${colorCode}2.png" class="force-icon-alt">` : '';
-    const descHTML  = formatDescription(c.description, colorCode);
-
+    const code      = (c.colors||'').split(',')[0].trim();
+    const forceHTML = c.power ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
+    const descHTML  = formatDescription(c.description, code);
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -111,8 +117,8 @@ console.log('Loaded cards:', allCards.length, allCards);
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${colorCode}.png" class="color-icon-alt">
-          <span class="color-text-alt">${colorCode}</span>
+          <img src="images/${code}.png" class="color-icon-alt">
+          <span class="color-text-alt">${code}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -140,8 +146,7 @@ console.log('Loaded cards:', allCards.length, allCards);
     return build('legend', c.variantNumber, `
       <div class="top-bar">
         <div class="legend-colors">
-          ${colors.map(col=>
-            `<img src="images/${col}.png" class="legend-color-icon">`).join('')}
+          ${colors.map(col=>`<img src="images/${col}.png" class="legend-color-icon">`).join('')}
         </div>
         <span class="legend-label">Legend</span>
       </div>
@@ -155,15 +160,15 @@ console.log('Loaded cards:', allCards.length, allCards);
   }
 
   function makeRune(c) {
-    const colorCode = (c.colors||'').split(',')[0].trim();
+    const code = (c.colors||'').split(',')[0].trim();
     return build('rune', c.variantNumber, `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
-        <img src="images/${colorCode}.png" class="rune-icon">
+        <img src="images/${code}.png" class="rune-icon">
       </div>`);
   }
 
-  // 6) Generic build+controls
+  // 6) Generic builder
   function build(cssClass, id, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
@@ -186,20 +191,13 @@ console.log('Loaded cards:', allCards.length, allCards);
     return el;
   }
 
-  // 7) Search modal wiring
-  const openBtn  = document.getElementById('open-search');
-  const closeBtn = document.getElementById('close-search');
-  const modal    = document.getElementById('search-modal');
-  const input    = document.getElementById('card-search-input');
-  const results  = document.getElementById('search-results');
-
+  // 7) Search modal logic
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
     results.innerHTML = '';
     input.focus();
   });
-
   closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
   input.addEventListener('input', () => {
@@ -209,29 +207,28 @@ console.log('Loaded cards:', allCards.length, allCards);
       return;
     }
     const filtered = allCards.filter(c => {
-      const name        = (c.name          || '').toLowerCase();
-      const variantNum  = (c.variantNumber || '').toLowerCase();
-      return name.includes(q) || variantNum.includes(q);
+      const name = (c.name||'').toLowerCase();
+      const vn   = (c.variantNumber||'').toLowerCase();
+      return name.includes(q) || vn.includes(q);
     });
     renderSearchResults(filtered);
   });
 
- function renderSearchResults(list) {
-  results.innerHTML = '';
-  list.forEach(c => {
-    let el;
-    switch ((c.type||'').toLowerCase()) {
-      case 'unit':        el = makeUnit(c);        break;
-      case 'spell':  
-      case 'gear':        el = makeSpell(c);       break;
-      case 'battlefield': el = makeBattlefield(c); break;
-      case 'legend':      el = makeLegend(c);      break;
-      case 'rune':        el = makeRune(c);        break;
-      default: return;
-    }
-    results.appendChild(el);
-  });
-}
-
+  function renderSearchResults(list) {
+    results.innerHTML = '';
+    list.forEach(c => {
+      let el;
+      switch ((c.type||'').toLowerCase()) {
+        case 'unit':        el = makeUnit(c);        break;
+        case 'spell':  
+        case 'gear':        el = makeSpell(c);       break;
+        case 'battlefield': el = makeBattlefield(c); break;
+        case 'legend':      el = makeLegend(c);      break;
+        case 'rune':        el = makeRune(c);        break;
+        default: return;
+      }
+      results.appendChild(el);
+    });
+  }
 
 })();
