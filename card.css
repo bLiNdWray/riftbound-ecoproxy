@@ -1,13 +1,18 @@
 /* card.css — Scoped under #card-container */
 
-/* Page layout */
 #card-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
+  gap: 0;                /* no gap between cards */
+  padding: 20px;         /* keep your page padding */
   background: #fff;
   font-family: Arial, sans-serif;
+}
+
+/* Ensure cards keep their own size and don’t overlap */
+#card-container .card {
+  flex: 0 0 auto;        /* do not grow or shrink */
+  margin: 0;             /* no extra margins */
 }
 
 /* Base card */
