@@ -14,7 +14,7 @@
     allCards   = Array.isArray(data) ? data : Object.values(data);
   }
   await loadAllCards();
-
+console.log('Loaded cards:', allCards.length, allCards);
   // 2) On load, render any ?id=variantNumber
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
