@@ -1,6 +1,6 @@
 // script.js
 (async () => {
-  const API_BASE   = 'https://script.google.com/macros/s/AKfycbzu1gZgmOFnlDjtTsq3WOa817_FVsaIcY44frW8wF3t2UvqRFU2UYVgoqUYqyMn5uwFSw/exec';
+  const API_BASE   = 'https://script.google.com/macros/s/AKfycbzi8Ci1-OetJZyBv8CEJNdB10qp_TT_lEzAC5fIwMJ34Z-ppvXIkvd17_n2eORhIhWlxw/exec';
   const SHEET_NAME = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
   const openBtn    = document.getElementById('open-search');
