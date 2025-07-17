@@ -2,52 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Riftbound Card Prototype (B&W)</title>
+  <title>Riftbound Card Prototype</title>
   <link rel="stylesheet" href="card.css">
 </head>
 <body>
-  <!-- Unit Card -->
-  <div class="card unit">
-    <div class="top-bar">
-      <span class="name">Lionheart Cavalry</span>
-      <span class="cost">
-        3
-        <img src="images/Order2.png" alt="Force 3" class="force-icon">
+  <!-- Alternate Unit Card -->
+  <div class="card unit-alt">
+    <div class="top-bar-alt">
+      <span class="cost-alt">
+        3 <img src="images/Order2.png" alt="Force 3" class="force-icon-alt">
+      </span>
+      <span class="might-alt">
+        <img src="images/SwordIconRB.png" alt="Might" class="might-icon-alt"> 5
       </span>
     </div>
-    <div class="middle">
+    <div class="name-alt">Lionheart Cavalry</div>
+    <div class="middle-alt">
       <p>When Lionheart Cavalry enters the battlefield, it gains +1 {p} for each other Unit you control.</p>
-      <div class="color-indicator">
-        <img src="images/Order.png" alt="Order" class="color-icon">
-        <span class="color-text">Order</span>
+      <div class="color-indicator-alt">
+        <img src="images/Order.png" alt="Order" class="color-icon-alt">
+        <span class="color-text-alt">Order</span>
       </div>
     </div>
-    <div class="bottom-bar">
-      <span class="type-line">Unit — Cavalry • Super</span>
-      <span class="might">
-        <img src="images/SwordIconRB.png" alt="Might" class="might-icon">5
-      </span>
+    <div class="bottom-bar-alt">
+      <span class="type-line-alt">Unit — Cavalry • Super</span>
     </div>
   </div>
 
-  <!-- Spell Card -->
-  <div class="card spell">
-    <div class="top-bar">
-      <span class="name">Blazing Invocation</span>
-      <span class="cost">
-        2
-        <img src="images/Body2.png" alt="Force 2" class="force-icon">
+  <!-- Alternate Spell Card -->
+  <div class="card spell-alt">
+    <div class="top-bar-alt">
+      <span class="cost-alt">
+        2 <img src="images/Body2.png" alt="Force 2" class="force-icon-alt">
+      </span>
+      <span class="might-alt">
+        <!-- Spells have no might -->
       </span>
     </div>
-    <div class="middle">
+    <div class="name-alt">Blazing Invocation</div>
+    <div class="middle-alt">
       <p>Deal 3 damage to any target. If you control a Rune, draw a card.</p>
-      <div class="color-indicator">
-        <img src="images/Body.png" alt="Body" class="color-icon">
-        <span class="color-text">Body</span>
+      <div class="color-indicator-alt">
+        <img src="images/Body.png" alt="Body" class="color-icon-alt">
+        <span class="color-text-alt">Body</span>
       </div>
     </div>
-    <div class="bottom-bar">
-      <span class="type-line">Spell — Invocation</span>
+    <div class="bottom-bar-alt">
+      <span class="type-line-alt">Spell — Invocation</span>
     </div>
   </div>
 
@@ -70,107 +71,34 @@
       </div>
     </div>
   </div>
+
   <!-- Legend Card -->
   <div class="card legend">
     <div class="top-bar">
-      <!-- Two color icons -->
       <div class="legend-colors">
         <img src="images/Body.png"  alt="Body"  class="legend-color-icon">
         <img src="images/Fury.png" alt="Fury" class="legend-color-icon">
       </div>
-      <!-- Legend label in top-right -->
       <span class="legend-label">Legend</span>
     </div>
-    <div class="middle">
-      <!-- Tag centered above name -->
+    <div class="middle legend-middle">
       <div class="legend-tag">Volibear</div>
-      <!-- Name centered -->
       <div class="legend-name">Relentless Storm</div>
     </div>
-    <!-- Larger bottom-bar for ability text -->
     <div class="bottom-bar legend-bottom">
       <p class="legend-ability">
         When you play a Mighty unit, you may exhaust me to channel 1 rune exhausted. A unit is Mighty while it has 5+ S.
       </p>
-      <div class="legend-footer">
-        <span class="page">OGN • 300s</span>
-        <span class="rarity">Rare</span>
-      </div>
     </div>
   </div>
 
   <!-- Rune Card -->
   <div class="card rune">
-    <!-- Top 18px bar with centered name -->
     <div class="rune-top">
       <span class="rune-name">Echoing Rune</span>
     </div>
-    <!-- Middle: large symbol, padded from top -->
     <div class="rune-middle">
       <img src="images/Rune.png" alt="Rune" class="rune-icon">
-    </div>
-  </div>
-
-  <!-- Alternate Unit Card -->
-  <div class="card unit-alt">
-    <div class="top-bar-alt">
-      <span class="cost-alt">
-        3 <img src="images/Order2.png" alt="Force 3" class="force-icon-alt">
-      </span>
-      <span class="might-alt">
-        <img src="images/SwordIconRB.png" alt="Might" class="might-icon-alt"> 5
-      </span>
-    </div>
-    <div class="name-alt">Lionheart Cavalry</div>
-
-    <div class="middle-alt">
-      <p>When Lionheart Cavalry enters the battlefield, it gains +1 {p} for each other Unit you control.</p>
-      <div class="color-indicator-alt">
-        <img src="images/Order.png" alt="Order" class="color-icon-alt">
-        <span class="color-text-alt">Order</span>
-      </div>
-    </div>
-
-    <div class="bottom-bar-alt">
-      <span class="type-line-alt">Unit — Cavalry • Super</span>
-    </div>
-  </div>
-
-  <!-- Alternate Unit Card -->
-  <div class="card unit-alt">
-    <div class="top-bar-alt">
-      <span class="cost-alt">
-        3 <img src="images/Order2.png" alt="Force 3" class="force-icon-alt">
-      </span>
-      <span class="might-alt">
-        <img src="images/SwordIconRB.png" alt="Might" class="might-icon-alt"> 5
-      </span>
-    </div>
-    <div class="name-alt">Lionheart Cavalry</div>
-    <div class="middle-alt">
-      <p>When Lionheart Cavalry enters the battlefield, it gains +1 {p} for each other Unit you control.</p>
-    </div>
-    <div class="bottom-bar-alt">
-      <span class="type-line-alt">Unit — Cavalry • Super</span>
-    </div>
-  </div>
-
-  <!-- Alternate Spell Card -->
-  <div class="card spell-alt">
-    <div class="top-bar-alt">
-      <span class="cost-alt">
-        2 <img src="images/Body2.png" alt="Force 2" class="force-icon-alt">
-      </span>
-      <span class="might-alt">
-        <!-- spells have no might -->
-      </span>
-    </div>
-    <div class="name-alt">Blazing Invocation</div>
-    <div class="middle-alt">
-      <p>Deal 3 damage to any target. If you control a Rune, draw a card.</p>
-    </div>
-    <div class="bottom-bar-alt">
-      <span class="type-line-alt">Spell — Invocation</span>
     </div>
   </div>
 </body>
