@@ -12,7 +12,7 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards
+  // 1) Load entire sheet for search
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
@@ -20,7 +20,7 @@
   }
   await loadAllCards();
 
-  // 2) Initial render from URL (?id=variantNumber)
+  // 2) On page load, read ?id=variantNumber
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
@@ -28,7 +28,7 @@
     initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
   }
 
-  // 3) Description formatter
+  // 3) Replace bracketed tokens with icons
   function formatDescription(text = '', colorCode) {
     let out = text
       .replace(/\[Tap\]:/g, `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
@@ -36,6 +36,7 @@
       .replace(/\[Rune\]/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
       .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
       .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
       out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
         `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
@@ -43,12 +44,12 @@
     return out;
   }
 
-  // 4) Render by variantNumber (uses &id=variantNumber)
+  // 4) Fetch & render cards by variantNumber (passed as id)
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let vn of ids) {
       const res  = await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(vn)}`
+        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(vn)}`
       );
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
@@ -79,7 +80,7 @@
     }
   }
 
-  // 5) Builders
+  // 5) Card builder functions (multi-color support)
 
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
@@ -91,8 +92,9 @@
       : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
     const tagText   = c.tags ? ` • ${c.tags}` : '';
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join(' ');
     const colorText = colors.join(', ');
+
     return build('unit-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -116,8 +118,9 @@
       ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join(' ');
     const colorText = colors.join(', ');
+
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -153,6 +156,7 @@
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags||'';
     const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`).join('');
+
     return build('legend', c.variantNumber, `
       <div class="top-bar">
         <div class="legend-colors">${colorIcons}</div>
@@ -172,30 +176,30 @@
       <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
   }
 
-  // 6) Generic builder
+  // Generic builder: uses variantNumber as the card ID
   function build(cssClass, variantNumber, html) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
     el.innerHTML = html;
     el.style.position = 'relative';
 
-    const btnAdd = document.createElement('button');
-    btnAdd.className = 'add-btn'; btnAdd.textContent = '+';
-    btnAdd.onclick = () => addCard(variantNumber);
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn'; addBtn.textContent = '+';
+    addBtn.onclick = () => addCard(variantNumber);
 
-    const btnRem = document.createElement('button');
-    btnRem.className = 'remove-btn'; btnRem.textContent = '–';
-    btnRem.onclick = () => removeCard(variantNumber, el);
+    const remBtn = document.createElement('button');
+    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
+    remBtn.onclick = () => removeCard(variantNumber, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
     badge.textContent = `Added: ${addedCounts[variantNumber]||0}`;
 
-    el.append(btnAdd, btnRem, badge);
+    el.append(addBtn, remBtn, badge);
     return el;
   }
 
-  // 7) Search modal
+  // 7) Search modal logic (searches name & variantNumber)
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -213,6 +217,7 @@
     );
     renderSearchResults(filtered);
   });
+
   function renderSearchResults(list) {
     results.innerHTML = '';
     list.forEach(c => {
@@ -229,4 +234,5 @@
       results.appendChild(el);
     });
   }
+
 })();
