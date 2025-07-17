@@ -27,7 +27,8 @@ body {
 }
 
 /* Top bar: cost/force left, might right */
-.top-bar-alt {
+#card-container .top-bar-alt {
+ 
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -36,7 +37,7 @@ body {
   height: 12mm;
   box-sizing: border-box;
 }
-.cost-alt {
+#card-container .cost-alt     {
   font-size: 18px;
   font-weight: bold;
   display: flex;
