@@ -278,9 +278,8 @@ body {
 }
 
 
-/* --- Alternate layout for Unit/Spell --- */
+/* --- Alternate layout for Unit/Spell, restored info --- */
 
-/* Base adjustments */
 .card.unit-alt,
 .card.spell-alt {
   display: flex;
@@ -293,7 +292,7 @@ body {
   overflow: hidden;
 }
 
-/* Top bar: cost/force on left, might on right */
+/* Top bar: cost/force left, might right */
 .top-bar-alt {
   display: flex;
   justify-content: space-between;
@@ -302,7 +301,11 @@ body {
   border-bottom: 1px solid #000;
   height: 12mm;
   box-sizing: border-box;
+  background: #ddd;
 }
+.card.unit-alt .top-bar-alt { background: #f9f9f9; }
+.card.spell-alt .top-bar-alt { background: #cceeff; }
+
 .cost-alt, .might-alt {
   display: flex;
   align-items: center;
@@ -310,13 +313,11 @@ body {
   font-weight: bold;
 }
 .force-icon-alt {
-  width: 12px;
-  height: 12px;
+  width: 12px; height: 12px;
   margin-left: 2px;
 }
 .might-icon-alt {
-  width: 18px;
-  height: 18px;
+  width: 18px; height: 18px;
   margin-right: 2px;
 }
 
@@ -328,8 +329,9 @@ body {
   margin: 4px 0;
 }
 
-/* Centered effect text */
+/* Centered effect text + color indicator */
 .middle-alt {
+  position: relative;
   flex: 1;
   display: flex;
   justify-content: center;
@@ -339,36 +341,39 @@ body {
   font-size: 8pt;
   line-height: 1.3;
 }
-
-/* Optional: different background hues */
-.card.unit-alt .top-bar-alt { background: #f9f9f9; }
-.card.spell-alt .top-bar-alt { background: #cceeff; }
-/* Type / Super tag under name */
-.type-alt {
-  text-align: center;
-  font-size: 10px;
-  margin-bottom: 4px;
-  font-weight: bold;
-}
-.super-tag {
-  font-style: italic;
-}
-
-/* Color indicator in alternate layout */
 .color-indicator-alt {
   position: absolute;
   bottom: 4px;
   right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .color-icon-alt {
-  width: 16px;
-  height: 16px;
-  opacity: 0.8;
+  width: 32px; height: 32px;
+}
+.color-text-alt {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: capitalize;
 }
 
-/* Ensure middle-alt is position: relative for the color indicator */
-.middle-alt {
-  position: relative;
+/* Bottom bar with type/super only */
+.bottom-bar-alt {
+  padding: 4px 6px;
+  border-top: 1px solid #000;
+  height: 10mm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+.type-line-alt {
+  font-size: 8pt;
+  font-weight: bold;
 }
 
-/* (Rest of .unit-alt/.spell-alt styles from previous step) */
+/* Print */
+@media print {
+  .card.unit-alt, .card.spell-alt { border-color: #000; }
+}
+
