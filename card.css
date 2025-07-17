@@ -11,10 +11,16 @@
 
 /* Lock each card to its fixed width and prevent flex-shrink */
 #card-container .card {
-  flex: 0 0 63mm;            /* no grow, no shrink, basis = 63mm */
-  height: 88mm;              /* fixed height */
-  margin: 0;                 /* no margins */
-  box-sizing: border-box;    
+  float: left;
+  margin: 0;         /* no gaps */
+  /* ensure the width/height you already defined stay in effect */
+}
+
+/* Clear floats so the container height wraps all cards */
+#card-container::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 /* Base card */
