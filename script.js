@@ -181,31 +181,49 @@
   results.innerHTML = '';
   list.forEach(c => {
     const id = c.NUMBER;
-    const cardEl = /* build card template as before */;
-    
-    // Create and append the badge
+    // Build the card template (without controls)
+    let cardEl;
+    const t = (c.TYPE||'').toLowerCase();
+    if (t === 'unit')           cardEl = makeUnit(c);
+    else if (t === 'spell'||t==='gear')  cardEl = makeSpell(c);
+    else if (t === 'battlefield') cardEl = makeBF(c);
+    else if (t === 'legend')      cardEl = makeLegend(c);
+    else if (t === 'rune')        cardEl = makeRune(c);
+    else return;
+
+    // Create add/remove buttons
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn';
+    addBtn.textContent = '+';
+    const remBtn = document.createElement('button');
+    remBtn.className = 'remove-btn';
+    remBtn.textContent = '–';
+
+    // Create and append count badge
     const badge = document.createElement('div');
     badge.className = 'count-badge';
     badge.textContent = `Added: ${addedCounts[id]||0}`;
+
+    // Hook up events
+    addBtn.addEventListener('click', () => {
+      addCard(id);
+      badge.textContent = `Added: ${addedCounts[id]}`;
+    });
+    remBtn.addEventListener('click', () => {
+      removeCard(id, /*el=*/cardEl);
+      badge.textContent = `Added: ${addedCounts[id]||0}`;
+    });
+
+    // Append controls into the card element
+    cardEl.style.position = 'relative';
+    cardEl.appendChild(addBtn);
+    cardEl.appendChild(remBtn);
     cardEl.appendChild(badge);
 
-    // Hook up add button
-    const addBtn = cardEl.querySelector('.add-btn');
-    addBtn.onclick = () => {
-      addCard(id);
-      // update this badge
-      badge.textContent = `Added: ${addedCounts[id]}`;
-    };
-
-    // Hook up remove button
-    const remBtn = cardEl.querySelector('.remove-btn');
-    remBtn.onclick = () => {
-      removeCard(id, cardEl);
-      badge.textContent = `Added: ${addedCounts[id]||0}`;
-    };
-
+    // Finally, append to results grid
     results.appendChild(cardEl);
   });
 }
+
 
 })();
