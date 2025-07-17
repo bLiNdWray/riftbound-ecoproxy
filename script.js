@@ -12,7 +12,7 @@
   const addedCounts = {};
   let allCards = [];
 
-  // Load all cards
+  // 1) Load all cards
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
@@ -20,7 +20,7 @@
   }
   await loadAllCards();
 
-  // Initial render from URL ?id=variantNumber
+  // 2) Initial render from URL (?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
@@ -28,7 +28,7 @@
     initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
   }
 
-  // Format descriptions
+  // 3) Description formatter
   function formatDescription(text = '', colorCode) {
     let out = text
       .replace(/\[Tap\]:/g, `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
@@ -43,11 +43,13 @@
     return out;
   }
 
-  // Render by variantNumber via &id=
+  // 4) Render by variantNumber instead of id
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let vn of ids) {
-      const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(vn)}`);
+      const res  = await fetch(
+        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(vn)}`
+      );
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
@@ -55,7 +57,7 @@
       let el;
       switch ((c.type||'').toLowerCase()) {
         case 'unit':        el = makeUnit(c);        break;
-        case 'spell':  
+        case 'spell':
         case 'gear':        el = makeSpell(c);       break;
         case 'battlefield': el = makeBattlefield(c); break;
         case 'legend':      el = makeLegend(c);      break;
@@ -77,16 +79,19 @@
     }
   }
 
-  // Builders—all call build(..., c.variantNumber, ...)
+  // 5) Card builders (multi-color)
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const forceHTML = c.power ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ') : '';
-    const mightHTML = c.might ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}` : '';
+    const forceHTML = c.power
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ')
+      : '';
+    const mightHTML = c.might
+      ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}`
+      : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
     const tagText   = c.tags ? ` • ${c.tags}` : '';
     const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt">`).join('');
     const colorText = colors.join(', ');
-
     return build('unit-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -106,7 +111,9 @@
 
   function makeSpell(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const forceHTML = c.power ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ') : '';
+    const forceHTML = c.power
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ')
+      : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
     const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt">`).join('');
     const colorText = colors.join(', ');
@@ -132,7 +139,10 @@
     return build('battlefield', c.variantNumber, `
       <div class="bf-columns">
         <div class="bf-col side left"><div class="bf-text">${descHTML}</div></div>
-        <div class="bf-col center"><div class="bf-type-text">${c.type}</div><div class="bf-name">${c.name}</div></div>
+        <div class="bf-col center">
+          <div class="bf-type-text">${c.type}</div>
+          <div class="bf-name">${c.name}</div>
+        </div>
         <div class="bf-col side right"><div class="bf-text">${descHTML}</div></div>
       </div>`);
   }
@@ -143,8 +153,14 @@
     const tagText  = c.tags||'';
     const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon">`).join('');
     return build('legend', c.variantNumber, `
-      <div class="top-bar"><div class="legend-colors">${colorIcons}</div><span class="legend-label">Legend</span></div>
-      <div class="middle legend-middle"><div class="legend-tag">${tagText}</div><div class="legend-name">${c.name}</div></div>
+      <div class="top-bar">
+        <div class="legend-colors">${colorIcons}</div>
+        <span class="legend-label">Legend</span>
+      </div>
+      <div class="middle legend-middle">
+        <div class="legend-tag">${tagText}</div>
+        <div class="legend-name">${c.name}</div>
+      </div>
       <div class="bottom-bar legend-bottom"><p>${descHTML}</p></div>`);
   }
 
@@ -155,30 +171,30 @@
       <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
   }
 
-  // Generic builder: always uses variantNumber as the id
+  // Generic build: always uses variantNumber as id
   function build(cssClass, variantNumber, html) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
     el.innerHTML = html;
     el.style.position = 'relative';
 
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-btn'; addBtn.textContent = '+';
-    addBtn.onclick = () => addCard(variantNumber);
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'add-btn'; btnAdd.textContent = '+';
+    btnAdd.onclick = () => addCard(variantNumber);
 
-    const remBtn = document.createElement('button');
-    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
-    remBtn.onclick = () => removeCard(variantNumber, el);
+    const btnRem = document.createElement('button');
+    btnRem.className = 'remove-btn'; btnRem.textContent = '–';
+    btnRem.onclick = () => removeCard(variantNumber, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
     badge.textContent = `Added: ${addedCounts[variantNumber]||0}`;
 
-    el.append(addBtn, remBtn, badge);
+    el.append(btnAdd, btnRem, badge);
     return el;
   }
 
-  // Search modal: filters on name & variantNumber
+  // Search modal: filtering on name & variantNumber
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -190,20 +206,19 @@
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (!q) return results.innerHTML = '';
-    const filtered = allCards.filter(c => {
-      return (c.name||'').toLowerCase().includes(q)
-          || (c.variantNumber||'').toLowerCase().includes(q);
-    });
+    const filtered = allCards.filter(c =>
+      (c.name||'').toLowerCase().includes(q) ||
+      (c.variantNumber||'').toLowerCase().includes(q)
+    );
     renderSearchResults(filtered);
   });
-
   function renderSearchResults(list) {
     results.innerHTML = '';
     list.forEach(c => {
       let el;
       switch ((c.type||'').toLowerCase()) {
         case 'unit':        el = makeUnit(c);        break;
-        case 'spell':
+        case 'spell':  
         case 'gear':        el = makeSpell(c);       break;
         case 'battlefield': el = makeBattlefield(c); break;
         case 'legend':      el = makeLegend(c);      break;
