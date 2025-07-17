@@ -12,7 +12,7 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards for search
+  // 1) Load all cards
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
@@ -20,12 +20,15 @@
   }
   await loadAllCards();
 
-  // 2) Initial render from URL (?id=variantNumber)
+  // 2) Initial render from URL (?id=SetNumber)
   const params     = new URLSearchParams(window.location.search);
-  const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const initialIds = (params.get('id') || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
   if (initialIds.length) {
     await renderCards(initialIds, true);
-    initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0) + 1);
+    initialIds.forEach(id => addedCounts[id] = (addedCounts[id] || 0) + 1);
   }
 
   // 3) Description formatter (bracketed tokens)
@@ -51,19 +54,19 @@
     return out;
   }
 
-  // 4) Core render by variantNumber, using &id= for the Apps Script
+  // 4) Core render — lookup by Set Number via &id=
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
-    for (let variant of ids) {
+    for (let setNum of ids) {
       const res  = await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(variant)}`
+        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(setNum)}`
       );
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
 
       let el;
-      switch ((c.type||'').toLowerCase()) {
+      switch ((c.type || '').toLowerCase()) {
         case 'unit':        el = makeUnit(c);        break;
         case 'spell':
         case 'gear':        el = makeSpell(c);       break;
@@ -76,29 +79,28 @@
     }
   }
 
-  function addCard(id) {
-    renderCards([id], false);
-    addedCounts[id] = (addedCounts[id]||0) + 1;
+  function addCard(setNum) {
+    renderCards([setNum], false);
+    addedCounts[setNum] = (addedCounts[setNum] || 0) + 1;
   }
 
-  function removeCard(id, el) {
-    if ((addedCounts[id]||0) > 0) {
-      addedCounts[id]--;
+  function removeCard(setNum, el) {
+    if ((addedCounts[setNum] || 0) > 0) {
+      addedCounts[setNum]--;
       el.remove();
     }
   }
 
-  // 5) Builders with split on comma OR semicolon
-
+  // 5) Card builders with multi-color support
   function makeUnit(c) {
-    const colors    = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
+    const colors    = (c.colors || '').split(/[;,]\s*/).map(s => s.trim()).filter(Boolean);
     const forceHTML = c.power
       ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
     const mightHTML = c.might
       ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${c.might}`
       : '';
-    const descHTML  = formatDescription(c.description, colors[0]||'');
+    const descHTML  = formatDescription(c.description, colors[0] || '');
     const tagText   = c.tags ? ` • ${c.tags}` : '';
 
     const colorIcons = colors
@@ -106,7 +108,7 @@
       .join(' ');
     const colorText = colors.join(', ');
 
-    return build('unit-alt', c.variantNumber, `
+    return build('unit-alt', c['Set Number'], `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
         <span class="might-alt">${mightHTML}</span>
@@ -125,18 +127,18 @@
   }
 
   function makeSpell(c) {
-    const colors    = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
+    const colors    = (c.colors || '').split(/[;,]\s*/).map(s => s.trim()).filter(Boolean);
     const forceHTML = c.power
       ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
-    const descHTML  = formatDescription(c.description, colors[0]||'');
+    const descHTML  = formatDescription(c.description, colors[0] || '');
 
     const colorIcons = colors
       .map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`)
       .join(' ');
     const colorText = colors.join(', ');
 
-    return build('spell-alt', c.variantNumber, `
+    return build('spell-alt', c['Set Number'], `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
         <span class="might-alt"></span>
@@ -156,7 +158,7 @@
 
   function makeBattlefield(c) {
     const descHTML = formatDescription(c.description, '');
-    return build('battlefield', c.variantNumber, `
+    return build('battlefield', c['Set Number'], `
       <div class="bf-columns">
         <div class="bf-col side left"><div class="bf-text">${descHTML}</div></div>
         <div class="bf-col center">
@@ -168,7 +170,7 @@
   }
 
   function makeLegend(c) {
-    const colors   = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
+    const colors   = (c.colors || '').split(/[;,]\s*/).map(s => s.trim()).filter(Boolean);
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags || '';
 
@@ -176,7 +178,7 @@
       .map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`)
       .join(' ');
 
-    return build('legend', c.variantNumber, `
+    return build('legend', c['Set Number'], `
       <div class="top-bar">
         <div class="legend-colors">
           ${colorIcons}
@@ -193,16 +195,16 @@
   }
 
   function makeRune(c) {
-    const code = (c.colors||'').split(/[;,]\s*/)[0]?.trim() || '';
-    return build('rune', c.variantNumber, `
+    const code = (c.colors || '').split(/[;,]\s*/)[0]?.trim() || '';
+    return build('rune', c['Set Number'], `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
         <img src="images/${code}.png" class="rune-icon" alt="${code}">
       </div>`);
   }
 
-  // 6) Generic builder that adds +/– buttons and badge
-  function build(cssClass, id, innerHTML) {
+  // 6) Generic builder
+  function build(cssClass, setNumber, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
     el.innerHTML = innerHTML;
@@ -210,21 +212,21 @@
 
     const btnAdd = document.createElement('button');
     btnAdd.className = 'add-btn'; btnAdd.textContent = '+';
-    btnAdd.onclick = () => addCard(id);
+    btnAdd.onclick = () => addCard(setNumber);
 
     const btnRem = document.createElement('button');
     btnRem.className = 'remove-btn'; btnRem.textContent = '–';
-    btnRem.onclick = () => removeCard(id, el);
+    btnRem.onclick = () => removeCard(setNumber, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
-    badge.textContent = `Added: ${addedCounts[id]||0}`;
+    badge.textContent = `Added: ${addedCounts[setNumber]||0}`;
 
     el.append(btnAdd, btnRem, badge);
     return el;
   }
 
-  // 7) Search modal logic
+  // 7) Search modal logic — now filters on name AND Set Number
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -238,14 +240,14 @@
 
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
-    if (q.length < 1) {
+    if (!q) {
       results.innerHTML = '';
       return;
     }
     const filtered = allCards.filter(c => {
       const nm = (c.name           || '').toLowerCase();
-      const vn = (c.variantNumber  || '').toLowerCase();
-      return nm.includes(q) || vn.includes(q);
+      const sn = (c['Set Number']  || '').toLowerCase();
+      return nm.includes(q) || sn.includes(q);
     });
     renderSearchResults(filtered);
   });
