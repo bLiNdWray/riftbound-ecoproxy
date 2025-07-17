@@ -1,16 +1,18 @@
 /* card.css — Scoped under #card-container */
 
 #card-container {
-  display: flex;
-  flex-wrap: wrap;    /* allow wrapping to next row */
-  gap: 0;              /* no gap between cards */
-  padding: 20px;       /* page padding */
+  /* remove any flex rules here */
+  display: block;
+  padding: 20px;
+  white-space: normal;  /* allow wrapping */
 }
 
-/* Ensure each card is fixed size and won’t grow or shrink */
 #card-container .card {
-  flex: 0 0 auto;      /* never grow, never shrink, auto basis = its width */
-  margin: 0;           /* no extra margins */
+  display: inline-block;
+  vertical-align: top;  /* align tops of cards */
+  width: 63mm;
+  height: 88mm;
+  margin: 0;
 }
 
 /* Base card */
