@@ -230,7 +230,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 4px;
+  padding-top: 12px;
 }
 .rune-name {
   font-size: 12pt;
