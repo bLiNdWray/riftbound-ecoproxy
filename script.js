@@ -12,7 +12,7 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards
+  // 1) Load all cards for search
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
@@ -20,7 +20,7 @@
   }
   await loadAllCards();
 
-  // 2) Initial render from URL
+  // 2) Initial render from URL (?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
@@ -51,12 +51,12 @@
     return out;
   }
 
-  // 4) Core render by variantNumber
+  // 4) Core render by variantNumber, using &id= for the Apps Script
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let variant of ids) {
       const res  = await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(variant)}`
+        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(variant)}`
       );
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
@@ -201,7 +201,7 @@
       </div>`);
   }
 
-  // 6) Generic builder
+  // 6) Generic builder that adds +/– buttons and badge
   function build(cssClass, id, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
