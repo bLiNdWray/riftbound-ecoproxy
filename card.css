@@ -136,3 +136,26 @@
 }
 /* adjust minmax to card width so modal results tile like printed cards */
 .results-grid .card { margin:0; }
+
+/* --- Hover row for add/remove --- */
+.card {
+  position: relative;
+}
+.card .hover-controls {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 8px;
+}
+.card:hover .hover-controls {
+  display: flex;
+}
+
+/* hide the individual add/remove badges */
+.card .add-btn,
+.card .remove-btn,
+.card .count-badge {
+  display: none;
+}
