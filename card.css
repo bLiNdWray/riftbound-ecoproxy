@@ -1,13 +1,18 @@
 /* card.css — Scoped under #card-container */
 
-/* — Horizontal Layout — */
 #card-container.layout-horizontal {
   display: grid;
+  /* Create as many 63 mm columns as will fit in 100% of the container width */
   grid-template-columns: repeat(auto-fill, 63mm);
   grid-auto-rows: 88mm;
   gap: 0;
-  padding: 20px;
+  
+  /* Force the container to fill the viewport width exactly */
+  width: 100vw;
+  padding: 0;
   box-sizing: border-box;
+
+  /* Align to top-left so rows start flush */
   justify-content: start;
   align-content: start;
 }
