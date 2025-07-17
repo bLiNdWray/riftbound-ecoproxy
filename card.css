@@ -343,3 +343,32 @@ body {
 /* Optional: different background hues */
 .card.unit-alt .top-bar-alt { background: #f9f9f9; }
 .card.spell-alt .top-bar-alt { background: #cceeff; }
+/* Type / Super tag under name */
+.type-alt {
+  text-align: center;
+  font-size: 10px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.super-tag {
+  font-style: italic;
+}
+
+/* Color indicator in alternate layout */
+.color-indicator-alt {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+.color-icon-alt {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+
+/* Ensure middle-alt is position: relative for the color indicator */
+.middle-alt {
+  position: relative;
+}
+
+/* (Rest of .unit-alt/.spell-alt styles from previous step) */
