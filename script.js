@@ -4,7 +4,7 @@
   const SHEET_NAME = 'Riftbound Cards';
   const container = document.getElementById('card-container');
 
-  // Fetch all cards (for search/import, if needed)
+  // Load all cards (if you need search/import)
   let allCards = [];
   async function loadAllCards() {
     const res = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
@@ -12,15 +12,11 @@
   }
   await loadAllCards();
 
-  // On page load, render any IDs in the URL
+  // On load, grab ?id= query
   const params = new URLSearchParams(window.location.search);
-  const idsParam = params.get('id') || '';
-  const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
-  if (ids.length) {
-    renderCards(ids);
-  }
+  const ids = (params.get('id') || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (ids.length) renderCards(ids);
 
-  // Main render function
   async function renderCards(ids) {
     container.innerHTML = '';
     for (let id of ids) {
@@ -29,31 +25,18 @@
       const card = data[0];
       if (!card) continue;
 
-      let cardEl;
-      switch ((card.Type || card.type || '').toLowerCase()) {
-        case 'unit':
-          cardEl = makeUnitCard(card);
-          break;
-        case 'spell':
-          cardEl = makeSpellCard(card);
-          break;
-        case 'battlefield':
-          cardEl = makeBattlefieldCard(card);
-          break;
-        case 'legend':
-          cardEl = makeLegendCard(card);
-          break;
-        case 'rune':
-          cardEl = makeRuneCard(card);
-          break;
-        default:
-          continue;
+      let el;
+      switch ((card.TYPE || '').toLowerCase()) {
+        case 'unit':         el = makeUnitCard(card);         break;
+        case 'spell':        el = makeSpellCard(card);        break;
+        case 'battlefield':  el = makeBattlefieldCard(card);  break;
+        case 'legend':       el = makeLegendCard(card);       break;
+        case 'rune':         el = makeRuneCard(card);         break;
+        default: continue;
       }
-      container.appendChild(cardEl);
+      container.appendChild(el);
     }
   }
-
-  // Template builders
 
   function makeUnitCard(card) {
     const el = document.createElement('div');
@@ -61,26 +44,25 @@
     el.innerHTML = `
       <div class="top-bar-alt">
         <span class="cost-alt">
-          ${card.Cost} <img src="images/${card.Color}2.png" class="force-icon-alt" alt="Force">
+          ${card.COST} <img src="images/${card.COLOR}2.png" class="force-icon-alt" alt="Force">
         </span>
         <span class="might-alt">
-          <img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${card.Might}
+          <img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${card.MIGHT}
         </span>
       </div>
-      <div class="name-alt">${card.Name}</div>
+      <div class="name-alt">${card.NAME}</div>
       <div class="middle-alt">
-        <p>${card.Effect}</p>
+        <p>${card.EFFECT}</p>
         <div class="color-indicator-alt">
-          <img src="images/${card.Color}.png" class="color-icon-alt" alt="${card.Color}">
-          <span class="color-text-alt">${card.Color}</span>
+          <img src="images/${card.COLOR}.png" class="color-icon-alt" alt="${card.COLOR}">
+          <span class="color-text-alt">${card.COLOR}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
         <span class="type-line-alt">
-          ${card.Type} — ${card.Subtype}${card.Super && card.Super !== 'None' ? ' • ' + card.Super : ''}
+          ${card.TYPE} — ${card.TAGS}${card.SUPER && card.SUPER !== 'None' ? ' • ' + card.SUPER : ''}
         </span>
-      </div>
-    `;
+      </div>`;
     return el;
   }
 
@@ -90,22 +72,21 @@
     el.innerHTML = `
       <div class="top-bar-alt">
         <span class="cost-alt">
-          ${card.Cost} <img src="images/${card.Color}2.png" class="force-icon-alt" alt="Force">
+          ${card.COST} <img src="images/${card.COLOR}2.png" class="force-icon-alt" alt="Force">
         </span>
         <span class="might-alt"></span>
       </div>
-      <div class="name-alt">${card.Name}</div>
+      <div class="name-alt">${card.NAME}</div>
       <div class="middle-alt">
-        <p>${card.Effect}</p>
+        <p>${card.EFFECT}</p>
         <div class="color-indicator-alt">
-          <img src="images/${card.Color}.png" class="color-icon-alt" alt="${card.Color}">
-          <span class="color-text-alt">${card.Color}</span>
+          <img src="images/${card.COLOR}.png" class="color-icon-alt" alt="${card.COLOR}">
+          <span class="color-text-alt">${card.COLOR}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
-        <span class="type-line-alt">${card.Type} — ${card.Subtype}</span>
-      </div>
-    `;
+        <span class="type-line-alt">${card.TYPE} — ${card.TAGS}</span>
+      </div>`;
     return el;
   }
 
@@ -114,19 +95,18 @@
     el.className = 'card battlefield';
     el.innerHTML = `
       <div class="bf-columns">
-        <div class="bf-col side left"><div class="bf-text">${card.Effect}</div></div>
+        <div class="bf-col side left"><div class="bf-text">${card.EFFECT}</div></div>
         <div class="bf-col center">
-          <div class="bf-type-text">${card.Type}</div>
-          <div class="bf-name">${card.Name}</div>
+          <div class="bf-type-text">${card.TYPE}</div>
+          <div class="bf-name">${card.NAME}</div>
         </div>
-        <div class="bf-col side right"><div class="bf-text">${card.Effect}</div></div>
-      </div>
-    `;
+        <div class="bf-col side right"><div class="bf-text">${card.EFFECT}</div></div>
+      </div>`;
     return el;
   }
 
   function makeLegendCard(card) {
-    const colors = (card.Colors || card.Color || '').split(',').map(c => c.trim());
+    const colors = (card.COLOR || '').split(',').map(c => c.trim());
     const el = document.createElement('div');
     el.className = 'card legend';
     el.innerHTML = `
@@ -137,13 +117,12 @@
         <span class="legend-label">Legend</span>
       </div>
       <div class="middle legend-middle">
-        <div class="legend-tag">${card.Tag}</div>
-        <div class="legend-name">${card.Name}</div>
+        <div class="legend-tag">${card.TAGS}</div>
+        <div class="legend-name">${card.NAME}</div>
       </div>
       <div class="bottom-bar legend-bottom">
-        <p class="legend-ability">${card.Effect}</p>
-      </div>
-    `;
+        <p class="legend-ability">${card.EFFECT}</p>
+      </div>`;
     return el;
   }
 
@@ -151,12 +130,10 @@
     const el = document.createElement('div');
     el.className = 'card rune';
     el.innerHTML = `
-      <div class="rune-top"><span class="rune-name">${card.Name}</span></div>
+      <div class="rune-top"><span class="rune-name">${card.NAME}</span></div>
       <div class="rune-middle">
-        <img src="images/${card.Color}.png" class="rune-icon" alt="${card.Color}">
-      </div>
-    `;
+        <img src="images/${card.COLOR}.png" class="rune-icon" alt="${card.COLOR}">
+      </div>`;
     return el;
   }
-
 })();
