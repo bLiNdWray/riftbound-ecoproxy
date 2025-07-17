@@ -12,57 +12,68 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards
+  // 1) Load all cards for search
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
     allCards   = Array.isArray(data) ? data : Object.values(data);
   }
   await loadAllCards();
-  console.log('Loaded cards:', allCards.length);
 
-  // 2) Initial render from URL
+  // 2) Initial render from URL (?id=variantNumber)
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
-  console.log('Query IDs:', initialIds);
   if (initialIds.length) {
     await renderCards(initialIds, true);
     initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0) + 1);
   }
 
-  // 3) Icon formatter
+  // 3) Description formatter (bracketed tokens only)
   function formatDescription(text = '', colorCode) {
-    return text
-      .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
-      .replace(/\bA\b/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="A">`)
-      .replace(/\bS\b/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\bC\b/g, `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+    let out = text
+      .replace(/\[Tap\]:/g,
+        `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\[Might\]/g,
+        `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
+      .replace(/\[Rune\]/g,
+        `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
+      .replace(/\[S\]/g,
+        `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+      .replace(/\[C\]/g,
+        `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+
+    // Color runes (Body, Calm, Chaos, Fury, Mind, Order)
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+      const re = new RegExp(`\\[${col}\\]`, 'g');
+      out = out.replace(re,
+        `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+    });
+
+    return out;
   }
 
-  // 4) Render cards by variantNumber
+  // 4) Core render loop (lookup by variantNumber)
   async function renderCards(ids, clear = true) {
-    console.log('renderCards called with:', ids, clear);
     if (clear) container.innerHTML = '';
     for (let variant of ids) {
       const res  = await fetch(
         `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(variant)}`
       );
       const data = await res.json();
-      console.log('Fetch data for', variant, data);
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
 
-      let cardEl;
+      let el;
       switch ((c.type||'').toLowerCase()) {
-        case 'unit':        cardEl = makeUnit(c);        break;
+        case 'unit':        el = makeUnit(c);        break;
         case 'spell':
-        case 'gear':        cardEl = makeSpell(c);       break;
-        case 'battlefield': cardEl = makeBattlefield(c); break;
-        case 'legend':      cardEl = makeLegend(c);      break;
-        case 'rune':        cardEl = makeRune(c);        break;
+        case 'gear':        el = makeSpell(c);       break;
+        case 'battlefield': el = makeBattlefield(c); break;
+        case 'legend':      el = makeLegend(c);      break;
+        case 'rune':        el = makeRune(c);        break;
         default: continue;
       }
-      container.appendChild(cardEl);
+      container.appendChild(el);
     }
   }
 
@@ -78,14 +89,24 @@
     }
   }
 
-  // 5) Card builders
+  // 5) Card builders with multi-color support
+
   function makeUnit(c) {
-    const colors       = (c.colors||'').split(',').map(s=>s.trim());
-    const code         = colors[0] || '';
-    const forceHTML    = c.power ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
-    const mightHTML    = c.might ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}` : '';
-    const descHTML     = formatDescription(c.description, code);
-    const tagText      = c.tags ? ` • ${c.tags}` : '';
+    const colors    = (c.colors||'').split(',').map(s=>s.trim());
+    const forceHTML = c.power
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
+      : '';
+    const mightHTML = c.might
+      ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${c.might}`
+      : '';
+    const descHTML  = formatDescription(c.description, colors[0]||'');
+    const tagText   = c.tags ? ` • ${c.tags}` : '';
+
+    const colorIcons = colors
+      .map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`)
+      .join(' ');
+    const colorText = colors.join(', ');
+
     return build('unit-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -95,8 +116,8 @@
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${code}.png" class="color-icon-alt">
-          <span class="color-text-alt">${code}</span>
+          ${colorIcons}
+          <span class="color-text-alt">${colorText}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -105,9 +126,17 @@
   }
 
   function makeSpell(c) {
-    const code      = (c.colors||'').split(',')[0].trim();
-    const forceHTML = c.power ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
-    const descHTML  = formatDescription(c.description, code);
+    const colors    = (c.colors||'').split(',').map(s=>s.trim());
+    const forceHTML = c.power
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
+      : '';
+    const descHTML  = formatDescription(c.description, colors[0]||'');
+
+    const colorIcons = colors
+      .map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`)
+      .join(' ');
+    const colorText = colors.join(', ');
+
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
@@ -117,8 +146,8 @@
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${code}.png" class="color-icon-alt">
-          <span class="color-text-alt">${code}</span>
+          ${colorIcons}
+          <span class="color-text-alt">${colorText}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -143,10 +172,15 @@
     const colors   = (c.colors||'').split(',').map(s=>s.trim());
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags || '';
+
+    const colorIcons = colors
+      .map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`)
+      .join(' ');
+
     return build('legend', c.variantNumber, `
       <div class="top-bar">
         <div class="legend-colors">
-          ${colors.map(col=>`<img src="images/${col}.png" class="legend-color-icon">`).join('')}
+          ${colorIcons}
         </div>
         <span class="legend-label">Legend</span>
       </div>
@@ -164,11 +198,11 @@
     return build('rune', c.variantNumber, `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
-        <img src="images/${code}.png" class="rune-icon">
+        <img src="images/${code}.png" class="rune-icon" alt="${code}">
       </div>`);
   }
 
-  // 6) Generic builder
+  // 6) Generic builder that adds +/– buttons and badge
   function build(cssClass, id, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
@@ -198,7 +232,10 @@
     results.innerHTML = '';
     input.focus();
   });
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
 
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
@@ -207,9 +244,9 @@
       return;
     }
     const filtered = allCards.filter(c => {
-      const name = (c.name||'').toLowerCase();
-      const vn   = (c.variantNumber||'').toLowerCase();
-      return name.includes(q) || vn.includes(q);
+      const nm = (c.name           || '').toLowerCase();
+      const vn = (c.variantNumber  || '').toLowerCase();
+      return nm.includes(q) || vn.includes(q);
     });
     renderSearchResults(filtered);
   });
@@ -220,7 +257,7 @@
       let el;
       switch ((c.type||'').toLowerCase()) {
         case 'unit':        el = makeUnit(c);        break;
-        case 'spell':  
+        case 'spell':
         case 'gear':        el = makeSpell(c);       break;
         case 'battlefield': el = makeBattlefield(c); break;
         case 'legend':      el = makeLegend(c);      break;
