@@ -1,6 +1,6 @@
 // script.js
 (async () => {
-  const API_BASE   = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
+  const API_BASE   = 'https://script.google.com/macros/s/AKfycbzLm-yhsBMjcNL5TI-TIoydCREK9Dou5yURdxlf9-Wlz44YGZUxuKRUrsu0Ef1qDNBdXA/exec';
   const SHEET_NAME = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
   const openBtn    = document.getElementById('open-search');
@@ -43,7 +43,7 @@
     return out;
   }
 
-  // 4) Render by variantNumber instead of id
+  // 4) Render by variantNumber (uses &id=variantNumber)
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let vn of ids) {
@@ -79,18 +79,19 @@
     }
   }
 
-  // 5) Card builders (multi-color)
+  // 5) Builders
+
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const forceHTML = c.power
-      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ')
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
     const mightHTML = c.might
-      ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}`
+      ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${c.might}`
       : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
     const tagText   = c.tags ? ` • ${c.tags}` : '';
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join('');
     const colorText = colors.join(', ');
     return build('unit-alt', c.variantNumber, `
       <div class="top-bar-alt">
@@ -112,10 +113,10 @@
   function makeSpell(c) {
     const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const forceHTML = c.power
-      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt">`).join(' ')
+      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
     const descHTML  = formatDescription(c.description, colors[0]||'');
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join('');
     const colorText = colors.join(', ');
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
@@ -151,7 +152,7 @@
     const colors   = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags||'';
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon">`).join('');
+    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`).join('');
     return build('legend', c.variantNumber, `
       <div class="top-bar">
         <div class="legend-colors">${colorIcons}</div>
@@ -171,7 +172,7 @@
       <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
   }
 
-  // Generic build: always uses variantNumber as id
+  // 6) Generic builder
   function build(cssClass, variantNumber, html) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
@@ -194,7 +195,7 @@
     return el;
   }
 
-  // Search modal: filtering on name & variantNumber
+  // 7) Search modal
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -217,16 +218,15 @@
     list.forEach(c => {
       let el;
       switch ((c.type||'').toLowerCase()) {
-        case 'unit':        el = makeUnit(c);        break;
-        case 'spell':  
-        case 'gear':        el = makeSpell(c);       break;
+        case 'unit': el = makeUnit(c); break;
+        case 'spell':
+        case 'gear': el = makeSpell(c); break;
         case 'battlefield': el = makeBattlefield(c); break;
-        case 'legend':      el = makeLegend(c);      break;
-        case 'rune':        el = makeRune(c);        break;
+        case 'legend': el = makeLegend(c); break;
+        case 'rune': el = makeRune(c); break;
         default: return;
       }
       results.appendChild(el);
     });
   }
-
 })();
