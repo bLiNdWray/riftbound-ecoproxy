@@ -216,21 +216,22 @@ console.log('Loaded cards:', allCards.length, allCards);
     renderSearchResults(filtered);
   });
 
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const el = (() => {
-        switch ((c.type||'').toLowerCase()) {
-          case 'unit':        return makeUnitCard(c);
-          case 'spell':
-          case 'gear':        return makeSpellCard(c);
-          case 'battlefield': return makeBattlefieldCard(c);
-          case 'legend':      return makeLegendCard(c);
-          case 'rune':        return makeRuneCard(c);
-        }
-      })();
-      results.appendChild(el);
-    });
-  }
+ function renderSearchResults(list) {
+  results.innerHTML = '';
+  list.forEach(c => {
+    let el;
+    switch ((c.type||'').toLowerCase()) {
+      case 'unit':        el = makeUnit(c);        break;
+      case 'spell':  
+      case 'gear':        el = makeSpell(c);       break;
+      case 'battlefield': el = makeBattlefield(c); break;
+      case 'legend':      el = makeLegend(c);      break;
+      case 'rune':        el = makeRune(c);        break;
+      default: return;
+    }
+    results.appendChild(el);
+  });
+}
+
 
 })();
