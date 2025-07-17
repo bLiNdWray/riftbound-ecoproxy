@@ -1,22 +1,28 @@
 /* card.css — Scoped under #card-container */
 
-/* Grid container: as many 63mm columns as fit; each row 88mm tall */
+/* === Proxy Cards Container === */
 #card-container {
   display: grid;
+  /* as many 63 mm columns as fit, then wrap */
   grid-template-columns: repeat(auto-fill, 63mm);
+  /* each row is exactly 88 mm tall */
   grid-auto-rows: 88mm;
-  justify-content: start;   /* pack cards to the left */
-  align-content: start;     /* pack rows to the top */
-  gap: 0;                   /* no space between cells */
-  padding: 20px;
+  /* sit cards flush with no gutters */
+  gap: 0;
+  /* ensure top‐left alignment */
+  justify-content: start;
+  align-content: start;
+  /* full‐width container */
+  width: 100%;
   box-sizing: border-box;
+  padding: 0;
 }
 
-/* Cards fill their grid cell exactly */
+/* force each card to its exact size */
 #card-container .card {
-  width: 100%;              /* fill cell width */
-  height: 100%;             /* fill cell height */
-  margin: 0;                /* no extra margins */
+  width: 63mm;
+  height: 88mm;
+  margin: 0;
   box-sizing: border-box;
 }
 
