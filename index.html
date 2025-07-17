@@ -8,6 +8,23 @@
   <link rel="stylesheet" href="card.css" />
 </head>
 <body>
+<!-- Add Cards Button -->
+<button id="open-search">Add Cards</button>
+
+<!-- Search Modal -->
+<div id="search-modal" class="hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content">
+    <button id="close-search" class="close-btn">×</button>
+    <input
+      type="text"
+      id="card-search-input"
+      placeholder="Search by name or set ID…"
+      autofocus
+    />
+    <div id="search-results"></div>
+  </div>
+</div>
   <header>
     <h1>Riftbound Proxy Generator</h1>
     <p>An ink-saving proxy generator to print and test your Riftbound cards.</p>
