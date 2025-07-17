@@ -12,7 +12,7 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards for search
+  // 1) Load all cards
   async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
@@ -20,7 +20,7 @@
   }
   await loadAllCards();
 
-  // 2) Initial render from URL (?id=variantNumber)
+  // 2) Initial render from URL
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
@@ -28,7 +28,7 @@
     initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0) + 1);
   }
 
-  // 3) Description formatter (bracketed tokens only)
+  // 3) Description formatter (bracketed tokens)
   function formatDescription(text = '', colorCode) {
     let out = text
       .replace(/\[Tap\]:/g,
@@ -42,7 +42,6 @@
       .replace(/\[C\]/g,
         `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
 
-    // Color runes (Body, Calm, Chaos, Fury, Mind, Order)
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
       const re = new RegExp(`\\[${col}\\]`, 'g');
       out = out.replace(re,
@@ -52,7 +51,7 @@
     return out;
   }
 
-  // 4) Core render loop (lookup by variantNumber)
+  // 4) Core render by variantNumber
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let variant of ids) {
@@ -89,10 +88,10 @@
     }
   }
 
-  // 5) Card builders with multi-color support
+  // 5) Builders with split on comma OR semicolon
 
   function makeUnit(c) {
-    const colors    = (c.colors||'').split(',').map(s=>s.trim());
+    const colors    = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
     const forceHTML = c.power
       ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
@@ -126,7 +125,7 @@
   }
 
   function makeSpell(c) {
-    const colors    = (c.colors||'').split(',').map(s=>s.trim());
+    const colors    = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
     const forceHTML = c.power
       ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
       : '';
@@ -169,7 +168,7 @@
   }
 
   function makeLegend(c) {
-    const colors   = (c.colors||'').split(',').map(s=>s.trim());
+    const colors   = (c.colors||'').split(/[;,]\s*/).map(s=>s.trim()).filter(Boolean);
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags || '';
 
@@ -194,7 +193,7 @@
   }
 
   function makeRune(c) {
-    const code = (c.colors||'').split(',')[0].trim();
+    const code = (c.colors||'').split(/[;,]\s*/)[0]?.trim() || '';
     return build('rune', c.variantNumber, `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
@@ -202,7 +201,7 @@
       </div>`);
   }
 
-  // 6) Generic builder that adds +/– buttons and badge
+  // 6) Generic builder
   function build(cssClass, id, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
