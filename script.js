@@ -6,12 +6,12 @@
 
   const colorMap = {
     Orange: 'Body', Green: 'Calm', Purple: 'Chaos',
-    Red: 'Fury', Blue: 'Mind', Yellow: 'Order'
+    Red: 'Fury',   Blue: 'Mind',  Yellow: 'Order'
   };
   const addedCounts = {};
   let allCards = [];
 
-  // Fetch all cards for search
+  // Load all cards for search
   async function loadAll() {
     allCards = await (await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`)).json();
   }
@@ -25,7 +25,7 @@
     initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0)+1);
   }
 
-  // Render helpers
+  // --- Render functions ---
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let id of ids) {
@@ -35,27 +35,34 @@
       if (!card) continue;
       let el;
       const t = (card.TYPE||'').toLowerCase();
-      if (t==='unit') el = makeUnit(card);
-      else if (t==='spell'||t==='gear') el = makeSpell(card);
-      else if (t==='battlefield') el = makeBF(card);
-      else if (t==='legend') el = makeLegend(card);
-      else if (t==='rune') el = makeRune(card);
+      if (t === 'unit') el = makeUnit(card);
+      else if (t === 'spell' || t === 'gear') el = makeSpell(card);
+      else if (t === 'battlefield') el = makeBF(card);
+      else if (t === 'legend') el = makeLegend(card);
+      else if (t === 'rune') el = makeRune(card);
       else continue;
       container.appendChild(el);
     }
   }
+
   function addCard(id) {
     renderCards([id], false);
-    addedCounts[id] = (addedCounts[id]||0)+1;
+    addedCounts[id] = (addedCounts[id]||0) + 1;
+  }
+  function removeCard(id, el) {
+    if ((addedCounts[id]||0) > 0) {
+      addedCounts[id]--;
+      el.remove();
+    }
   }
 
-  // Card builders
+  // --- Card builders (as before) ---
   function makeUnit(c) {
     const code = colorMap[c.COLOR]||c.COLOR;
     const force = c.FORCE ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
     const might = c.MIGHT ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.MIGHT}` : '';
     const sup = (c.SUPER&&c.SUPER.toLowerCase()!=='none')?` • ${c.SUPER}`:'';
-    return build('unit-alt', `
+    return build('unit-alt', c, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.COST} ${force}</span>
         <span class="might-alt">${might}</span>
@@ -75,7 +82,7 @@
   function makeSpell(c) {
     const code = colorMap[c.COLOR]||c.COLOR;
     const force = c.FORCE ? `<img src="images/${code}2.png" class="force-icon-alt">` : '';
-    return build('spell-alt', `
+    return build('spell-alt', c, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.COST} ${force}</span>
         <span class="might-alt"></span>
@@ -93,7 +100,7 @@
       </div>`);
   }
   function makeBF(c) {
-    return build('battlefield', `
+    return build('battlefield', c, `
       <div class="bf-columns">
         <div class="bf-col side left"><div class="bf-text">${c.EFFECT}</div></div>
         <div class="bf-col center">
@@ -105,11 +112,10 @@
   }
   function makeLegend(c) {
     const cols = c.COLOR.split(',').map(x=>colorMap[x.trim()]||x.trim());
-    return build('legend', `
+    return build('legend', c, `
       <div class="top-bar">
-        <div class="legend-colors">
-          ${cols.map(x=>`<img src="images/${x}.png" class="legend-color-icon">`).join('')}
-        </div>
+        <div class="legend-colors">${cols.map(x=>
+          `<img src="images/${x}.png" class="legend-color-icon">`).join('')}</div>
         <span class="legend-label">Legend</span>
       </div>
       <div class="middle legend-middle">
@@ -122,52 +128,48 @@
   }
   function makeRune(c) {
     const code = colorMap[c.COLOR]||c.COLOR;
-    return build('rune', `
+    return build('rune', c, `
       <div class="rune-top"><span class="rune-name">${c.NAME}</span></div>
-      <div class="rune-middle">
-        <img src="images/${code}.png" class="rune-icon">
-      </div>`);
-  }
-  function build(cls, html) {
-    const d = document.createElement('div');
-    d.className = `card ${cls}`;
-    d.innerHTML = html;
-    return d;
+      <div class="rune-middle"><img src="images/${code}.png" class="rune-icon"></div>`);
   }
 
- // --- Search modal logic ---
+  function build(cssClass, cardObj, innerHTML) {
+    const el = document.createElement('div');
+    el.className = `card ${cssClass}`;
+    el.innerHTML = innerHTML;
+    // add/remove controls
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn'; addBtn.textContent = '+'; 
+    addBtn.onclick = () => addCard(cardObj.NUMBER);
+    const remBtn = document.createElement('button');
+    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
+    remBtn.onclick = () => removeCard(cardObj.NUMBER, el);
+    el.appendChild(addBtn);
+    el.appendChild(remBtn);
+    return el;
+  }
+
+  // --- Search modal logic ---
   const openBtn = document.getElementById('open-search');
   const closeBtn = document.getElementById('close-search');
   const modal    = document.getElementById('search-modal');
   const input    = document.getElementById('card-search-input');
   const results  = document.getElementById('search-results');
-  const preview  = document.getElementById('card-preview');
-  const prevAdd  = document.getElementById('preview-add');
-  let currentId  = null;
 
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
-    // start blank
     results.innerHTML = '';
-    preview.innerHTML = '<em>Type to search…</em>';
-    prevAdd.disabled = true;
     input.focus();
   });
-
   closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (q.length < 1) {
-      // clear until at least one character
       results.innerHTML = '';
-      preview.innerHTML = '<em>Type to search…</em>';
-      prevAdd.disabled = true;
-      currentId = null;
       return;
     }
-    // otherwise show filtered results
     const filtered = allCards.filter(c =>
       c.NAME.toLowerCase().includes(q) ||
       c.NUMBER.toLowerCase().includes(q)
@@ -177,47 +179,23 @@
 
   function renderSearch(list) {
     results.innerHTML = '';
-    preview.innerHTML = '<em>Hover to preview…</em>';
-    prevAdd.disabled = true;
-    currentId = null;
-
     list.forEach(c => {
-      const id = c.NUMBER;
-      const div = document.createElement('div');
-      div.className = 'search-card';
-      div.dataset.id = id;
-      div.innerHTML = `
-        <div class="name">${c.NAME}</div>
-        <button class="btn-add">Add</button>
-        <div class="count-badge">Added: ${addedCounts[id]||0}</div>
-      `;
-      // add handler
-      div.querySelector('.btn-add')
-         .addEventListener('click', () => addCard(id));
-
-      // live preview on hover
-      div.addEventListener('mouseover', () => {
-        currentId = id;
-        // build appropriate preview template
-        let previewEl;
-        const t = (c.TYPE||'').toLowerCase();
-        if (t==='unit') previewEl = makeUnit(c);
-        else if (t==='spell'||t==='gear') previewEl = makeSpell(c);
-        else if (t==='battlefield') previewEl = makeBF(c);
-        else if (t==='legend') previewEl = makeLegend(c);
-        else if (t==='rune') previewEl = makeRune(c);
-        else previewEl = document.createTextNode('No preview');
-
-        preview.innerHTML = '';
-        preview.appendChild(previewEl);
-        prevAdd.disabled = false;
-      });
-
-      results.appendChild(div);
+      let cardEl;
+      const t = (c.TYPE||'').toLowerCase();
+      if (t==='unit') cardEl = makeUnit(c);
+      else if (t==='spell'||t==='gear') cardEl = makeSpell(c);
+      else if (t==='battlefield') cardEl = makeBF(c);
+      else if (t==='legend') cardEl = makeLegend(c);
+      else if (t==='rune') cardEl = makeRune(c);
+      else return;
+      // update count badge inside card
+      const badge = document.createElement('div');
+      badge.className = 'count-badge';
+      badge.textContent = `Added: ${addedCounts[c.NUMBER]||0}`;
+      cardEl.appendChild(badge);
+      // hook add/remove already on template
+      results.appendChild(cardEl);
     });
   }
 
-  prevAdd.addEventListener('click', () => {
-    if (currentId) addCard(currentId);
-  });
 })();
