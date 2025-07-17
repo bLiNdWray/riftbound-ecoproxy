@@ -4,7 +4,6 @@
   const SHEET_NAME = 'Riftbound Cards';
   const container = document.getElementById('card-container');
 
-  // Map sheet color names to image codes & display names
   const colorMap = {
     Orange: 'Body',
     Green:  'Calm',
@@ -14,145 +13,32 @@
     Yellow: 'Order'
   };
 
-  // Load all cards (for search/import if needed)
-  let allCards = [];
-  async function loadAllCards() {
-    allCards = await (await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`)).json();
-  }
-  await loadAllCards();
+  // 1) Fetch all cards at once
+  const allCards = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`)
+    .then(r => r.json());
 
-  // On load, render any ?id=…
-  const ids = (new URLSearchParams(window.location.search).get('id') || '')
-    .split(',').map(s => s.trim()).filter(Boolean);
+  // 2) Grab IDs from URL, then render
+  const ids = (new URLSearchParams(window.location.search).get('id')||'')
+    .split(',').map(s=>s.trim()).filter(Boolean);
   if (ids.length) renderCards(ids);
 
-  async function renderCards(ids) {
+  function renderCards(ids) {
     container.innerHTML = '';
-    for (let id of ids) {
-      const [card] = await (await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(id)}`
-      )).json();
-      if (!card) continue;
-
-      // decide builder by type (gear treated as spell)
-      const type = (card.TYPE || '').toLowerCase();
+    // filter once
+    const selected = allCards.filter(c => ids.includes(c.NUMBER));
+    for (let card of selected) {
       let el;
+      const type = (card.TYPE||'').toLowerCase();
       if (type === 'unit')         el = makeUnitCard(card);
-      else if (type === 'spell' || type === 'gear')
-                                   el = makeSpellCard(card);
+      else if (type === 'spell' || type === 'gear') el = makeSpellCard(card);
       else if (type === 'battlefield') el = makeBattlefieldCard(card);
       else if (type === 'legend')      el = makeLegendCard(card);
       else if (type === 'rune')        el = makeRuneCard(card);
       else continue;
-
       container.appendChild(el);
     }
   }
 
-  function makeUnitCard(card) {
-    const code = colorMap[card.COLOR] || card.COLOR;
-    const displayColor = code; // show mapped name
-    const forceHTML = card.FORCE
-      ? `<img src="images/${code}2.png" class="force-icon-alt" alt="Force">`
-      : '';
-    const mightHTML = card.MIGHT
-      ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${card.MIGHT}`
-      : '';
-
-    // only add "• Super" if SUPER is not None/blank
-    const superText = (card.SUPER && card.SUPER.toLowerCase() !== 'none')
-      ? ` • ${card.SUPER}` : '';
-
-    return createCard('unit-alt', `
-      <div class="top-bar-alt">
-        <span class="cost-alt">${card.COST} ${forceHTML}</span>
-        <span class="might-alt">${mightHTML}</span>
-      </div>
-      <div class="name-alt">${card.NAME}</div>
-      <div class="middle-alt">
-        <p>${card.EFFECT}</p>
-        <div class="color-indicator-alt">
-          <img src="images/${code}.png" class="color-icon-alt" alt="${displayColor}">
-          <span class="color-text-alt">${displayColor}</span>
-        </div>
-      </div>
-      <div class="bottom-bar-alt">
-        <span class="type-line-alt">
-          ${card.TYPE} — ${card.TAGS}${superText}
-        </span>
-      </div>`);
-  }
-
-  function makeSpellCard(card) {
-    const code = colorMap[card.COLOR] || card.COLOR;
-    const displayColor = code;
-    const forceHTML = card.FORCE
-      ? `<img src="images/${code}2.png" class="force-icon-alt" alt="Force">`
-      : '';
-
-    return createCard('spell-alt', `
-      <div class="top-bar-alt">
-        <span class="cost-alt">${card.COST} ${forceHTML}</span>
-        <span class="might-alt"></span>
-      </div>
-      <div class="name-alt">${card.NAME}</div>
-      <div class="middle-alt">
-        <p>${card.EFFECT}</p>
-        <div class="color-indicator-alt">
-          <img src="images/${code}.png" class="color-icon-alt" alt="${displayColor}">
-          <span class="color-text-alt">${displayColor}</span>
-        </div>
-      </div>
-      <div class="bottom-bar-alt">
-        <span class="type-line-alt">${card.TYPE} — ${card.TAGS}</span>
-      </div>`);
-  }
-
-  function makeBattlefieldCard(card) {
-    return createCard('battlefield', `
-      <div class="bf-columns">
-        <div class="bf-col side left"><div class="bf-text">${card.EFFECT}</div></div>
-        <div class="bf-col center">
-          <div class="bf-type-text">${card.TYPE}</div>
-          <div class="bf-name">${card.NAME}</div>
-        </div>
-        <div class="bf-col side right"><div class="bf-text">${card.EFFECT}</div></div>
-      </div>`);
-  }
-
-  function makeLegendCard(card) {
-    const colors = (card.COLOR || '').split(',')
-      .map(c => (colorMap[c.trim()] || c.trim()));
-    return createCard('legend', `
-      <div class="top-bar">
-        <div class="legend-colors">
-          ${colors.map(c => `<img src="images/${c}.png" class="legend-color-icon" alt="${c}">`).join('')}
-        </div>
-        <span class="legend-label">Legend</span>
-      </div>
-      <div class="middle legend-middle">
-        <div class="legend-tag">${card.TAGS}</div>
-        <div class="legend-name">${card.NAME}</div>
-      </div>
-      <div class="bottom-bar legend-bottom">
-        <p class="legend-ability">${card.EFFECT}</p>
-      </div>`);
-  }
-
-  function makeRuneCard(card) {
-    const code = colorMap[card.COLOR] || card.COLOR;
-    return createCard('rune', `
-      <div class="rune-top"><span class="rune-name">${card.NAME}</span></div>
-      <div class="rune-middle">
-        <img src="images/${code}.png" class="rune-icon" alt="${card.COLOR}">
-      </div>`);
-  }
-
-  function createCard(cssClass, innerHTML) {
-    const el = document.createElement('div');
-    el.className = `card ${cssClass}`;
-    el.innerHTML = innerHTML;
-    return el;
-  }
+  // … your makeXCard and createCard functions go here unchanged …
 
 })();
