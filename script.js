@@ -1,32 +1,29 @@
 // script.js
 (async () => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
-  const SHEET_NAME = 'piltover_cards';  
+  const SHEET_NAME = 'piltover_cards';
   const container  = document.getElementById('card-container');
 
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards for search, ensure it's always an array
-  async function loadAll() {
+  // 1) Load entire sheet for search
+  async function loadAllCards() {
     const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
     const data = await res.json();
-    allCards = Array.isArray(data) ? data : Object.values(data);
+    allCards   = Array.isArray(data) ? data : Object.values(data);
   }
-  await loadAll();
+  await loadAllCards();
 
-  // 2) Initial render from URL (?id=variantNumber)
+  // 2) On load, render any ?id=variantNumber
   const params     = new URLSearchParams(window.location.search);
-  const initialIds = (params.get('id') || '')
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
+  const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initialIds.length) {
     await renderCards(initialIds, true);
-    initialIds.forEach(id => { addedCounts[id] = (addedCounts[id]||0) + 1 });
+    initialIds.forEach(id => addedCounts[id] = (addedCounts[id]||0) + 1);
   }
 
-  // 3) Placeholder→icon helper
+  // 3) Format description placeholders
   function formatDescription(text = '', colorCode) {
     return text
       .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
@@ -35,7 +32,7 @@
       .replace(/\bC\b/g, `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
   }
 
-  // 4) Core render loop (fetches by variantNumber)
+  // 4) Render function (lookup by variantNumber)
   async function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     for (let variant of ids) {
@@ -46,17 +43,17 @@
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
 
-      let cardEl;
-      switch ((c.type || '').toLowerCase()) {
-        case 'unit':        cardEl = makeUnit(c);        break;
+      let el;
+      switch ((c.type||'').toLowerCase()) {
+        case 'unit':        el = makeUnit(c);        break;
         case 'spell':
-        case 'gear':        cardEl = makeSpell(c);       break;
-        case 'battlefield': cardEl = makeBattlefield(c); break;
-        case 'legend':      cardEl = makeLegend(c);      break;
-        case 'rune':        cardEl = makeRune(c);        break;
+        case 'gear':        el = makeSpell(c);       break;
+        case 'battlefield': el = makeBattlefield(c); break;
+        case 'legend':      el = makeLegend(c);      break;
+        case 'rune':        el = makeRune(c);        break;
         default: continue;
       }
-      container.appendChild(cardEl);
+      container.appendChild(el);
     }
   }
 
@@ -72,13 +69,14 @@
     }
   }
 
-  // 5) Card builders using new CSV headers
+  // 5) Card builder functions
+
   function makeUnit(c) {
-    const colors       = (c.colors || '').split(',').map(s => s.trim());
-    const primaryColor = colors[0] || '';
-    const forceHTML    = c.power ? `<img src="images/${primaryColor}2.png" class="force-icon-alt">` : '';
+    const colors       = (c.colors||'').split(',').map(s=>s.trim());
+    const colorCode    = colors[0] || '';
+    const forceHTML    = c.power ? `<img src="images/${colorCode}2.png" class="force-icon-alt">` : '';
     const mightHTML    = c.might ? `<img src="images/SwordIconRB.png" class="might-icon-alt"> ${c.might}` : '';
-    const descHTML     = formatDescription(c.description, primaryColor);
+    const descHTML     = formatDescription(c.description, colorCode);
     const tagText      = c.tags ? ` • ${c.tags}` : '';
 
     return build('unit-alt', c.variantNumber, `
@@ -90,8 +88,8 @@
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${primaryColor}.png" class="color-icon-alt">
-          <span class="color-text-alt">${primaryColor}</span>
+          <img src="images/${colorCode}.png" class="color-icon-alt">
+          <span class="color-text-alt">${colorCode}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -100,10 +98,9 @@
   }
 
   function makeSpell(c) {
-    const colors       = (c.colors || '').split(',').map(s => s.trim());
-    const primaryColor = colors[0] || '';
-    const forceHTML    = c.power ? `<img src="images/${primaryColor}2.png" class="force-icon-alt">` : '';
-    const descHTML     = formatDescription(c.description, primaryColor);
+    const colorCode = (c.colors||'').split(',')[0].trim();
+    const forceHTML = c.power ? `<img src="images/${colorCode}2.png" class="force-icon-alt">` : '';
+    const descHTML  = formatDescription(c.description, colorCode);
 
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
@@ -114,8 +111,8 @@
       <div class="middle-alt">
         <p>${descHTML}</p>
         <div class="color-indicator-alt">
-          <img src="images/${primaryColor}.png" class="color-icon-alt">
-          <span class="color-text-alt">${primaryColor}</span>
+          <img src="images/${colorCode}.png" class="color-icon-alt">
+          <span class="color-text-alt">${colorCode}</span>
         </div>
       </div>
       <div class="bottom-bar-alt">
@@ -137,13 +134,14 @@
   }
 
   function makeLegend(c) {
-    const colors   = (c.colors || '').split(',').map(s => s.trim());
+    const colors   = (c.colors||'').split(',').map(s=>s.trim());
     const descHTML = formatDescription(c.description, '');
     const tagText  = c.tags || '';
     return build('legend', c.variantNumber, `
       <div class="top-bar">
         <div class="legend-colors">
-          ${colors.map(col => `<img src="images/${col}.png" class="legend-color-icon">`).join('')}
+          ${colors.map(col=>
+            `<img src="images/${col}.png" class="legend-color-icon">`).join('')}
         </div>
         <span class="legend-label">Legend</span>
       </div>
@@ -157,38 +155,38 @@
   }
 
   function makeRune(c) {
-    const primaryColor = (c.colors || '').split(',')[0]?.trim() || '';
+    const colorCode = (c.colors||'').split(',')[0].trim();
     return build('rune', c.variantNumber, `
       <div class="rune-top"><span class="rune-name">${c.name}</span></div>
       <div class="rune-middle">
-        <img src="images/${primaryColor}.png" class="rune-icon">
+        <img src="images/${colorCode}.png" class="rune-icon">
       </div>`);
   }
 
-  // 6) Generic builder: appends controls and badge
-  function build(cssClass, variantNumber, innerHTML) {
+  // 6) Generic build+controls
+  function build(cssClass, id, innerHTML) {
     const el = document.createElement('div');
     el.className = `card ${cssClass}`;
     el.innerHTML = innerHTML;
     el.style.position = 'relative';
 
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-btn'; addBtn.textContent = '+';
-    addBtn.onclick = () => addCard(variantNumber);
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'add-btn'; btnAdd.textContent = '+';
+    btnAdd.onclick = () => addCard(id);
 
-    const remBtn = document.createElement('button');
-    remBtn.className = 'remove-btn'; remBtn.textContent = '–';
-    remBtn.onclick = () => removeCard(variantNumber, el);
+    const btnRem = document.createElement('button');
+    btnRem.className = 'remove-btn'; btnRem.textContent = '–';
+    btnRem.onclick = () => removeCard(id, el);
 
     const badge = document.createElement('div');
     badge.className = 'count-badge';
-    badge.textContent = `Added: ${addedCounts[variantNumber]||0}`;
+    badge.textContent = `Added: ${addedCounts[id]||0}`;
 
-    el.append(addBtn, remBtn, badge);
+    el.append(btnAdd, btnRem, badge);
     return el;
   }
 
-  // 7) Search modal wiring with guarded filter
+  // 7) Search modal wiring
   const openBtn  = document.getElementById('open-search');
   const closeBtn = document.getElementById('close-search');
   const modal    = document.getElementById('search-modal');
@@ -202,9 +200,7 @@
     input.focus();
   });
 
-  closeBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
+  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
@@ -213,23 +209,25 @@
       return;
     }
     const filtered = allCards.filter(c => {
-      const nm = (c.name           || '').toString().toLowerCase();
-      const vn = (c.variantNumber || '').toString().toLowerCase();
-      return nm.includes(q) || vn.includes(q);
+      const name        = (c.name          || '').toLowerCase();
+      const variantNum  = (c.variantNumber || '').toLowerCase();
+      return name.includes(q) || variantNum.includes(q);
     });
-    renderSearch(filtered);
+    renderSearchResults(filtered);
   });
 
-  function renderSearch(list) {
+  function renderSearchResults(list) {
     results.innerHTML = '';
     list.forEach(c => {
       const el = (() => {
-        const t = (c.type||'').toLowerCase();
-        if (t==='unit')           return makeUnit(c);
-        if (t==='spell'||t==='gear') return makeSpell(c);
-        if (t==='battlefield')    return makeBattlefield(c);
-        if (t==='legend')         return makeLegend(c);
-        if (t==='rune')           return makeRune(c);
+        switch ((c.type||'').toLowerCase()) {
+          case 'unit':        return makeUnitCard(c);
+          case 'spell':
+          case 'gear':        return makeSpellCard(c);
+          case 'battlefield': return makeBattlefieldCard(c);
+          case 'legend':      return makeLegendCard(c);
+          case 'rune':        return makeRuneCard(c);
+        }
       })();
       results.appendChild(el);
     });
