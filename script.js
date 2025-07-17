@@ -26,13 +26,23 @@
   }
 
   // Helper: replace placeholders with <img> icons
-  function formatEffect(text, code) {
-    return text
-      .replace(/\{S\}/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\{C\}/g, `<img src="images/${code}2.png"      class="inline-icon" alt="C">`)
-      .replace(/\{T\}/g, `<img src="images/Tap.png"            class="inline-icon" alt="T">`)
-      .replace(/\{A\}/g, `<img src="images/RainbowRune.png"    class="inline-icon" alt="A">`);
-  }
+ * Swap out standalone tokens in effect text:
+ *  • S → SwordIconRB.png  
+ *  • C → <force>2.png  
+ *  • T: → Tap.png  
+ *  • A: → RainbowRune.png  
+ */
+function formatEffect(text, code) {
+  return text
+    // T: must include the colon
+    .replace(/T:/g, `<img src="images/Tap.png" class="inline-icon" alt="T">`)
+    // A: must include the colon
+    .replace(/A:/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="A">`)
+    // standalone S (e.g. "5+ S")
+    .replace(/\bS\b/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+    // standalone C for the card’s force symbol
+    .replace(/\bC\b/g, `<img src="images/${code}2.png" class="inline-icon" alt="C">`);
+}
 
   // Render functions
   async function renderCards(ids, clear = true) {
