@@ -1,14 +1,14 @@
-/* card.css */
+/* === card.css === */
 
-/* --- Page & Layout --- */
+/* --- Page & Container --- */
 body {
   background: #eee;
   padding: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  margin: 0;
 }
-
 .card {
   width: 63mm;
   height: 88mm;
@@ -21,66 +21,61 @@ body {
   position: relative;
 }
 
-/* --- Top Bar --- */
+/* --- Top Bar (units/spells) --- */
 .top-bar-alt {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 4px 6px;
-  height: 12mm;
+  background: #f0f0f0;
   box-sizing: border-box;
+  height: 12mm;
   font-weight: bold;
   font-size: 10pt;
-  background: #f0f0f0;
 }
-
 .cost-alt {
   font-size: 18px;
 }
-
 .might-alt img {
   width: 16px;
   height: 16px;
   vertical-align: middle;
 }
 
-/* --- Name --- */
+/* --- Name Row --- */
 .name-alt {
   text-align: center;
   font-size: 14pt;
   font-weight: bold;
   margin: 4px 0;
+  padding: 0 6px;
 }
 
-/* --- Middle (effect + color) --- */
+/* --- Middle Section --- */
 .middle-alt {
   flex: 1;
   padding: 4px 6px;
   font-size: 8pt;
-  line-height: 1.2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-sizing: border-box;
 }
-
 .middle-alt p {
   margin: 0;
   flex: 1;
   overflow: auto;
 }
-
 .color-indicator-alt {
   display: flex;
   align-items: center;
   margin-top: 4px;
 }
-
 .color-icon-alt {
   width: 16px;
   height: 16px;
   margin-right: 4px;
 }
-
 .color-text-alt {
   font-size: 9pt;
   margin-left: 4px;
@@ -88,20 +83,20 @@ body {
 
 /* --- Bottom Bar --- */
 .bottom-bar-alt {
-  border-top: 1px solid #333;
-  padding: 4px 6px;
-  font-size: 8pt;
-  height: 10mm;
   display: flex;
   align-items: center;
+  padding: 4px 6px;
+  border-top: 1px solid #333;
+  height: 10mm;
+  box-sizing: border-box;
+  font-size: 8pt;
 }
-
 .type-line-alt {
-  text-align: left;
   flex: 1;
+  text-align: left;
 }
 
-/* --- Hover Controls --- */
+/* --- Hover Controls (add/remove) --- */
 .hover-controls {
   position: absolute;
   bottom: 4px;
@@ -111,12 +106,11 @@ body {
   padding: 4px;
   border-radius: 4px;
   gap: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-
 .card:hover .hover-controls {
   display: flex;
 }
-
 .hover-controls button {
   background: rgba(0,0,0,0.1);
   border: none;
@@ -126,76 +120,72 @@ body {
   font-size: 12px;
 }
 
-/* --- Legend Card Overrides --- */
+/* --- Legend Card --- */
 .legend-alt {
   background: #fafafa;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  text-align: center;
+  box-sizing: border-box;
 }
-
-/* Legend Top: colors & label */
+/* Legend Top */
 .legend-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 6px;
 }
-
 .legend-colors {
   display: flex;
   gap: 4px;
 }
-
 .legend-colors img {
   width: 16px;
   height: 16px;
 }
-
 .legend-label {
-  font-size: 10pt;
   font-weight: bold;
+  font-size: 10pt;
 }
-
-/* Legend Center: tags & name */
+/* Legend Center */
 .legend-center {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   padding: 4px 6px;
+  box-sizing: border-box;
 }
-
 .legend-tags {
   font-size: 8pt;
-  margin-bottom: 4px;
   color: #555;
+  margin-bottom: 4px;
 }
-
 .legend-name {
   font-size: 14pt;
   font-weight: bold;
 }
-
-/* Legend Bottom: ability text */
+/* Legend Bottom */
 .legend-bottom {
   border-top: 1px solid #333;
   padding: 6px;
-  font-size: 8pt;
   height: 20mm;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 8pt;
 }
 
-/* --- Battlefield & Rune (if needed) --- */
-.battlefield, .rune {
-  /* Your existing battlefield/rune styles */
+/* --- Battlefield & Rune (if used) --- */
+.battlefield {
+  /* your battlefield overrides here */
+}
+.rune {
+  /* your rune overrides here */
 }
 
-/* --- Toast --- */
+/* --- Toast Notification --- */
 .toast {
   position: fixed;
   top: 16px;
@@ -219,4 +209,3 @@ body {
   .card { box-shadow: none; margin: 0; }
   .hover-controls { display: none; }
 }
-
