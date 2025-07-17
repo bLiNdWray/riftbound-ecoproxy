@@ -1,21 +1,20 @@
 /* card.css — Scoped under #card-container */
 
 #card-container {
-  display: grid;
-  grid-auto-flow: row;              /* fill rows first, then wrap down */
-  grid-template-columns: repeat(auto-fill, 63mm);
-  grid-auto-rows: 88mm;
-  gap: 0;                           /* no gap between cards */
+  display: flex;
+  flex-wrap: wrap;          /* allow cards to wrap to next line */
+  align-items: flex-start;   /* align all cards to top of row */
   padding: 20px;
-  background: #fff;
+  gap: 0;                    /* no gap between cards */
   box-sizing: border-box;
 }
 
-/* Lock each .card to its cell */
+/* Lock each card to its fixed width and prevent flex-shrink */
 #card-container .card {
-  width: 63mm; 
-  height: 88mm;
-  margin: 0;                        /* no extra margins */
+  flex: 0 0 63mm;            /* no grow, no shrink, basis = 63mm */
+  height: 88mm;              /* fixed height */
+  margin: 0;                 /* no margins */
+  box-sizing: border-box;    
 }
 
 /* Base card */
