@@ -37,8 +37,8 @@
     if (clear) container.innerHTML = '';
     for (let id of ids) {
       const res = await fetch(
-        `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(id)}`
-      );
+  `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&variantNumber=${encodeURIComponent(id)}`
+);
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) continue;
       const c = data[0];
