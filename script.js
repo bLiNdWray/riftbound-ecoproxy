@@ -14,53 +14,65 @@
     Yellow: 'Order'
   };
 
-  // Load all cards (for search/import if needed)
+  // Store counts of how many copies have been added
+  const addedCounts = {};
+
+  // Load all cards (for search)
   let allCards = [];
   async function loadAllCards() {
     allCards = await (await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`)).json();
   }
   await loadAllCards();
 
-  // On load, render any ?id=…
-  const ids = (new URLSearchParams(window.location.search).get('id') || '')
+  // On load: render any IDs in ?id=… (clearing first)
+  const params = new URLSearchParams(window.location.search);
+  const initialIds = (params.get('id') || '')
     .split(',').map(s => s.trim()).filter(Boolean);
-  if (ids.length) renderCards(ids);
+  if (initialIds.length) {
+    await renderCards(initialIds, /*clear=*/true);
+    // initialize counts
+    initialIds.forEach(id => { addedCounts[id] = (addedCounts[id]||0) + 1; });
+  }
 
-  async function renderCards(ids) {
-    container.innerHTML = '';
+  // --- Render functions ---
+
+  // Renders an array of IDs; clear determines whether to wipe existing
+  async function renderCards(ids, clear = true) {
+    if (clear) container.innerHTML = '';
     for (let id of ids) {
       const [card] = await (await fetch(
         `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}&id=${encodeURIComponent(id)}`
       )).json();
       if (!card) continue;
-
-      // decide builder by type (gear treated as spell)
-      const type = (card.TYPE || '').toLowerCase();
       let el;
-
-      if (type === 'unit')         el = makeUnitCard(card);
-      else if (type === 'spell' || type === 'gear')
-                                   el = makeSpellCard(card);
+      const type = (card.TYPE || '').toLowerCase();
+      if (type === 'unit') el = makeUnitCard(card);
+      else if (type === 'spell' || type === 'gear') el = makeSpellCard(card);
       else if (type === 'battlefield') el = makeBattlefieldCard(card);
-      else if (type === 'legend')      el = makeLegendCard(card);
-      else if (type === 'rune')        el = makeRuneCard(card);
+      else if (type === 'legend') el = makeLegendCard(card);
+      else if (type === 'rune') el = makeRuneCard(card);
       else continue;
-
       container.appendChild(el);
     }
   }
 
+  // Adds exactly one copy of a card without clearing
+  function addCard(id) {
+    renderCards([id], /*clear=*/false);
+    addedCounts[id] = (addedCounts[id]||0) + 1;
+  }
+
+  // --- Card template builders ---
+
   function makeUnitCard(card) {
     const code = colorMap[card.COLOR] || card.COLOR;
-    const displayColor = code; // show mapped name
+    const displayColor = code;
     const forceHTML = card.FORCE
       ? `<img src="images/${code}2.png" class="force-icon-alt" alt="Force">`
       : '';
     const mightHTML = card.MIGHT
       ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${card.MIGHT}`
       : '';
-
-    // only add "• Super" if SUPER is not None/blank
     const superText = (card.SUPER && card.SUPER.toLowerCase() !== 'none')
       ? ` • ${card.SUPER}` : '';
 
@@ -90,7 +102,6 @@
     const forceHTML = card.FORCE
       ? `<img src="images/${code}2.png" class="force-icon-alt" alt="Force">`
       : '';
-
     return createCard('spell-alt', `
       <div class="top-bar-alt">
         <span class="cost-alt">${card.COST} ${forceHTML}</span>
@@ -122,7 +133,8 @@
   }
 
   function makeLegendCard(card) {
-    const colors = (card.COLOR || '').split(',')
+    const colors = (card.COLOR || '')
+      .split(',')
       .map(c => (colorMap[c.trim()] || c.trim()));
     return createCard('legend', `
       <div class="top-bar">
@@ -155,71 +167,56 @@
     el.innerHTML = innerHTML;
     return el;
   }
-// --- Live Search Modal Logic ---
 
-const openBtn   = document.getElementById('open-search');
-const closeBtn  = document.getElementById('close-search');
-const modal     = document.getElementById('search-modal');
-const input     = document.getElementById('card-search-input');
-const results   = document.getElementById('search-results');
+  // --- Search Modal Logic ---
 
-// Keep track of which IDs are currently rendered
-let addedCounts = {};  // e.g. { "OGN-001": 2, "OGN-124": 1, ... }
+  const openBtn   = document.getElementById('open-search');
+  const closeBtn  = document.getElementById('close-search');
+  const modal     = document.getElementById('search-modal');
+  const input     = document.getElementById('card-search-input');
+  const results   = document.getElementById('search-results');
 
-// Whenever we render a card onto the main page, bump counts:
-function incrementCount(id) {
-  addedCounts[id] = (addedCounts[id]||0) + 1;
-}
-
-// Update a badge in the search results
-function updateBadge(el, id) {
-  el.querySelector('.count-badge').textContent =
-    `Added: ${addedCounts[id]||0}`;
-}
-
-// Show the modal
-openBtn.addEventListener('click', () => {
-  modal.classList.remove('hidden');
-  input.value = '';
-  renderSearchResults(allCards);
-  input.focus();
-});
-
-// Close the modal
-closeBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
-});
-
-// Filter & render search results
-input.addEventListener('input', () => {
-  const q = input.value.toLowerCase();
-  const filtered = allCards.filter(card =>
-    card.NAME.toLowerCase().includes(q) ||
-    card.NUMBER.toLowerCase().includes(q)
-  );
-  renderSearchResults(filtered);
-});
-
-function renderSearchResults(list) {
-  results.innerHTML = '';
-  list.forEach(card => {
-    const id = card.NUMBER;
-    const div = document.createElement('div');
-    div.className = 'search-card';
-    div.innerHTML = `
-      <div class="name">${card.NAME}</div>
-      <button class="btn-add">Add</button>
-      <div class="count-badge">Added: ${addedCounts[id]||0}</div>
-    `;
-    // hook up the add button
-    div.querySelector('.btn-add').addEventListener('click', () => {
-      // render one more of this card onto the page
-      renderCards([id]);
-      incrementCount(id);
-      updateBadge(div, id);
-    });
-    results.appendChild(div);
+  openBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    input.value = '';
+    renderSearchResults(allCards);
+    input.focus();
   });
-}
+
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase();
+    const filtered = allCards.filter(card =>
+      card.NAME.toLowerCase().includes(q) ||
+      card.NUMBER.toLowerCase().includes(q)
+    );
+    renderSearchResults(filtered);
+  });
+
+  function renderSearchResults(list) {
+    results.innerHTML = '';
+    list.forEach(card => {
+      const id = card.NUMBER;
+      const div = document.createElement('div');
+      div.className = 'search-card';
+      div.innerHTML = `
+        <div class="name">${card.NAME}</div>
+        <button class="btn-add">Add</button>
+        <div class="count-badge">Added: ${addedCounts[id]||0}</div>
+      `;
+      div.querySelector('.btn-add').addEventListener('click', () => {
+        addCard(id);
+        updateBadge(div, id);
+      });
+      results.appendChild(div);
+    });
+  }
+
+  function updateBadge(el, id) {
+    el.querySelector('.count-badge').textContent = `Added: ${addedCounts[id]||0}`;
+  }
 
 })();
