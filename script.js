@@ -1,7 +1,7 @@
 // script.js
 (async () => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbzAPCWQtZVlaDuQknhAa8KGaW2TWwLwcI_fxaSVxe05vHkqqXiE5EOphhCFABvzuqCqTg/exec';
-  const SHEET_NAME = 'piltover_cards';
+  const SHEET_NAME = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
   const openBtn    = document.getElementById('open-search');
   const closeBtn   = document.getElementById('close-search');
