@@ -235,3 +235,46 @@ body {
 }
 .legend-footer .page { }
 /* you can style .rarity if needed */
+
+/* --- Rune Card Template --- */
+.card.rune {
+  width: 63mm;
+  height: 88mm;
+  background: #fff;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Top bar for Rune: 18px tall, centered name */
+.card.rune .rune-top {
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.card.rune .rune-name {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Middle: fill remaining space, center the icon */
+.card.rune .rune-middle {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Large color symbol */
+.card.rune .rune-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* Remove any default inner borders */
+.card.rune .rune-top,
+.card.rune .rune-middle {
+  border: none;
+}
