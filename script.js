@@ -36,6 +36,7 @@
   // 1) Load all cards for search via JSONP
   function loadAllCards(cb) {
     jsonpFetch({ sheet: SHEET_NAME }, data => {
+      console.log('⚡︎ [loadAllCards] got', data.length, 'cards');
       allCards = Array.isArray(data) ? data : Object.values(data);
       cb();
     });
@@ -70,6 +71,7 @@
     if (clear) container.innerHTML = '';
     ids.forEach(vn => {
       jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
+        console.log(`⚡︎ [renderCards] for "${vn}" got:`, data);
         if (!Array.isArray(data) || data.length === 0) return;
         const c = data[0];
         let el;
