@@ -1,15 +1,17 @@
+/* card.css — Scoped under #card-container */
+
 /* Page layout */
-body {
-  background: #fff;
-  padding: 20px;
+#card-container {
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  background: #fff;
   font-family: Arial, sans-serif;
 }
 
 /* Base card */
-.card {
+#card-container .card {
   width: 63mm;
   height: 88mm;
   background: #fff;
@@ -21,14 +23,13 @@ body {
 }
 
 /* — Alternate Unit/Spell Layout — */
-.card.unit-alt,
-.card.spell-alt {
-  /* inherits base */
+#card-container .card.unit-alt,
+#card-container .card.spell-alt {
+  /* inherits .card */
 }
 
 /* Top bar: cost/force left, might right */
 #card-container .top-bar-alt {
- 
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -36,30 +37,31 @@ body {
   border-bottom: 1px solid #000;
   height: 12mm;
   box-sizing: border-box;
+  background: none;
 }
-#card-container .cost-alt     {
+#card-container .cost-alt {
   font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.force-icon-alt {
+#card-container .force-icon-alt {
   width: 18px;
   height: 18px;
 }
-.might-alt {
+#card-container .might-alt {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.might-icon-alt {
+#card-container .might-icon-alt {
   width: 18px;
   height: 18px;
 }
 
 /* Name under top bar */
-.name-alt {
+#card-container .name-alt {
   text-align: center;
   font-size: 12px;
   font-weight: bold;
@@ -67,7 +69,7 @@ body {
 }
 
 /* Centered effect text + color */
-.middle-alt {
+#card-container .middle-alt {
   position: relative;
   flex: 1;
   display: flex;
@@ -78,7 +80,7 @@ body {
   font-size: 8pt;
   line-height: 1.3;
 }
-.color-indicator-alt {
+#card-container .color-indicator-alt {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -86,18 +88,18 @@ body {
   align-items: center;
   gap: 4px;
 }
-.color-icon-alt {
+#card-container .color-icon-alt {
   width: 32px;
   height: 32px;
 }
-.color-text-alt {
+#card-container .color-text-alt {
   font-size: 8pt;
   font-weight: bold;
   text-transform: capitalize;
 }
 
 /* Bottom bar with type-line only */
-.bottom-bar-alt {
+#card-container .bottom-bar-alt {
   padding: 4px 6px;
   border-top: 1px solid #000;
   height: 10mm;
@@ -105,18 +107,18 @@ body {
   display: flex;
   align-items: center;
 }
-.type-line-alt {
+#card-container .type-line-alt {
   font-size: 8pt;
   font-weight: bold;
 }
 
 /* — Battlefield — */
-.bf-columns {
+#card-container .bf-columns {
   display: flex;
   width: 100%;
   height: 100%;
 }
-.bf-col {
+#card-container .bf-col {
   flex: 1;
   box-sizing: border-box;
   overflow: hidden;
@@ -125,30 +127,30 @@ body {
   align-items: center;
   padding: 4px;
 }
-.bf-col.side { width: 20%; }
-.bf-col.center {
+#card-container .bf-col.side { width: 20%; }
+#card-container .bf-col.center {
   width: 60%;
   flex-direction: column;
 }
-.bf-type-text {
+#card-container .bf-type-text {
   font-size: 8pt;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
-.bf-name {
+#card-container .bf-name {
   font-size: 10pt;
   font-weight: bold;
   text-align: center;
 }
-.bf-col.side.left .bf-text {
+#card-container .bf-col.side.left .bf-text {
   writing-mode: vertical-lr;
   text-orientation: mixed;
   text-align: left;
   font-size: 7pt;
   line-height: 1.2;
 }
-.bf-col.side.right .bf-text {
+#card-container .bf-col.side.right .bf-text {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
@@ -158,11 +160,11 @@ body {
 }
 
 /* — Legend — */
-.card.legend {
-  /* inherits base */
+#card-container .card.legend {
+  /* inherits .card */
 }
 /* Top bar: colors left, label right */
-.top-bar {
+#card-container .card.legend .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -170,22 +172,23 @@ body {
   border-bottom: 1px solid #000;
   height: 12mm;
   box-sizing: border-box;
+  background: none;
 }
-.legend-colors {
+#card-container .legend-colors {
   display: flex;
   gap: 2px;
 }
-.legend-color-icon {
+#card-container .legend-color-icon {
   width: 32px;
   height: 32px;
 }
-.legend-label {
+#card-container .legend-label {
   font-size: 8pt;
   font-weight: bold;
   text-transform: uppercase;
 }
 /* Center tag + name */
-.legend-middle {
+#card-container .legend-middle {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -194,57 +197,56 @@ body {
   padding: 4px 6px;
   box-sizing: border-box;
 }
-.legend-tag {
+#card-container .legend-tag {
   font-size: 8pt;
   font-style: italic;
   margin-bottom: 2px;
 }
-.legend-name {
+#card-container .legend-name {
   font-size: 14pt;
   font-weight: bold;
   text-align: center;
 }
 /* Centered ability, no footer */
-.legend-bottom {
+#card-container .legend-bottom {
   padding: 6px 8px;
   border-top: 1px solid #000;
   height: 30mm;
   box-sizing: border-box;
   display: flex;
-  align-items: center;    /* vertical centering */
-  justify-content: center; /* horizontal centering */
-  text-align: center;      /* center the paragraph text itself */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-.legend-ability {
+#card-container .legend-ability {
   margin: 0;
   font-size: 8pt;
   line-height: 1.3;
-  text-align: center;
 }
 
 /* — Rune — */
-.card.rune {
-  /* inherits base */
+#card-container .card.rune {
+  /* inherits .card */
 }
-.rune-top {
+#card-container .rune-top {
   height: 18px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 12px;
+  padding-top: 4px;
 }
-.rune-name {
+#card-container .rune-name {
   font-size: 12pt;
   font-weight: bold;
   text-align: center;
 }
-.rune-middle {
+#card-container .rune-middle {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.rune-icon {
+#card-container .rune-icon {
   width: 180px;
   height: 180px;
   border: none;
@@ -252,6 +254,9 @@ body {
 
 /* Print */
 @media print {
-  body { background: none; padding: 0; }
-  .card { border-color: #000; box-shadow: none; margin: 0; }
+  #card-container .card {
+    border-color: #000;
+    box-shadow: none;
+    margin: 0;
+  }
 }
