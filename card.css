@@ -2,17 +2,15 @@
 
 #card-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0;                /* no gap between cards */
-  padding: 20px;         /* keep your page padding */
-  background: #fff;
-  font-family: Arial, sans-serif;
+  flex-wrap: wrap;    /* allow wrapping to next row */
+  gap: 0;              /* no gap between cards */
+  padding: 20px;       /* page padding */
 }
 
-/* Ensure cards keep their own size and don’t overlap */
+/* Ensure each card is fixed size and won’t grow or shrink */
 #card-container .card {
-  flex: 0 0 auto;        /* do not grow or shrink */
-  margin: 0;             /* no extra margins */
+  flex: 0 0 auto;      /* never grow, never shrink, auto basis = its width */
+  margin: 0;           /* no extra margins */
 }
 
 /* Base card */
