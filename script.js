@@ -7,12 +7,13 @@
   const addedCounts = {};
   let allCards = [];
 
-  // 1) Load all cards for search
-  async function loadAll() {
-    allCards = await (await fetch(
-      `${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`
-    )).json();
-  }
+  // 1) Load all cards for search, and ensure it's always an array
+async function loadAll() {
+  const res  = await fetch(`${API_BASE}?sheet=${encodeURIComponent(SHEET_NAME)}`);
+  const data = await res.json();
+  // If it’s already an array, great; otherwise take its values
+  allCards = Array.isArray(data) ? data : Object.values(data);
+}
   await loadAll();
 
   // 2) On load, render any ?id=
