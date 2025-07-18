@@ -204,7 +204,9 @@ function makeBattlefield(c) {
       <div class="main-title">${mainTitle}</div>
       ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
     </div>
-    <div class="legend-body">${bodyHTML}</div>
+<div class="legend-body">
+    <div class="legend-body-text">${bodyHTML}</div>
+</div>
   `);
 }
 function makeRune(c) {
