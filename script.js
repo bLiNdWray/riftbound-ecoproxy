@@ -164,7 +164,7 @@ function makeSpell(c) {
     </div>`);
 }
 
- function makeBattlefield(c) {
+function makeBattlefield(c) {
   const desc = c.description || '';
   return build(c.variantNumber, `
     <div class="bf-columns">
@@ -181,7 +181,6 @@ function makeSpell(c) {
     </div>
   `);
 }
-
 
  function makeLegend(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
