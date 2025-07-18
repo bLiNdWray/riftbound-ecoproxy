@@ -1,13 +1,4 @@
-(function(){
-  // Button references
-  var openBtn       = document.getElementById('open-search');
-  var btnImport     = document.getElementById('btn-import');
-  var btnPrint      = document.getElementById('btn-print');
-  var btnOverview   = document.getElementById('btn-overview');
-  var btnFullProxy  = document.getElementById('btn-full-proxy');
-  var btnReset      = document.getElementById('btn-reset');
-  var countLabel    = document.getElementById('card-count');
-
+(function() {
   // State
   window.addedVariants = window.addedVariants || [];
   var fullProxy = false;
@@ -23,13 +14,29 @@
     setTimeout(function(){ n.remove(); }, 3000);
   }
 
-  // IMPORT LIST: prompt for newline-separated variant IDs
-  btnImport.addEventListener('click', function(){
+  // update card counter badge
+  function updateCount() {
+    var countLabel = document.getElementById('card-count');
+    var t = window.addedVariants.length;
+    countLabel.textContent = t + ' card' + (t !== 1 ? 's' : '');
+  }
+
+  // cache current list to URL params
+  function cacheState() {
+    var p = new URLSearchParams();
+    window.addedVariants.forEach(function(vn) {
+      p.append('id', vn);
+    });
+    history.replaceState({}, '', window.location.pathname + '?' + p.toString());
+  }
+
+  // IMPORT LIST handler
+  function handleImport() {
     var text = prompt('Paste your list of variant numbers (one per line):');
     if (!text) return;
     var list = text.split(/\r?\n/);
     var imported = 0;
-    list.forEach(function(line){
+    list.forEach(function(line) {
       var vn = line.trim();
       if (vn && window.addedVariants.indexOf(vn) === -1) {
         window.addCard(vn);
@@ -40,19 +47,19 @@
     updateCount();
     cacheState();
     notify(imported + ' cards imported');
-  });
+  }
 
-  // PRINT: hide UI, print, then restore
-  btnPrint.addEventListener('click', function(){
+  // PRINT handler
+  function handlePrint() {
     var bar = document.getElementById('top-bar');
     bar.style.display = 'none';
     document.getElementById('search-modal').classList.add('hidden');
     window.print();
     setTimeout(function(){ bar.style.display = ''; }, 0);
-  });
+  }
 
-  // OVERVIEW MODAL: grouped by type
-  function buildOverview(){
+  // OVERVIEW builder
+  function buildOverview() {
     var existing = document.getElementById('overview-modal');
     if (existing) existing.remove();
 
@@ -66,12 +73,12 @@
         '<div id="overview-list"></div>' +
       '</div>';
     document.body.appendChild(modal);
-    document.getElementById('close-overview').onclick = function(){ modal.remove(); };
+    document.getElementById('close-overview').onclick = function() { modal.remove(); };
 
     var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
     var grouped = {};
 
-    window.addedVariants.forEach(function(vn){
+    window.addedVariants.forEach(function(vn) {
       var el = document.querySelector('[data-variant="' + vn + '"]');
       var type = (el && el.dataset.type) ? el.dataset.type : 'Other';
       grouped[type] = grouped[type] || [];
@@ -79,18 +86,17 @@
     });
 
     var container = document.getElementById('overview-list');
-    order.forEach(function(type){
+    order.forEach(function(type) {
       if (grouped[type]) {
         var sec = document.createElement('div');
         var h = document.createElement('h3'); h.textContent = type;
         sec.appendChild(h);
 
-        grouped[type].forEach(function(vn){
+        grouped[type].forEach(function(vn) {
           var el = document.querySelector('[data-variant="' + vn + '"]');
           var name = (el && el.dataset.name) ? el.dataset.name : vn;
           var setNo = (el && el.dataset.set)    ? el.dataset.set    : '';
           var logo  = (el && el.dataset.colorLogo) ? el.dataset.colorLogo : '';
-
           var row = document.createElement('div');
           row.className = 'overview-item';
           row.innerHTML =
@@ -106,55 +112,36 @@
       }
     });
   }
-  btnOverview.addEventListener('click', function(){
-    buildOverview();
-    notify('Overview opened');
-  });
 
-  // FULL PROXY: toggle between proxy and full-art
-  btnFullProxy.addEventListener('click', function(){
+  // FULL PROXY handler
+  function handleFullProxy() {
     fullProxy = !fullProxy;
-    window.addedVariants.forEach(function(vn){
+    window.addedVariants.forEach(function(vn) {
       var img = document.querySelector('[data-variant="' + vn + '"] img.card-img');
       if (!img) return;
       img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
     });
     notify(fullProxy ? 'Full art ON' : 'Proxy art ON');
-  });
+  }
 
-  // RESET: clear state, UI, and URL
-  btnReset.addEventListener('click', function(){
+  // RESET handler
+  function handleReset() {
     history.replaceState({}, '', window.location.pathname);
     window.addedVariants = [];
     document.getElementById('card-container').innerHTML = '';
     updateCount();
     notify('Reset complete');
-  });
-
-  // update card counter badge
-  function updateCount(){
-    var t = window.addedVariants.length;
-    countLabel.textContent = t + ' card' + (t !== 1 ? 's' : '');
   }
 
-  // cache current list to URL params
-  function cacheState(){
-    var p = new URLSearchParams();
-    window.addedVariants.forEach(function(vn){
-      p.append('id', vn);
-    });
-    history.replaceState({}, '', window.location.pathname + '?' + p.toString());
-  }
-
-  // wrap original addCard/removeCard safely
+  // Wrap original addCard/removeCard safely
   var origAdd = typeof window.addCard === 'function'
     ? window.addCard
-    : function(vn){ console.warn('addCard not defined'); };
+    : function(vn) { console.warn('addCard not defined'); };
   var origRm  = typeof window.removeCard === 'function'
     ? window.removeCard
-    : function(vn,el){ console.warn('removeCard not defined'); };
+    : function(vn,el) { console.warn('removeCard not defined'); };
 
-  window.addCard = function(vn){
+  window.addCard = function(vn) {
     origAdd(vn);
     if (window.addedVariants.indexOf(vn) === -1) {
       window.addedVariants.push(vn);
@@ -162,24 +149,45 @@
     updateCount();
     cacheState();
   };
-  window.removeCard = function(vn,el){
+  window.removeCard = function(vn,el) {
     origRm(vn,el);
-    window.addedVariants = window.addedVariants.filter(function(x){
-      return x !== vn;
-    });
+    window.addedVariants = window.addedVariants.filter(function(x){ return x !== vn; });
     updateCount();
     cacheState();
   };
 
-  // on-load: restore from URL
-  document.addEventListener('DOMContentLoaded', function(){
-    var ps = new URLSearchParams(window.location.search);
-    ps.getAll('id').forEach(function(vn){
-      window.addCard(vn);
+  // Initialize once DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    // Lookup buttons
+    var openBtn       = document.getElementById('open-search');
+    var btnImport     = document.getElementById('btn-import');
+    var btnPrint      = document.getElementById('btn-print');
+    var btnOverview   = document.getElementById('btn-overview');
+    var btnFullProxy  = document.getElementById('btn-full-proxy');
+    var btnReset      = document.getElementById('btn-reset');
+    var cardContainer = document.getElementById('card-container');
+    var searchModal   = document.getElementById('search-modal');
+
+    // Hook up your existing search modal open/close
+    openBtn.addEventListener('click', function(){ searchModal.classList.remove('hidden'); });
+    document.getElementById('close-search').addEventListener('click', function(){
+      searchModal.classList.add('hidden');
     });
+
+    // Hook up new controls
+    btnImport.addEventListener('click', handleImport);
+    btnPrint.addEventListener('click', handlePrint);
+    btnOverview.addEventListener('click', function(){ buildOverview(); notify('Overview opened'); });
+    btnFullProxy.addEventListener('click', handleFullProxy);
+    btnReset.addEventListener('click', handleReset);
+
+    // Restore from URL
+    var ps = new URLSearchParams(window.location.search);
+    ps.getAll('id').forEach(function(vn){ window.addCard(vn); });
     updateCount();
-    var searchModal = document.getElementById('search-modal');
-    if (searchModal) searchModal.style.top = '50px';
+
+    // Anchor search modal
+    if (searchModal) { searchModal.style.top = '50px'; }
   });
 
 })();
