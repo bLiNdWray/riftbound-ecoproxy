@@ -261,53 +261,46 @@ function makeRune(c) {
 }
 // In script.js, replace the existing build() function with:
 
+/**
+ * Creates a card element in #card-container
+ */
 function build(id, html) {
+  // wrapper & data-variant attribute
   const wrapper = document.createElement('div');
   wrapper.className = 'card';
   wrapper.setAttribute('data-variant', id);
   wrapper.innerHTML = html;
 
-  // Quantity badge in bottom-right
-  const badge = document.createElement('div');
+  // quantity badge
+  const badge = document.createElement('span');
   badge.className = 'qty-badge';
   badge.textContent = addedCounts[id] || 0;
   wrapper.appendChild(badge);
 
-  // Hover bar with add/remove buttons
-  const hoverBar = document.createElement('div');
-  hoverBar.className = 'hover-bar';
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-btn';
-  addBtn.textContent = '+';
+  // + / – buttons
+  const addBtn    = document.createElement('button');
   const removeBtn = document.createElement('button');
-  removeBtn.className = 'remove-btn';
-  removeBtn.textContent = '–';
-  hoverBar.append(addBtn, removeBtn);
-  wrapper.appendChild(hoverBar);
+  addBtn.className    = 'btn-add';
+  removeBtn.className = 'btn-remove';
+  addBtn.textContent    = '+';
+  removeBtn.textContent = '−';
+  wrapper.appendChild(addBtn);
+  wrapper.appendChild(removeBtn);
 
-  // Event handlers
+  // ROUTE ALL CLICKS THROUGH THE GLOBAL API
+  // (this ensures ui.js sees every change)
   addBtn.addEventListener('click', function(e) {
-   e.stopPropagation();
-   window.addCard(id);
-   badge.textContent = addedCounts[id] || 0;
- });
- removeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    window.addCard(id);
+  });
+  removeBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     window.removeCard(id, wrapper);
-    badge.textContent = addedCounts[id] || 0;
- });
+  });
+
   return wrapper;
 }
-// -------------------------------------------------
-// Your core add/remove implementations
-// -------------------------------------------------
-function addCard(vn) {
-  // … your existing logic to render the card, update addedCounts, etc. …
-}
 
-function removeCard(vn, el) {
-  // … your existing logic to remove the card element and update addedCounts …
-}
 
 // -------------------------------------------------
 // Expose to ui.js (must be before the IIFE closes)
