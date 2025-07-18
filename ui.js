@@ -10,54 +10,18 @@
   window.addedVariants = window.addedVariants || [];
   var fullProxy = false;
 
-  function notify(message) {
+ // Toast helper (short)
+  function notify(msg) {
     var n = document.createElement('div');
     n.className = 'toast-notice';
-    n.textContent = message;
+    n.textContent = msg;
     document.body.appendChild(n);
     setTimeout(function(){ n.classList.add('visible'); }, 10);
     setTimeout(function(){ n.classList.remove('visible'); }, 2000);
-    setTimeout(function(){ n.remove(); }, 3000);
+    setTimeout(function(){ n.remove(); }, 2500);
   }
 
-// ===== IMPORT LIST (modal) =====
-btnImport.addEventListener('click', function(){
-  window.cardCounts = window.cardCounts || {};
-
-  var prev = document.getElementById('import-modal');
-  if (prev) prev.remove();
-
-  var overlay = document.createElement('div');
-  overlay.id = 'import-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-content large" style="max-width:600px; padding:16px;">
-      <button id="close-import" class="modal-close">×</button>
-      <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code.</p>
-      <textarea id="import-area"
-        style="width:100%; height:200px; font-family:monospace;"
-        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-      <label style="display:block; margin:8px 0;">
-        <input type="checkbox" id="import-clear" />
-        Clear existing cards before import
-      </label>
-      <div style="text-align:right; margin-top:12px;">
-        <button id="import-cancel" class="topbar-btn">Cancel</button>
-        <button id="import-ok"     class="topbar-btn">Import</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-
-  var area  = document.getElementById('import-area'),
-      clear = document.getElementById('import-clear');
-  document.getElementById('close-import').onclick = closeModal;
-  document.getElementById('import-cancel').onclick = closeModal;
-
-  area.value = Object.keys(window.cardCounts).join(' ');
-
-  function closeModal() { overlay.remove(); }
-
+  // Toast helper (long for imports)
   function longNotify(msg) {
     var n = document.createElement('div');
     n.className = 'toast-notice';
@@ -68,38 +32,93 @@ btnImport.addEventListener('click', function(){
     setTimeout(function(){ n.remove(); }, 4500);
   }
 
-  document.getElementById('import-ok').onclick = function(){
-    var tokens = (area.value||'').trim().split(/\s+/);
-    if (clear.checked) {
-      document.getElementById('card-container').innerHTML = '';
+  // Persistence helpers
+  function saveState() {
+    localStorage.setItem(
+      'riftboundCardCounts',
+      JSON.stringify(window.cardCounts || {})
+    );
+  }
+  function loadState() {
+    try {
+      var s = localStorage.getItem('riftboundCardCounts');
+      window.cardCounts = s ? JSON.parse(s) : {};
+    } catch (e) {
+      console.warn('Failed to load state', e);
       window.cardCounts = {};
-      updateCount(); saveState();
     }
-    var added = 0, errors = [];
-    tokens.forEach(function(tok){
-      var parts = tok.split('-');
-      if (parts.length < 2) {
-        errors.push(tok);
-        return;
+  }
+
+  // ===== IMPORT LIST (modal) =====
+  btnImport.addEventListener('click', function(){
+    window.cardCounts = window.cardCounts || {};
+
+    var prev = document.getElementById('import-modal');
+    if (prev) prev.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content large" style="max-width:600px; padding:16px;">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <p>Paste your Table Top Simulator Deck Code.</p>
+        <textarea id="import-area"
+          style="width:100%; height:200px; font-family:monospace;"
+          placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <label style="display:block; margin:8px 0;">
+          <input type="checkbox" id="import-clear" />
+          Clear existing cards before import
+        </label>
+        <div style="text-align:right; margin-top:12px;">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok"     class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    var area  = document.getElementById('import-area'),
+        clear = document.getElementById('import-clear');
+    document.getElementById('close-import').onclick = closeModal;
+    document.getElementById('import-cancel').onclick = closeModal;
+
+    area.value = Object.keys(window.cardCounts).join(' ');
+
+    function closeModal() { overlay.remove(); }
+
+    document.getElementById('import-ok').onclick = function(){
+      var tokens = (area.value||'').trim().split(/\s+/);
+      if (clear.checked) {
+        document.getElementById('card-container').innerHTML = '';
+        window.cardCounts = {};
+        updateCount();
+        saveState();
       }
-      var vn = parts[0] + '-' + parts[1];
-      var before = window.cardCounts[vn] || 0;
-      window.addCard(vn);
-      var after = window.cardCounts[vn] || 0;
-      if (after > before) added++;
-      else errors.push(vn);
-    });
+      var added = 0, errors = [];
+      tokens.forEach(function(tok){
+        var parts = tok.split('-');
+        if (parts.length < 2) {
+          errors.push(tok);
+          return;
+        }
+        var vn = parts[0] + '-' + parts[1];
+        var before = window.cardCounts[vn] || 0;
+        window.addCard(vn);
+        var after = window.cardCounts[vn] || 0;
+        if (after > before) added++;
+        else errors.push(vn);
+      });
 
-    closeModal();
-    saveState();
+      closeModal();
+      saveState();
 
-    if (added) longNotify(added + ' card' + (added>1?'s':'') + ' added');
-    errors.forEach(function(vn){
-      notify(vn + " can't be found");
-    });
-  };
-});
-
+      if (added) longNotify(added + ' card' + (added>1?'s':'') + ' added');
+      errors.forEach(function(vn){
+        notify(vn + " can't be found");
+      });
+    };
+  });
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
