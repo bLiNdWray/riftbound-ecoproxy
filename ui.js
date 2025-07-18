@@ -25,11 +25,11 @@ btnImport.addEventListener('click', function(){
   // 1) Ensure cardCounts exists
   window.cardCounts = window.cardCounts || {};
 
-  // 2) Remove any existing modal
+  // 2) Remove any existing import modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // 3) Build overlay and inner HTML
+  // 3) Build overlay + modal HTML
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -37,7 +37,7 @@ btnImport.addEventListener('click', function(){
     <div class="modal-content large" style="max-width:600px; padding:16px;">
       <button id="close-import" class="modal-close">×</button>
       <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code:</p>
+      <p>Paste your Table Top Simulator Deck Code.</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
         placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
@@ -46,53 +46,49 @@ btnImport.addEventListener('click', function(){
         Clear existing cards before import
       </label>
       <div style="text-align:right; margin-top:12px;">
-        <button id="import-cancel" class="action-btn">Cancel</button>
-        <button id="import-ok" class="action-btn primary">Import</button>
+        <button id="import-cancel" class="topbar-btn">Cancel</button>
+        <button id="import-ok"     class="topbar-btn">Import</button>
       </div>
     </div>`;
 
-  // 4) **Append to document before querying any children**
+  // 4) Append to DOM
   document.body.appendChild(overlay);
 
-  // 5) Now grab the textarea and checkbox
+  // 5) Grab references
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
 
-  // 6) Prefill with current counts
-  var tokens = [];
-  Object.entries(window.cardCounts || {}).forEach(function([vn, cnt]){
-    // XXX-XXX-YY format, pad to two digits
-    tokens.push(vn + '-' + String(cnt).padStart(2,'0'));
-  });
+  // 6) Prefill with current variants (no quantities)
+  var tokens = Object.keys(window.cardCounts || {});
   area.value = tokens.join(' ');
 
-  // 7) Wire up close/cancel
+  // 7) Wire up Cancel/Close
   function close() { overlay.remove(); }
   document.getElementById('close-import').onclick = close;
   document.getElementById('import-cancel').onclick = close;
 
-  // 8) Wire the Import button
+  // 8) Wire up Import
   document.getElementById('import-ok').onclick = function(){
-    var input = area.value.trim();
+    var input = area.value.trim().split(/\s+/);
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
       updateCount();
+      saveState();
     }
-    if (input) {
-      input.split(/\s+/).forEach(function(tok){
-        var parts = tok.split('-');
-        if (parts.length < 3) return;
-        var vn  = parts[0] + '-' + parts[1];
-        var qty = parseInt(parts[2], 10) || 1;
-        for (var i = 0; i < qty; i++) window.addCard(vn);
-      });
-    }
+    input.forEach(function(tok){
+      // parse XXX-XXX-YY but ignore YY
+      var parts = tok.split('-');
+      if (parts.length < 2) return;
+      var vn = parts[0] + '-' + parts[1];
+      window.addCard(vn);
+    });
     saveState();
     close();
     notify('Deck imported');
   };
 });
+
 
 
   btnPrint.addEventListener('click', function(){
