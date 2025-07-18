@@ -181,7 +181,6 @@ function makeBattlefield(c) {
     </div>
   `);
 }
-
  function makeLegend(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
   const iconsHTML = cols.map(col =>
