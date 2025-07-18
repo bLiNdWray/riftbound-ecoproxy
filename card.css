@@ -92,19 +92,19 @@
   justify-content: center;
   text-align: justify;
   font-size: 8pt;
-  overflow: visible;    /* allow overflow for color-indicator */
+  overflow: hidden;     /* clip overflow except our indicator */
 }
 
 /* Color indicator (icon + text) above bottom bar */
 .card .color-indicator {
   position: absolute;
-  bottom: calc(10mm + 4px);  /* bottom-bar height + its top padding */
-  right: 6px;                /* same inset as bottom-bar horizontal padding */
+  bottom: 10mm;       /* exactly at the top edge of the 10mm bottom bar */
+  right: 6px;         /* match bottom-bar padding */
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.8);
-  padding: 2px 4px;
+  /* no background here so it floats cleanly */
+  padding: 0;
   z-index: 2;
 }
 .card .color-indicator img {
@@ -118,7 +118,7 @@
   color: #000;
 }
 
-/* Bottom bar: type/tags + faction icon */
+/* Bottom bar: type/tags (no more faction icon) */
 .card .bottom-bar {
   padding: 4px 6px;
   border-top: 1px solid #000;
@@ -126,7 +126,7 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* center the type-line now */
   flex-shrink: 0;
   font-size: 8pt;
   font-weight: bold;
@@ -134,10 +134,7 @@
 .card .type-line {
   white-space: nowrap;
 }
-.card .faction-icon {
-  width: 18px;
-  height: 18px;
-}
+
 
 /* === Battlefield === */
 .card.battlefield .bf-columns {
