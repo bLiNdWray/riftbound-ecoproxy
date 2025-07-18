@@ -88,21 +88,55 @@ function renderSearchResults(list) {
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
-// Icon replacer with whitespace collapse
-function formatDescription(text = '', colorCode) {
-  let out = text
-    .replace(/\s*\[tap\]\s*/g,   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-    .replace(/\s*\[Might\]\s*/g,  `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-    .replace(/\s*\[power\]\s*/g,   `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-    .replace(/\s*\[S\]\s*/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-    .replace(new RegExp(`\\s*\\[C\\]\\s*`, 'g'),
-      `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+function formatDescription(txt = '', color) {
+  let out = txt;
+
+  // Map of tokens to image HTML
+  const map = {
+    '[Tap]:': `<img src="images/Tap.png" class="inline-icon" alt="Tap">`,
+    '[Might]': `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`,
+    '[Rune]': `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`,
+    '[S]': `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`
+  };
+
+  // 1) Strip and replace fixed tokens
+  for (const [token, html] of Object.entries(map)) {
+    // \s* around token eats any surrounding whitespace/newlines
+    const re = new RegExp(`\\s*${escapeRegExp(token)}\\s*`, 'g');
+    out = out.replace(re, html);
+  }
+
+  // 2) Replace [C] with the color-specific icon
+  if (color) {
+    const reC = new RegExp(`\\s*\\[C\\]\\s*`, 'g');
+    out = out.replace(reC,
+      `<img src="images/${color}2.png" class="inline-icon" alt="${color}">`
+    );
+  }
+
+  // 3) Replace generic [Body], [Fury], etc.
   ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-    out = out.replace(new RegExp(`\\s*\\[${col}\\]\\s*`, 'g'),
-      `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+    const re = new RegExp(`\\s*\\[${col}\\]\\s*`, 'g');
+    out = out.replace(re,
+      `<img src="images/${col}.png" class="inline-icon" alt="${col}">`
+    );
   });
-  // collapse residual whitespace
-  return out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
+
+  // 4) Finally collapse any leftover inter-tag whitespace and trim
+  out = out
+    .replace(/>\s+</g, '><')   // remove whitespace between tags
+    .replace(/\s{2,}/g, ' ')   // collapse multiple spaces
+    .trim();
+
+  return out;
+}
+
+/**
+ * Utility to escape tokens for use in RegExp
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 }
   // Builders with dash separator
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
