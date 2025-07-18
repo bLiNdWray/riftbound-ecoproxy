@@ -170,18 +170,6 @@
   padding: 0;
 }
 
-
-/* Use vertical writing mode for side text */
-.card.battlefield .bf-col.side .bf-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  white-space: nowrap;
-  font-size: 8pt;
-  text-align: center;
-  color: #000;
-  margin: 0;  /* remove any default margins that might push it away */
-}
-
 /* Center panel unchanged */
 
 /* Center panel – fill remaining space */
