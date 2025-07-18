@@ -91,7 +91,7 @@ function renderSearchResults(list) {
 // Icon replacer with whitespace collapse
 function formatDescription(text = '', colorCode) {
   let out = text
-    .replace(/\s*\[tap\]:\s*/g,   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+    .replace(/\s*\[tap\]\s*/g,   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
     .replace(/\s*\[Might\]\s*/g,  `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
     .replace(/\s*\[power\]\s*/g,   `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
     .replace(/\s*\[S\]\s*/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
