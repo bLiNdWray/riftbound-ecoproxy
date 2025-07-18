@@ -181,11 +181,12 @@
   align-items: flex-start;        /* legend-title at top */
   justify-content: space-between;
   padding: 6px 8px;
-  /* border-bottom removed */
+  /* no border-bottom */
   box-sizing: border-box;
 }
 .card.legend .legend-icons {
   display: flex;
+  flex-direction: column;         /* stack vertically */
   align-items: center;
   gap: 6px;
 }
@@ -197,10 +198,10 @@
   font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
-  /* push to top: no extra alignment needed beyond flex-start */
+  align-self: flex-end;           /* keep LEGEND on right */
 }
 
-/* 2) Middle third: legend-name (unchanged) */
+/* 2) Middle third: legend-name */
 .card.legend .legend-name {
   flex: 1 1 33.33%;
   display: flex;
@@ -229,11 +230,10 @@
   font-size: 9pt;
   line-height: 1.4;
   box-sizing: border-box;
-  /* border-top removed */
   overflow: auto;
   text-align: center;
+  /* no borders */
 }
-
 /* === Rune === */
 .card.rune {
   display: flex;
