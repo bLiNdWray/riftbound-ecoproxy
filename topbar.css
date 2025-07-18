@@ -32,3 +32,33 @@
   margin-left: 8px;
 }
 body { padding-top: 50px; }
+/* Container for toasts, pinned under the top bar */
+#toast-container {
+  position: fixed;
+  top: 50px;               /* right under 50px-tall top bar */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;           /* above everything except the bar */
+  pointer-events: none;    /* clicks pass through */
+  width: auto;
+}
+
+/* Individual toast box */
+.toast-notice {
+  display: block;
+  margin: 8px auto;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  border-radius: 4px;
+  min-width: 200px;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* When visible, fade in */
+.toast-notice.visible {
+  opacity: 1;
+}
