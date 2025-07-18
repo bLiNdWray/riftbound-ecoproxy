@@ -1,68 +1,160 @@
-/* Top bar styling */
-#top-bar {
+/* styles.css - Global & layout styles for Riftbound Eco Proxy */
+
+/* Reset & base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Layout classes */
+.layout-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  justify-content: flex-start;
+}
+
+/* Floating Action Button */
+.fab-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.fab-btn:hover {
+  background-color: #218838;
+}
+
+/* Modal overlay & content resets (generic) */
+.modal {
+  /* generic modal styling if any */
+}
+.hidden {
+  display: none !important;
+}
+
+/* Scoped Search Modal */
+.search-modal {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.search-modal.hidden {
+  display: none !important;
+}
+
+/* Modal content */
+.modal-content {
+  background-color: #fff;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.modal-body {
+  padding: 20px;
+}
+
+/* Search panel */
+.search-panel {
+  display: flex;
+  flex-direction: column;
+}
+#card-search-input {
   width: 100%;
-  height: 50px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+/* Top bar */
+#top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
   background: #fff;
   border-bottom: 1px solid #ccc;
   display: flex;
   align-items: center;
-  z-index: 2000;
   padding: 0 16px;
-  box-sizing: border-box;
+  z-index: 2000;
 }
-#top-bar .btn {
-  margin-right: 8px;
-  padding: 6px 12px;
-  border: 1px solid #0066cc;
-  background: #fff;
-  color: #0066cc;
-  cursor: pointer;
-  border-radius: 4px;
-}
-#top-bar .btn:hover {
-  background: #0066cc;
-  color: #fff;
-}
-#top-bar .bar-left,
-#top-bar .bar-center,
-#top-bar .bar-right {
+#top-bar .left-group,
+#top-bar .center-group,
+#top-bar .right-group {
   display: flex;
   align-items: center;
 }
-#top-bar .bar-left { flex: 1; }
-#top-bar .bar-center { flex: 1; justify-content: center; }
-#top-bar .bar-right { flex: 1; justify-content: flex-end; }
-#card-container { padding-top: 60px; }
-
-/* Notification popup */
-.notification {
-  position: fixed;
-  top: 60px;
-  right: 16px;
-  background: rgba(0,0,0,0.8);
+#top-bar .left-group { flex: 1; gap: 8px; }
+#top-bar .center-group { flex: 1; justify-content: center; }
+#top-bar .right-group { flex: 1; justify-content: flex-end; gap: 8px; }
+.bar-btn {
+  background: #0066cc;
   color: #fff;
-  padding: 8px 12px;
+  border: none;
+  padding: 6px 12px;
   border-radius: 4px;
-  z-index: 3000;
-  transition: opacity 0.4s;
+  cursor: pointer;
+  font-size: 0.9em;
 }
-.notification.hidden { opacity: 0; pointer-events: none; }
-.notification.show { opacity: 1; }
-
-/* Overview panel */
-#overview-panel {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #fff;
-  overflow-y: auto;
-  z-index: 1500;
-  padding: 20px;
+.bar-btn img {
+  height: 24px;
+  width: auto;
 }
-#overview-panel.hidden { display: none !important; }
-#overview-list { display: grid; gap: 8px; }
+/* push main content down under the bar */
+body > main,
+body > #card-container {
+  padding-top: 64px;
+}
+/* print styles: hide helper UI, show only cards */
+@media print {
+  #top-bar, .hover-bar, .qty-badge, #search-modal, #overview-panel { display: none !important; }
+  body, html { margin: 0; padding: 0; }
+}
