@@ -114,7 +114,7 @@ function loadState() {
     origAdd(vn);
     window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
     updateCount();
-    cacheState();
+    saveState();
     refreshBadge(vn);
   };
 
@@ -128,7 +128,7 @@ function loadState() {
       if (el && el.parentNode) el.parentNode.removeChild(el);
     }
     updateCount();
-    cacheState();
+    saveState();
     refreshBadge(vn);
   };
 
