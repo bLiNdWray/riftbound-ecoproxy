@@ -197,11 +197,26 @@
   }
 
   function makeLegend(c) {
-    const desc = formatDescription(c.description, '');
-    return build(c.variantNumber, `
-      <div class="legend-header">${c.name}</div>
-      <div class="legend-body">${desc}</div>`);
-  }
+  // Pull in any color icons (if your sheet has them)
+  const cols       = (c.colors||'').split(/[;]\s*/).filter(Boolean);
+  const colorIcons = cols.map(col =>
+    `<img src="images/${col}.png" alt="${col}">`
+  ).join('');
+  
+  // Format rich-text description
+  const desc       = formatDescription(c.description, cols[0]||'');
+  
+  // Build the legend card HTML
+  return build(c.variantNumber, `
+    <div class="legend-header-row">
+      <div class="legend-icons">${colorIcons}</div>
+      <div class="legend-label">LEGEND</div>
+    </div>
+    <hr class="legend-divider"/>
+    <div class="legend-name">${c.name}</div>
+    <div class="legend-body">${desc}</div>
+  `);
+}
 
   function makeRune(c) {
     const desc = formatDescription(c.description, '');
