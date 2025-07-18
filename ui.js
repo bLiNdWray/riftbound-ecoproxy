@@ -50,16 +50,15 @@ function longNotify(msg) {
     }
   }
 
-  // ===== IMPORT LIST (modal) =====
+// ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // Ensure state
   window.cardCounts = window.cardCounts || {};
 
-  // Remove old modal if present
+  // Remove old modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // Build overlay + modal
+  // Build modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -88,22 +87,21 @@ btnImport.addEventListener('click', function(){
   document.getElementById('close-import').onclick = closeModal;
   document.getElementById('import-cancel').onclick = closeModal;
 
-  // Prefill variants list
+  // Prefill
   area.value = Object.keys(window.cardCounts || {}).join(' ');
 
-  // Close helper
   function closeModal() { overlay.remove(); }
 
-  // Import click
+  // On Import
   document.getElementById('import-ok').onclick = function(){
-    // Immediately close and persist
+    // Close modal & persist
     closeModal();
     saveState();
 
-    // Show in-progress toast for 4s
+    // Show in-progress
     longNotify('Deck Import in Progress');
 
-    // Optionally clear
+    // Optional clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -111,9 +109,9 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // Parse and import
-    var tokens = (area.value||'').trim().split(/\s+/);
-    var errors = [];
+    // Parse & add, collect errors
+    var tokens = (area.value||'').trim().split(/\s+/),
+        errors = [];
     tokens.forEach(function(tok){
       var parts = tok.split('-');
       if (parts.length < 2) {
@@ -124,15 +122,12 @@ btnImport.addEventListener('click', function(){
       var before = window.cardCounts[vn] || 0;
       window.addCard(vn);
       var after = window.cardCounts[vn] || 0;
-      if (after === before) {
-        // no change => error
-        errors.push(vn);
-      }
+      if (after === before) errors.push(vn);
     });
 
-    // Show error toasts
+    // Show errors
     errors.forEach(function(vn){
-      notify(vn + \" can't be found\");
+      notify(vn + ' can\'t be found');
     });
   };
 });
