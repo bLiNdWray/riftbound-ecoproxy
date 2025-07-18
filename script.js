@@ -164,13 +164,24 @@ function makeSpell(c) {
     </div>`);
 }
 
-  function makeBattlefield(c) {
-    const desc = formatDescription(c.description, '');
-    const tagsArr = c.tags?c.tags.split(/;\s*/):[];
-    const tagsStr = tagsArr.length?` - ${tagsArr.join(' ')}`:'';
-    return build(c.variantNumber, `
-      <div class="bf-columns"><div class="bf-col side"><div class="bf-text">${desc}</div></div><div class="bf-col center"><div class="bf-type-text">${c.type}${tagsStr}</div><div class="bf-name">${c.name}</div></div><div class="bf-col side"><div class="bf-text">${desc}</div></div></div>`);
-  }
+ function makeBattlefield(c) {
+  const desc = c.description || '';
+  return build(c.variantNumber, `
+    <div class="bf-columns">
+      <div class="bf-col side left">
+        <div class="bf-text">${desc}</div>
+      </div>
+      <div class="bf-col center">
+        <div class="bf-type-text">${c.type.toUpperCase()}</div>
+        <div class="bf-name">${c.name}</div>
+      </div>
+      <div class="bf-col side right">
+        <div class="bf-text">${desc}</div>
+      </div>
+    </div>
+  `);
+}
+
 
  function makeLegend(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
