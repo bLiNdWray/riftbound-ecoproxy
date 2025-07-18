@@ -76,16 +76,15 @@
   flex-shrink: 0;
 }
 
-/* Middle body */
 .card .middle {
   position: relative;
   flex: 1;
-  padding: 6px 6px 6px 9px;
+  padding: 6px 6px 6px 9px;   /* extra left padding preserved */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;   /* was center */
-  align-items: flex-start;       /* ensure inline content starts at left */
-  text-align: justify;
+  justify-content: center;    /* center vertically */
+  align-items: flex-start;    /* start at left edge */
+  text-align: left;           /* remove justified spacing */
   font-size: 8pt;
   overflow-y: auto;
   overflow-x: visible;
