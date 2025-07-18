@@ -172,13 +172,20 @@ function makeSpell(c) {
       <div class="bf-columns"><div class="bf-col side"><div class="bf-text">${desc}</div></div><div class="bf-col center"><div class="bf-type-text">${c.type}${tagsStr}</div><div class="bf-name">${c.name}</div></div><div class="bf-col side"><div class="bf-text">${desc}</div></div></div>`);
   }
 
-  function makeLegend(c) {
+ function makeLegend(c) {
+  // 1) Icons
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
   const iconsHTML = cols.map(col =>
     `<img src="images/${col}.png" alt="${col}">`
   ).join('');
 
-  const mainTitle = c.name;                // e.g. “Relentless Storm”
+  // 2) Name split on comma → two lines
+  const mainTitle = (c.name || '').split(',').map(s => s.trim()).join('<br>');
+
+  // 3) Subtitle (moniker)
+  const subtitle  = c.variantType || '';
+
+  // 4) Body
   const bodyHTML  = formatDescription(c.description, cols[0]||'');
 
   return build(c.variantNumber, `
@@ -188,10 +195,12 @@ function makeSpell(c) {
     </div>
     <div class="legend-name">
       <div class="main-title">${mainTitle}</div>
+      ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
     </div>
     <div class="legend-body">${bodyHTML}</div>
   `);
 }
+
   function makeRune(c) {
     const desc = formatDescription(c.description, '');
     const tagsArr = c.tags?c.tags.split(/;\s*/):[];
