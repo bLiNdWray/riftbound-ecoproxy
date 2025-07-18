@@ -299,4 +299,113 @@ function build(id, html) {
 
   return wrapper;
 }
+
+   const topBar = document.getElementById('top-bar');
+  const importInput = document.getElementById('import-file');
+  const overviewPanel = document.getElementById('overview-panel');
+  const overviewList = document.getElementById('overview-list');
+  const countLabel = document.getElementById('card-count');
+  const notification = document.getElementById('notification');
+  let fullProxy = false;
+
+  function updateCount() {
+    const total = Object.values(addedCounts).reduce((a,b)=>a+b,0);
+    countLabel.textContent = `${total} card${total!==1?'s':''}`;
+  }
+
+  function showNotification(msg) {
+    notification.textContent = msg;
+    notification.classList.remove('hidden');
+    notification.classList.add('show');
+    setTimeout(() => {
+      notification.classList.remove('show');
+      notification.classList.add('hidden');
+    }, 2000);
+  }
+
+  // Import List
+  document.getElementById('import-list').addEventListener('click', ()=> importInput.click());
+  importInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    file.text().then(txt => {
+      const ids = txt.split(/\s+/).filter(Boolean);
+      ids.forEach(vn => addCard(vn));
+      updateUrl(); updateCount();
+      showNotification('Imported list');
+    });
+  });
+
+  // Print view
+  document.getElementById('print-cards').addEventListener('click', () => {
+    // hide helper UI
+    topBar.style.display = 'none';
+    document.body.classList.add('print-mode');
+    window.print();
+    // restore
+    window.onafterprint = () => { topBar.style.display = ''; document.body.classList.remove('print-mode'); };
+  });
+
+  // Overview toggle
+  document.getElementById('overview-toggle').addEventListener('click', () => {
+    overviewList.innerHTML = '';
+    // build grouped list by type & color
+    ['legend','rune','unit','spell','gear','battlefield'].forEach(type => {
+      const group = document.createElement('div');
+      group.innerHTML = `<h3>${type.charAt(0).toUpperCase()+type.slice(1)}</h3>`;
+      for (const [vn, count] of Object.entries(addedCounts)) {
+        if (count && getCardType(vn)===type) {
+          const entry = document.createElement('div');
+          entry.textContent = `${vn}: ${count}`;
+          group.appendChild(entry);
+        }
+      }
+      overviewList.appendChild(group);
+    });
+    overviewPanel.classList.remove('hidden');
+  });
+  document.getElementById('close-overview').addEventListener('click', ()=> overviewPanel.classList.add('hidden'));
+
+  // Full Proxy toggle
+  document.getElementById('full-proxy-toggle').addEventListener('click', () => {
+    fullProxy = !fullProxy;
+    document.querySelectorAll('#card-container .card img').forEach(img => {
+      const base = img.getAttribute('src');
+      img.src = fullProxy ? base.replace('/proxy/','/full/') : base;
+    });
+  });
+
+  // Reset
+  document.getElementById('reset-cards').addEventListener('click', () => {
+    container.innerHTML='';
+    Object.keys(addedCounts).forEach(k=>addedCounts[k]=0);
+    updateUrl(); updateCount();
+    showNotification('Reset all cards');
+  });
+
+  // URL & caching
+  function updateUrl() {
+    const params = new URLSearchParams();
+    const ids = [];
+    for (const [vn, count] of Object.entries(addedCounts)) {
+      for (let i=0;i<count;i++) ids.push(vn);
+    }
+    if (ids.length) params.set('id', ids.join(','));
+    history.replaceState(null,'',`?${params.toString()}`);
+    localStorage.setItem('lastIds', JSON.stringify(ids));
+  }
+  // on load, restore
+  window.addEventListener('load', () => {
+    const saved = JSON.parse(localStorage.getItem('lastIds')||'[]');
+    saved.forEach(vn=>addCard(vn)); updateCount();
+  });
+
+  // Override existing addCard to include UI updates
+  const origAdd = addCard;
+  window.addCard = vn => {
+    origAdd(vn);
+    updateUrl(); updateCount();
+    showNotification(`Added ${vn}`);
+  };
+
 })();
