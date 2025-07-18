@@ -123,7 +123,7 @@ function renderCards(ids, clear = true) {
     }
 
     // Core symbols
-    replaceCode('[Tap]',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode(/\[Tap\]/gi,  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
     replaceCode('[Might]', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
     replaceCode('[Power]',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
 
