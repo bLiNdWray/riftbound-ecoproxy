@@ -1,5 +1,6 @@
 /* card.css – Complete Updated Styles for Riftbound Eco Proxy */
 
+
 /* Container in horizontal mode */
 #card-container.layout-horizontal {
   display: grid;
@@ -15,11 +16,11 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   border: 1px solid #000;
   background: #fff;
   box-sizing: border-box;
   height: 100%;
+  overflow: hidden;
 }
 
 /* Quantity badge */
