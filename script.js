@@ -179,13 +179,10 @@ function makeSpell(c) {
     `<img src="images/${col}.png" alt="${col}">`
   ).join('');
 
-  // 2) Name split on comma → two lines
+  // 2) Name split on comma → two lines (moniker second line)
   const mainTitle = (c.name || '').split(',').map(s => s.trim()).join('<br>');
 
-  // 3) Subtitle (moniker)
-  const subtitle  = c.variantType || '';
-
-  // 4) Body
+  // 3) Body
   const bodyHTML  = formatDescription(c.description, cols[0]||'');
 
   return build(c.variantNumber, `
@@ -195,12 +192,10 @@ function makeSpell(c) {
     </div>
     <div class="legend-name">
       <div class="main-title">${mainTitle}</div>
-      ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
     </div>
     <div class="legend-body">${bodyHTML}</div>
   `);
 }
-
   function makeRune(c) {
     const desc = formatDescription(c.description, '');
     const tagsArr = c.tags?c.tags.split(/;\s*/):[];
