@@ -127,7 +127,7 @@ function makeUnit(c) {
     </div>
     <div class="name">${c.name}</div>
     <div class="middle">
-      ${descHTML}
+     <div class="desc-wrap">${descHTML}</div>
       <div class="color-indicator">
         ${colorIcon}<span class="color-text">${colorText}</span>
 
