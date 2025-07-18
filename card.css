@@ -85,7 +85,7 @@
   justify-content: center;    /* center vertically */
   align-items: flex-start;    /* start at left edge */
   text-align: middle;           /* remove justified spacing */
-  font-size: 8pt;
+  font-size: 9pt;
   overflow-y: auto;
   overflow-x: visible;
 }
