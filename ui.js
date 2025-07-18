@@ -21,7 +21,23 @@
     setTimeout(function(){ n.classList.remove('visible'); }, 2000);
     setTimeout(function(){ n.remove(); }, 3000);
   }
+// Persist cardCounts in localStorage under 'riftboundCardCounts'
+function saveState() {
+  localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts));
+}
+function loadState() {
+  try {
+    var stored = localStorage.getItem('riftboundCardCounts');
+    if (stored) {
+      window.cardCounts = JSON.parse(stored);
+    }
+  } catch (e) {
+    console.warn('Failed to load saved state', e);
+    window.cardCounts = {};
+  }
+}
 
+  
   // IMPORT
   btnImport.addEventListener('click', function(){
     var text = prompt('Paste variant numbers (one per line):');
@@ -77,17 +93,7 @@
     countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
 
-  // Cache URL
-  function cacheState() {
-    var params = new URLSearchParams();
-    Object.entries(window.cardCounts).forEach(function(pair){
-      var vn = pair[0], cnt = pair[1];
-      for (var i = 0; i < cnt; i++) {
-        params.append('id', vn);
-      }
-    });
-    history.replaceState({}, '', window.location.pathname + '?' + params.toString());
-  }
+  
 
   // Wrap original hooks
   var origAdd = typeof window.addCard === 'function'
@@ -126,17 +132,7 @@
     refreshBadge(vn);
   };
 
-  // On load: restore from URL
-  document.addEventListener('DOMContentLoaded', function(){
-    var ps = new URLSearchParams(window.location.search);
-    ps.getAll('id').forEach(function(vn){
-      window.addCard(vn);
-    });
-    updateCount();
-    var sm = document.getElementById('search-modal');
-    if (sm) sm.style.top = '50px';
-  });
-
+  
   // Overview builder (unchanged)
   function buildOverview(){
     var ex = document.getElementById('overview-modal');
