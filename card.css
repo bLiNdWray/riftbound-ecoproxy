@@ -1,13 +1,16 @@
-/* Container */
+/* card.css – Up-to-date Card Layout Styles for Riftbound Eco Proxy */
+
+/* Container in horizontal mode */
 #card-container.layout-horizontal {
   display: grid;
   grid-template-columns: repeat(auto-fill, 63mm);
   grid-auto-rows: 88mm;
   gap: 16px;
   padding: 16px;
+  justify-content: start;
 }
 
-/* Base card */
+/* Base card wrapper */
 .card {
   position: relative;
   display: flex;
@@ -19,7 +22,26 @@
   height: 100%;
 }
 
-/* Top-bar: cost & might */
+/* Quantity badge */
+.qty-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* === Unit / Spell / Gear Shared Styles === */
+
+/* Top bar: cost + power icons and might */
 .card .top-bar {
   display: flex;
   justify-content: space-between;
@@ -49,7 +71,7 @@
 /* Name bar */
 .card .name {
   padding: 4px 6px;
-  font-size: 12pt;       /* increased size */
+  font-size: 12pt;
   font-weight: bold;
   text-align: center;
   text-transform: uppercase;
@@ -62,13 +84,13 @@
   padding: 6px;
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* vertically center the text */
-  text-align: justify;      /* justify the effect text */
+  justify-content: center;
+  text-align: justify;
   font-size: 8pt;
   overflow-y: auto;
 }
 
-/* Bottom-bar: type and tags */
+/* Bottom bar: type/tags + faction icon */
 .card .bottom-bar {
   padding: 4px 6px;
   border-top: 1px solid #000;
@@ -84,10 +106,121 @@
 .card .type-line {
   white-space: nowrap;
 }
-/* Faction icon in bottom-right */
 .card .faction-icon {
   width: 18px;
   height: 18px;
 }
 
-/* Battlefield, Legend, Rune… (unchanged) */
+/* === Battlefield === */
+.card.battlefield .bf-columns {
+  display: flex;
+  height: 100%;
+}
+.card.battlefield .bf-col {
+  flex: 1;
+  padding: 6px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.card.battlefield .bf-col.center {
+  flex-direction: column;
+}
+.card.battlefield .bf-col.side {
+  width: 20mm;
+  background: #fafafa;
+  position: relative;
+}
+.card.battlefield .bf-col.side .bf-text {
+  font-size: 8pt;
+  transform: rotate(-90deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+}
+.card.battlefield .bf-type-text {
+  font-size: 10pt;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.card.battlefield .bf-name {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* === Legend === */
+.card.legend {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card.legend .legend-header {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  background: #000;
+  color: #fff;
+  flex-shrink: 0;
+}
+.card.legend .legend-header img {
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+}
+.card.legend .legend-header .legend-title {
+  font-size: 12pt;
+  font-weight: bold;
+  margin-left: auto;
+}
+.card.legend .legend-name {
+  padding: 8px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.card.legend .legend-name .subtitle {
+  font-size: 9pt;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.card.legend .legend-name .main-title {
+  font-size: 14pt;
+  font-weight: bold;
+}
+.card.legend .legend-divider {
+  border-top: 1px solid #000;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+.card.legend .legend-body {
+  padding: 8px;
+  font-size: 8pt;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* === Rune === */
+.card.rune {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card.rune .rune-body {
+  padding: 8px;
+  font-size: 8pt;
+  flex: 1;
+  box-sizing: border-box;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Inline icons */
+.inline-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: text-bottom;
+}
