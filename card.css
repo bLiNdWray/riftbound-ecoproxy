@@ -1,6 +1,6 @@
-/* card.css - Card Layout Styles for Riftbound Eco Proxy */
+/* card.css – Card Layout Styles for Riftbound Eco Proxy */
 
-/* Container in horizontal mode: grid of proxy cards */
+/* Container in horizontal mode */
 #card-container.layout-horizontal {
   display: grid;
   grid-template-columns: repeat(auto-fill, 63mm);
@@ -41,15 +41,7 @@
   pointer-events: none;
 }
 
-/* Card type classes (for potential future overrides) */
-.card.unit { }
-.card.spell { }
-.card.gear { }
-.card.battlefield { }
-.card.legend { }
-.card.rune { }
-
-/* Shared layout for unit, spell, gear */
+/* === Unit / Spell / Gear shared bars === */
 .card.unit .top-bar,
 .card.spell .top-bar,
 .card.gear .top-bar {
@@ -59,20 +51,14 @@
   height: 12mm;
   box-sizing: border-box;
 }
-
-.card.unit .cost,
-.card.spell .cost,
-.card.gear .cost {
+.card .cost {
   font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
-.card.unit .might,
-.card.spell .might,
-.card.gear .might {
+.card .might {
   font-size: 16px;
   display: flex;
   align-items: center;
@@ -89,21 +75,20 @@
   flex-shrink: 0;
 }
 
-/* Middle body: grows to fill space */
+/* Middle body */
 .card .middle {
   flex: 1;
   padding: 4px 6px;
   font-size: 8pt;
   overflow-y: auto;
 }
-
 .card .color-indicator {
   margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.card .color-icon {
+.card .color-indicator img {
   width: 32px;
   height: 32px;
 }
@@ -129,7 +114,7 @@
   width: 100%;
 }
 
-/* Battlefield card */
+/* === Battlefield === */
 .card.battlefield .bf-columns {
   display: flex;
   height: 100%;
@@ -139,91 +124,107 @@
   padding: 6px;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+}
+.card.battlefield .bf-col.center {
+  flex-direction: column;
 }
 .card.battlefield .bf-col.side {
   width: 20mm;
   background: #fafafa;
-  flex-direction: column;
-  text-align: center;
+  position: relative;
 }
-.card.battlefield .bf-col.center {
-  flex-direction: column;
+.card.battlefield .bf-col.side .bf-text {
+  font-size: 8pt;
+  /* rotate so bottom of text sits at outer edge */
+  transform: rotate(-90deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
 }
 .card.battlefield .bf-type-text {
   font-size: 10pt;
   font-weight: bold;
   margin-bottom: 4px;
+  text-align: center;
 }
 .card.battlefield .bf-name {
   font-size: 12pt;
   font-weight: bold;
-}
-.card.battlefield .bf-text {
-  font-size: 8pt;
-  overflow-y: auto;
   text-align: center;
 }
 
-/* Legend card */
+/* === Legend === */
 .card.legend {
   display: flex;
   flex-direction: column;
   height: 100%;
-  box-sizing: border-box;
 }
-.card.legend .legend-header-row {
+.card.legend .legend-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 6px;
+  background: #000;
+  color: #fff;
+  flex-shrink: 0;
 }
-.card.legend .legend-icons img {
-  width: 24px;
-  height: 24px;
-  margin-right: 4px;
+.card.legend .legend-header img {
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
 }
-.card.legend .legend-label {
-  font-size: 10pt;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-.card.legend .legend-divider {
-  border: none;
-  border-top: 2px solid #000;
-  margin: 0;
-}
-.card.legend .legend-name {
-  padding: 4px 6px;
+.card.legend .legend-header .legend-title {
   font-size: 12pt;
   font-weight: bold;
+  margin-left: auto;
+}
+.card.legend .legend-name {
+  padding: 8px;
   text-align: center;
+  flex-shrink: 0;
+}
+.card.legend .legend-name .subtitle {
+  font-size: 9pt;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.card.legend .legend-name .main-title {
+  font-size: 14pt;
+  font-weight: bold;
+}
+.card.legend .legend-divider {
+  border-top: 1px solid #000;
+  margin: 0 8px;
+  flex-shrink: 0;
 }
 .card.legend .legend-body {
   padding: 8px;
   font-size: 8pt;
-  flex: 1;
   overflow-y: auto;
-  text-align: left;
+  flex: 1;
 }
 
-/* Battlefield side text orientation */
-.card.battlefield .bf-col.side {
+/* === Rune === */
+.card.rune {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card.rune .rune-body {
+  padding: 8px;
+  font-size: 8pt;
+  flex: 1;
+  box-sizing: border-box;
+  overflow-y: auto;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 6px;
-  box-sizing: border-box;
+  justify-content: center;
+  text-align: center;
 }
-.card.battlefield .bf-col.side.left .bf-text {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-}
-.card.battlefield .bf-col.side.right {
-  justify-content: flex-start;
-}
-.card.battlefield .bf-col.side.right .bf-text {
-  writing-mode: vertical-lr;
-  text-orientation: upright;
+
+/* Inline icons */
+.inline-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: text-bottom;
 }
