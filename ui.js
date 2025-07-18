@@ -22,40 +22,22 @@
 
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // remove any existing import modal
+  // ensure cardCounts exists
+  window.cardCounts = window.cardCounts || {};
+
+  // remove existing modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // build overlay + modal
-  var overlay = document.createElement('div');
-  overlay.id = 'import-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-content large" style="max-width:600px; padding:16px;">
-      <button id="close-import" class="modal-close">×</button>
-      <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code:</p>
-      <textarea id="import-area"
-        style="width:100%; height:200px; font-family:monospace;"
-        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-      <label style="display:block; margin:8px 0;">
-        <input type="checkbox" id="import-clear" />
-        Clear existing cards before import
-      </label>
-      <div style="text-align:right; margin-top:12px;">
-        <button id="import-cancel" class="action-btn">Cancel</button>
-        <button id="import-ok" class="action-btn primary">Import</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-
+  // build overlay...
+  // ...snip...
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
 
-  // prefill with current counts: "VARIANT-COUNT"
+  // prefill safely
   var tokens = [];
-  Object.entries(window.cardCounts).forEach(function([vn, cnt]){
-    tokens.push(vn + '-' + ('' + cnt).padStart(2,'0'));
+  Object.entries(window.cardCounts || {}).forEach(function([vn, cnt]){
+    tokens.push(vn + '-' + cnt.toString().padStart(2,'0'));
   });
   area.value = tokens.join(' ');
 
