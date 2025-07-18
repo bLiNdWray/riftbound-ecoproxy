@@ -146,46 +146,44 @@
   height: 100%;
 }
 
-/* Side panels – auto width, centered content */
+/* Side panels – auto width, centered vertically, padded horizontally */
 .card.battlefield .bf-col.side {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 4px 8px;       /* added 8px left/right padding */
   box-sizing: border-box;
   overflow-wrap: break-word;
 }
 
-/* LEFT panel: vertical-rl, no extra rotation/orientation property */
+/* LEFT panel: vertical-rl, left‐aligned text */
 .card.battlefield .bf-col.side.left .bf-text {
   writing-mode: vertical-rl;
-  /* remove text-orientation entirely so browser default applies */
   white-space: normal;
   font-size: 8pt;
   line-height: 1.2;
-  text-align: center;
+  text-align: start;      /* left‐align along flow */
   margin: 0;
   padding: 0;
   word-break: break-word;
 }
 
-/* RIGHT panel: vertical-rl + 180° rotation */
+/* RIGHT panel: vertical-rl + 180° rotation, left‐aligned text */
 .card.battlefield .bf-col.side.right .bf-text {
   writing-mode: vertical-rl;
   white-space: normal;
   font-size: 8pt;
   line-height: 1.2;
-  text-align: center;
+  text-align: start;
   margin: 0;
   padding: 0;
   word-break: break-word;
-  /* flip end-to-end */
   transform: rotate(180deg);
   transform-origin: center;
 }
 
-/* Center panel – fill remaining space */
+/* Center panel – fills remaining space */
 .card.battlefield .bf-col.center {
   flex: 1 1 auto;
   display: flex;
@@ -212,6 +210,7 @@
   text-align: center;
   color: #000;
 }
+
 
 /* === Legend Cards === */
 .card.legend {
