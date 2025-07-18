@@ -333,11 +333,8 @@
 /* Hover bar styling */
 .card .hover-bar {
   position: absolute;
-  bottom: 4px;
   left: 0;
   width: 100%;
-  display: none;
-  gap: 8px;
 }
 .card .hover-bar button {
   flex: 1;
