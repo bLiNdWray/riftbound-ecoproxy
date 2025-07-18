@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Riftbound Proxy Generator</title>
-  <!-- Core styles -->
   <link rel="stylesheet" href="style.css">
-  <!-- Top-bar styles -->
+  <link rel="stylesheet" href="card.css">
   <link rel="stylesheet" href="topbar.css">
-<link rel="stylesheet" href="card.css">
-
 </head>
 <body>
-  <!-- Fixed Top Bar -->
   <nav id="top-bar">
     <div class="topbar-left">
       <button id="open-search" class="topbar-btn">Add Cards</button>
@@ -24,20 +20,18 @@
       <span id="card-count">0 cards</span>
     </div>
     <div class="topbar-right">
-      <a href="https://paypal.me/YourLink" target="_blank" class="donate-btn">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/paypal.svg" alt="PayPal" />
+      <a href="https://www.paypal.com/paypalme/YourLink" target="_blank" class="donate-btn">
+        <img src="images/paypal-logo.png" alt="PayPal">
       </a>
       <a href="https://venmo.com/YourHandle" target="_blank" class="donate-btn">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/venmo.svg" alt="Venmo" />
+        <img src="images/venmo-logo.png" alt="Venmo">
       </a>
       <button id="btn-reset" class="topbar-btn">Reset</button>
     </div>
   </nav>
 
-  <!-- Main card container -->
   <main id="card-container" class="layout-horizontal"></main>
 
-  <!-- Search Modal (anchored 50px down) -->
   <div id="search-modal" class="search-modal hidden" style="top:50px;">
     <div class="modal-content">
       <button id="close-search" class="modal-close">×</button>
@@ -50,7 +44,6 @@
     </div>
   </div>
 
-  <!-- Core scripts -->
   <script src="script.js"></script>
   <script src="ui.js"></script>
 </body>
