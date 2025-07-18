@@ -97,8 +97,8 @@
 /* Color indicator inside .middle */
 .card .middle .color-indicator {
   position: absolute;
-  bottom: 0;         /* flush with bottom of middle */
-  right: 0;          /* flush with right edge of middle */
+  bottom: 4px;    /* lift it up 4px from the bottom of middle */
+  right: 4px;     /* inset it 4px from the right edge */
   display: flex;
   align-items: center;
   gap: 4px;
