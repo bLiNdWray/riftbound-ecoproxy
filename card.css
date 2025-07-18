@@ -1,123 +1,262 @@
-/* — Horizontal Layout Mode — */
-#card-container.layout-horizontal {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 63mm);
-  grid-auto-rows: 88mm;
-  gap: 0;
-  padding: 0;
-  box-sizing: border-box;
-  justify-content: start;
-  align-content: start;
+/* card.css — Scoped under #card-container */
+
+/* Page layout */
+#card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  background: #fff;
+  font-family: Arial, sans-serif;
 }
 
-/* — Base Card Styling — */
-.card {
+/* Base card */
+#card-container .card {
   width: 63mm;
   height: 88mm;
-  margin: 0;
-  box-sizing: border-box;
   background: #fff;
   border: 1px solid #000;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  position: relative;
+  box-sizing: border-box;
 }
 
-/* — Unit & Spell (“alt”) Layout — */
-.card.unit-alt,
-.card.spell-alt { }
-.top-bar-alt {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 4px 6px; border-bottom: 1px solid #000; height: 12mm; box-sizing: border-box;
+/* — Alternate Unit/Spell Layout — */
+#card-container .card.unit-alt,
+#card-container .card.spell-alt {
+  /* inherits .card */
 }
-.cost-alt { font-size:18px; font-weight:bold; display:flex; align-items:center; gap:4px; }
-.force-icon-alt { width:18px; height:18px; }
-.might-alt { display:flex; align-items:center; gap:4px; }
-.might-icon-alt { width:18px; height:18px; }
-.name-alt { text-align:center; font-size:12px; font-weight:bold; margin:4px 0; }
-.middle-alt {
-  position:relative; flex:1; display:flex; justify-content:center; align-items:center;
-  padding:6px; text-align:center; font-size:8pt; line-height:1.3;
+
+/* Top bar: cost/force left, might right */
+#card-container .top-bar-alt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid #000;
+  height: 12mm;
+  box-sizing: border-box;
+  background: none;
 }
-.color-indicator-alt {
-  position:absolute; bottom:4px; right:4px; display:flex; align-items:center; gap:4px;
+#card-container .cost-alt {
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-.color-icon-alt { width:32px; height:32px; }
-.color-text-alt { font-size:8pt; font-weight:bold; text-transform:capitalize; }
-.bottom-bar-alt {
-  padding:4px 6px; border-top:1px solid #000; height:10mm; box-sizing:border-box; display:flex; align-items:center;
+#card-container .force-icon-alt {
+  width: 18px;
+  height: 18px;
 }
-.type-line-alt { font-size:8pt; font-weight:bold; }
+#card-container .might-alt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#card-container .might-icon-alt {
+  width: 18px;
+  height: 18px;
+}
+
+/* Name under top bar */
+#card-container .name-alt {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+/* Centered effect text + color */
+#card-container .middle-alt {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  text-align: center;
+  font-size: 8pt;
+  line-height: 1.3;
+}
+#card-container .color-indicator-alt {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#card-container .color-icon-alt {
+  width: 32px;
+  height: 32px;
+}
+#card-container .color-text-alt {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+/* Bottom bar with type-line only */
+#card-container .bottom-bar-alt {
+  padding: 4px 6px;
+  border-top: 1px solid #000;
+  height: 10mm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+#card-container .type-line-alt {
+  font-size: 8pt;
+  font-weight: bold;
+}
 
 /* — Battlefield — */
-.bf-columns { display:flex; width:100%; height:100%; }
-.bf-col { flex:1; box-sizing:border-box; overflow:hidden; display:flex; justify-content:center; align-items:center; padding:4px; }
-.bf-col.side { width:20%; }
-.bf-col.center { width:60%; flex-direction:column; }
-.bf-type-text { font-size:8pt; font-weight:bold; text-transform:uppercase; margin-bottom:4px; }
-.bf-name { font-size:10pt; font-weight:bold; text-align:center; }
-.bf-col.side.left .bf-text {
-  writing-mode:vertical-lr; text-orientation:mixed; text-align:left; font-size:7pt; line-height:1.2;
+#card-container .bf-columns {
+  display: flex;
+  width: 100%;
+  height: 100%;
 }
-.bf-col.side.right .bf-text {
-  writing-mode:vertical-rl; text-orientation:mixed; transform:rotate(180deg);
-  text-align:right; font-size:7pt; line-height:1.2;
+#card-container .bf-col {
+  flex: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+}
+#card-container .bf-col.side { width: 20%; }
+#card-container .bf-col.center {
+  width: 60%;
+  flex-direction: column;
+}
+#card-container .bf-type-text {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+#card-container .bf-name {
+  font-size: 10pt;
+  font-weight: bold;
+  text-align: center;
+}
+#card-container .bf-col.side.left .bf-text {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  text-align: left;
+  font-size: 7pt;
+  line-height: 1.2;
+}
+#card-container .bf-col.side.right .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  text-align: right;
+  font-size: 7pt;
+  line-height: 1.2;
 }
 
 /* — Legend — */
-.card.legend { }
-.card.legend .top-bar {
-  display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
-  border-bottom:1px solid #000; height:12mm; box-sizing: border-box; background:none;
+#card-container .card.legend {
+  /* inherits .card */
 }
-.legend-colors { display:flex; gap:2px; }
-.legend-color-icon { width:32px; height:32px; }
-.legend-label { font-size:8pt; font-weight:bold; text-transform:uppercase; }
-.legend-middle {
-  flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
-  padding:4px 6px; box-sizing:border-box;
+/* Top bar: colors left, label right */
+#card-container .card.legend .top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid #000;
+  height: 12mm;
+  box-sizing: border-box;
+  background: none;
 }
-.legend-tag { font-size:8pt; font-style:italic; margin-bottom:2px; }
-.legend-name { font-size:14pt; font-weight:bold; text-align:center; }
-.legend-bottom {
-  padding:6px 8px; border-top:1px solid #000; height:30mm; box-sizing:border-box;
-  display:flex; align-items:center; justify-content:center; text-align:center;
+#card-container .legend-colors {
+  display: flex;
+  gap: 2px;
 }
-.legend-ability { margin:0; font-size:8pt; line-height:1.3; }
+#card-container .legend-color-icon {
+  width: 32px;
+  height: 32px;
+}
+#card-container .legend-label {
+  font-size: 8pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+/* Center tag + name */
+#card-container .legend-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+#card-container .legend-tag {
+  font-size: 8pt;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+#card-container .legend-name {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+}
+/* Centered ability, no footer */
+#card-container .legend-bottom {
+  padding: 6px 8px;
+  border-top: 1px solid #000;
+  height: 30mm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+#card-container .legend-ability {
+  margin: 0;
+  font-size: 8pt;
+  line-height: 1.3;
+}
 
 /* — Rune — */
-.card.rune { }
-.rune-top { height:18px; display:flex; justify-content:center; align-items:flex-start; padding-top:4px; }
-.rune-name { font-size:12pt; font-weight:bold; text-align:center; }
-.rune-middle { flex:1; display:flex; justify-content:center; align-items:center; }
-.rune-icon { width:180px; height:180px; border:none; }
+#card-container .card.rune {
+  /* inherits .card */
+}
+#card-container .rune-top {
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+#card-container .rune-name {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+#card-container .rune-middle {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#card-container .rune-icon {
+  width: 180px;
+  height: 180px;
+  border: none;
+}
 
-/* — Modal & Controls — */
-/* Add Cards FAB */
-.fab-btn {
-  background:#28a745; color:#fff; padding:0.5rem 1rem; border:none; border-radius:4px;
-  font-size:1rem; cursor:pointer; margin:1rem;
+/* Print */
+@media print {
+  #card-container .card {
+    border-color: #000;
+    box-shadow: none;
+    margin: 0;
+  }
 }
-.modal {
-  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6);
-  display:flex; justify-content:center; align-items:center; z-index:1000;
-}
-.modal.hidden { display:none; }
-.modal-content {
-  background:#fff; width:90vw; max-width:1000px; height:90vh; border-radius:8px;
-  overflow:hidden; display:flex; flex-direction:column;
-}
-.modal-close {
-  background:none; border:none; font-size:1.5rem; padding:0.5rem; align-self:flex-end; cursor:pointer;
-}
-.modal-body { display:flex; flex:1; overflow:hidden; }
-.search-panel { width:100%; display:flex; flex-direction:column; }
-#card-search-input {
-  padding:0.5rem; font-size:1rem; border:none; border-bottom:1px solid #ddd;
-}
-.results-grid {
-  flex:1; overflow:auto;
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(63mm,1fr)); gap:0.5rem; padding:0.5rem;
-}
-/* ensure search results tile as cards */
-.results-grid .card { margin:0; }
