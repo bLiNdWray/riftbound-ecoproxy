@@ -395,3 +395,18 @@
   width: 100%;
   height: 100%;
 }
+
+/* Prevent inline icons from causing line‐breaks */
+.inline-icon,
+.cost-icon,
+.might-icon {
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+/* Prevent the icon + following text from wrapping */
+.color-indicator,
+.card .top-bar .cost,
+.card .top-bar .might {
+  white-space: nowrap;
+}
