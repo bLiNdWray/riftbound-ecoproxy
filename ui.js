@@ -20,22 +20,31 @@
     setTimeout(function(){ n.remove(); }, 3000);
   }
 
-  btnImport.addEventListener('click', function(){
-    var text = prompt('Paste your list of variant numbers (one per line):');
-    if (!text) return;
-    var list = text.split(/\r?\n/);
-    var imported = 0;
-    list.forEach(function(line){
-      var vn = line.trim();
-      if (vn && window.addedVariants.indexOf(vn) === -1) {
-        window.addCard(vn);
-        window.addedVariants.push(vn);
-        imported++;
-      }
-    });
-    updateCount(); cacheState();
-    notify(imported + ' cards imported');
+btnImport.addEventListener('click', function(){
+  var input = prompt(
+    'Paste your Tabletop Simulator Deck Code here (e.g. OGN-045-1 OGN-046-1 ...):',
+    // prefill with existing codes:
+    Object.entries(window.cardCounts)
+      .map(([vn,c]) => Array(c).fill(vn+'-1').join(' '))
+      .join(' ')
+  );
+  if (!input) return;
+  // reset
+  window.cardCounts = {};
+  document.getElementById('card-container').innerHTML = '';
+  updateCount();
+  saveState();
+
+  // parse and import
+  input.trim().split(/\s+/).forEach(function(tok){
+    var [set, num, qty] = tok.split('-');
+    var vn = set + '-' + num;
+    qty = parseInt(qty, 10) || 1;
+    for (var i = 0; i < qty; i++) {
+      window.addCard(vn);
+    }
   });
+});
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
