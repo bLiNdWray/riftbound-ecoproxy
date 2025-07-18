@@ -173,18 +173,33 @@ function makeSpell(c) {
   }
 
   function makeLegend(c) {
-    const icons = (c.colors||'').split(/[;]\s*/).map(col=>`<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('');
-    const subtitle = c.variantType||'';
-    const mainTitle = c.name;
-    const body = formatDescription(c.description, '');
-    const tagsArr = c.tags?c.tags.split(/;\s*/):[];
-    const tagsStr = tagsArr.length?` - ${tagsArr.join(' ')}`:'';
-    return build(c.variantNumber, `
-      <div class="legend-header">${icons}<span class="legend-title">LEGEND</span></div>
-      <div class="legend-name"><div class="subtitle">${subtitle}</div><div class="main-title">${mainTitle}</div></div>
-      <div class="legend-divider"></div><div class="legend-body">${body}</div>
-      <div class="bottom-bar"><span class="type-line">${c.type}${tagsStr}</span></div>`);
-  }
+  // Colors → icons
+  const cols       = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const iconsHTML  = cols.map(col =>
+    `<img src="images/${col}.png" alt="${col}">`
+  ).join('');
+
+  // Moniker above the name
+  const subtitle   = c.variantType || '';   // e.g. “Volibear”
+  const mainTitle  = c.name;                // e.g. “Relentless Storm”
+
+  // Body description
+  const bodyHTML   = formatDescription(c.description, cols[0]||'');
+
+  return build(c.variantNumber, `
+    <div class="legend-header">
+      <div class="legend-icons">
+        ${iconsHTML}
+      </div>
+      <div class="legend-title">LEGEND</div>
+    </div>
+    <div class="legend-name">
+      <div class="subtitle">${subtitle}</div>
+      <div class="main-title">${mainTitle}</div>
+    </div>
+    <div class="legend-body">${bodyHTML}</div>
+  `);
+}
 
   function makeRune(c) {
     const desc = formatDescription(c.description, '');
