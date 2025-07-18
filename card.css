@@ -241,22 +241,44 @@
   /* no borders */
 }
 
-/* === Rune === */
+/* === Rune Cards === */
 .card.rune {
   display: flex;
   flex-direction: column;
   height: 100%;
+  border: 1px solid #000;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
 }
-.card.rune .rune-body {
-  padding: 8px;
-  font-size: 8pt;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* Title at top */
+.card.rune .rune-title {
+  flex: 0 0 auto;
+  padding: 8px 6px;
   text-align: center;
-  overflow: auto;
+  font-size: 14pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
 }
+
+/* Centered symbol */
+.card.rune .rune-image {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.card.rune .rune-image img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
 
 /* Inline icons (shared) */
 .inline-icon {
