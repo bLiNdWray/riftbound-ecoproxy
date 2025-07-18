@@ -181,5 +181,19 @@ function loadState() {
       }
     });
   }
-
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. Load any saved cardCounts
+  loadState();
+  // 2. Re-render all saved cards
+  Object.keys(window.cardCounts).forEach(function(vn) {
+    for (var i = 0; i < window.cardCounts[vn]; i++) {
+      window.addCard(vn);
+    }
+  });
+  // 3. Update the top-bar total and badges
+  updateCount();
+  // 4. Anchor the search modal
+  var sm = document.getElementById('search-modal');
+  if (sm) sm.style.top = '50px';
+});
 })();
