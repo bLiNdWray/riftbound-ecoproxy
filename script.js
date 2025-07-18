@@ -12,7 +12,6 @@
 
   let allCards = [];
 
-  // JSONP helper
   function jsonpFetch(params, cb) {
     const cbName = 'jsonp_cb_' + Date.now();
     window[cbName] = data => {
@@ -28,7 +27,6 @@
     document.head.appendChild(script);
   }
 
-  // Toast
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
@@ -40,7 +38,6 @@
     }, 1500);
   }
 
-  // Format effects
   function formatDescription(txt = '', colorCode) {
     return txt
       .replace(/\[Tap\]/gi,   `<img src="images/Tap.png" class="icon" alt="Tap">`)
@@ -51,7 +48,7 @@
       .replace(/\n/g, '<br>');
   }
 
-  // 1) Load all cards
+  // Load all cards
   await new Promise(r => {
     jsonpFetch({ sheet: SHEET_NAME }, data => {
       allCards = Array.isArray(data) ? data : [];
@@ -59,16 +56,16 @@
     });
   });
 
-  // 2) Initial render
+  // Initial render
   const params = new URLSearchParams(location.search);
-  const initial = (params.get('id')||'')
-    .split(',').map(s=>s.trim()).filter(Boolean);
+  const initial = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
   if (initial.length) renderCards(initial, true);
 
-  // 3) Modal logic
+  // Modal logic
   openBtn.onclick  = () => {
     modal.classList.remove('hidden');
-    input.value = ''; results.innerHTML = '';
+    input.value = '';
+    results.innerHTML = '';
     input.focus();
   };
   closeBtn.onclick = () => modal.classList.add('hidden');
@@ -83,7 +80,6 @@
     matches.forEach(c => results.appendChild(buildCard(c)));
   };
 
-  // Render helpers
   function renderCards(vns, clear=false) {
     if (clear) container.innerHTML = '';
     vns.forEach(vn => {
@@ -100,7 +96,7 @@
     const code  = cols[0]||'';
     const desc  = formatDescription(c.description, code);
 
-    let html;
+    let html = '';
     switch ((c.type||'').toLowerCase()) {
       case 'unit':
         html = `
@@ -112,7 +108,7 @@
           <div class="bottom-bar">
             <span class="type-line">Unit • ${tags}</span>
             <span class="might">${c.might
-              ? `<img src="images/SwordIconRB.png" class="icon">${c.might}`
+              ? `<img src="images/SwordIconRB.png" class="icon" alt="Might">${c.might}`
               : ''}</span>
           </div>`;
         break;
