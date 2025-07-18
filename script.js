@@ -267,11 +267,10 @@ function makeRune(c) {
 function build(id, html) {
   // wrapper & data-variant attribute
 const wrapper = document.createElement('div');
-+  wrapper.className = 'card';
-+  wrapper.setAttribute('data-variant', id);
-+
-+  // inject your full template *inside* the wrapper
-+  wrapper.insertAdjacentHTML('beforeend', html);
+wrapper.className = 'card';
+wrapper.setAttribute('data-variant', id);
+// inject your full template *inside* the wrapper
+wrapper.insertAdjacentHTML('beforeend', html);
 
   // quantity badge
   const badge = document.createElement('span');
