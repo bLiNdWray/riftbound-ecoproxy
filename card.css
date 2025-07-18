@@ -134,39 +134,24 @@
   overflow: visible; /* keep this so side panels show*/
 }
 
-/* Side panels – fixed width and relative container */
+/* Side panels – fixed width, flex‐centered content */
 .card.battlefield .bf-col.side {
   flex: 0 0 20mm;
-  position: relative;
+  display: flex;
+  align-items: center;    /* vertical centering */
+  justify-content: center;/* horizontal centering */
+  padding: 4px;
   box-sizing: border-box;
 }
 
-/* LEFT panel: use the previous “right” style */
-.card.battlefield .bf-col.side.left .bf-text {
-  position: absolute;
-  bottom: 4px;               /* inset from bottom */
-  left: 0;
-  transform: rotate(90deg);
-  transform-origin: bottom left;
+/* Vertical text inside each panel */
+.card.battlefield .bf-col.side .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
   white-space: nowrap;
   font-size: 8pt;
+  text-align: center;
   color: #000;
-  margin: 0;
-  padding: 0;
-}
-
-/* RIGHT panel: use the previous “left” style */
-.card.battlefield .bf-col.side.right .bf-text {
-  position: absolute;
-  top: 4px;                  /* inset from top */
-  right: 0;
-  transform: rotate(-90deg);
-  transform-origin: top right;
-  white-space: nowrap;
-  font-size: 8pt;
-  color: #000;
-  margin: 0;
-  padding: 0;
 }
 
 /* Center panel – fill remaining space */
