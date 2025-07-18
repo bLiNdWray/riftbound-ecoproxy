@@ -1,105 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Riftbound Card Prototype</title>
-  <link rel="stylesheet" href="card.css">
+  <link rel="stylesheet" href="card.css" />
 </head>
 <body>
-  <!-- Alternate Unit Card -->
-  <div class="card unit-alt">
-    <div class="top-bar-alt">
-      <span class="cost-alt">
-        3 <img src="images/Order2.png" alt="Force 3" class="force-icon-alt">
-      </span>
-      <span class="might-alt">
-        <img src="images/SwordIconRB.png" alt="Might" class="might-icon-alt"> 5
-      </span>
-    </div>
-    <div class="name-alt">Lionheart Cavalry</div>
-    <div class="middle-alt">
-      <p>When Lionheart Cavalry enters the battlefield, it gains +1 {p} for each other Unit you control.</p>
-      <div class="color-indicator-alt">
-        <img src="images/Order.png" alt="Order" class="color-icon-alt">
-        <span class="color-text-alt">Order</span>
+  <!-- Card container -->
+  <div id="card-container">
+    <!-- Static examples -->
+    <div class="card unit">
+      <div class="top-bar">
+        <span class="name">Lionheart Cavalry</span>
+        <span class="cost">3</span>
+      </div>
+      <div class="middle">
+        <p>
+          When Lionheart Cavalry enters the battlefield, it gains +1
+          <img src="images/SwordIconRB.png" alt="Might" class="icon" />
+          for each other Unit you control.
+        </p>
+      </div>
+      <div class="bottom-bar">
+        <span class="type-line">Unit — Cavalry • Super</span>
+        <span class="might">
+          <img src="images/SwordIconRB.png" alt="Might" class="icon" />5
+        </span>
       </div>
     </div>
-    <div class="bottom-bar-alt">
-      <span class="type-line-alt">Unit — Cavalry • Super</span>
-    </div>
-  </div>
 
-  <!-- Alternate Spell Card -->
-  <div class="card spell-alt">
-    <div class="top-bar-alt">
-      <span class="cost-alt">
-        2 <img src="images/Body2.png" alt="Force 2" class="force-icon-alt">
-      </span>
-      <span class="might-alt">
-        <!-- Spells have no might -->
-      </span>
-    </div>
-    <div class="name-alt">Blazing Invocation</div>
-    <div class="middle-alt">
-      <p>Deal 3 damage to any target. If you control a Rune, draw a card.</p>
-      <div class="color-indicator-alt">
-        <img src="images/Body.png" alt="Body" class="color-icon-alt">
-        <span class="color-text-alt">Body</span>
+    <div class="card spell">
+      <div class="top-bar">
+        <span class="name">Blazing Invocation</span>
+        <span class="cost">2</span>
       </div>
-    </div>
-    <div class="bottom-bar-alt">
-      <span class="type-line-alt">Spell — Invocation</span>
-    </div>
-  </div>
-
-  <!-- Battlefield 3-Column Card -->
-  <div class="card battlefield">
-    <div class="bf-columns">
-      <div class="bf-col side left">
-        <div class="bf-text">
-          Units here have <strong>GANKING</strong>. (They can move from battlefield to battlefield.)
-        </div>
+      <div class="middle">
+        <p>
+          Deal 3 damage to any target. If you control a Rune,
+          draw a card.
+        </p>
       </div>
-      <div class="bf-col center">
-        <div class="bf-type-text">Battlefield</div>
-        <div class="bf-name">Windswept Hillock</div>
-      </div>
-      <div class="bf-col side right">
-        <div class="bf-text">
-          Units here have <strong>GANKING</strong>. (They can move from battlefield to battlefield.)
-        </div>
+      <div class="bottom-bar">
+        <span class="type-line">Spell — Invocation</span>
       </div>
     </div>
   </div>
 
-  <!-- Legend Card -->
-  <div class="card legend">
-    <div class="top-bar">
-      <div class="legend-colors">
-        <img src="images/Body.png"  alt="Body"  class="legend-color-icon">
-        <img src="images/Fury.png" alt="Fury" class="legend-color-icon">
-      </div>
-      <span class="legend-label">Legend</span>
-    </div>
-    <div class="middle legend-middle">
-      <div class="legend-tag">Volibear</div>
-      <div class="legend-name">Relentless Storm</div>
-    </div>
-    <div class="bottom-bar legend-bottom">
-      <p class="legend-ability">
-        When you play a Mighty unit, you may exhaust me to channel 1 rune exhausted. A unit is Mighty while it has 5+ S.
-      </p>
+  <!-- Placeholder for search UI -->
+  <button id="open-search">Add Cards</button>
+  <div id="search-modal" class="hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button id="close-search">✕</button>
+      <input
+        id="card-search-input"
+        type="text"
+        placeholder="Search by name or set…"
+        autocomplete="off"
+      />
+      <div id="search-results"></div>
     </div>
   </div>
 
-  <!-- Rune Card -->
-  <div class="card rune">
-    <div class="rune-top">
-      <span class="rune-name">Echoing Rune</span>
-    </div>
-    <div class="rune-middle">
-      <img src="images/Rune.png" alt="Rune" class="rune-icon">
-    </div>
-  </div>
+  <script src="script.js"></script>
 </body>
 </html>
