@@ -22,14 +22,14 @@
 
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // 1) Ensure cardCounts exists
+  // ensure state
   window.cardCounts = window.cardCounts || {};
 
-  // 2) Remove any existing import modal
+  // remove old modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // 3) Build overlay + modal HTML
+  // build overlay + modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -50,46 +50,68 @@ btnImport.addEventListener('click', function(){
         <button id="import-ok"     class="topbar-btn">Import</button>
       </div>
     </div>`;
-
-  // 4) Append to DOM
   document.body.appendChild(overlay);
 
-  // 5) Grab references
+  // grab UI elements
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
+  document.getElementById('close-import').onclick = closeModal;
+  document.getElementById('import-cancel').onclick = closeModal;
 
-  // 6) Prefill with current variants (no quantities)
-  var tokens = Object.keys(window.cardCounts || {});
-  area.value = tokens.join(' ');
+  // prefill with variants only
+  area.value = Object.keys(window.cardCounts || {}).join(' ');
 
-  // 7) Wire up Cancel/Close
-  function close() { overlay.remove(); }
-  document.getElementById('close-import').onclick = close;
-  document.getElementById('import-cancel').onclick = close;
+  // helper to close
+  function closeModal() { overlay.remove(); }
 
-  // 8) Wire up Import
+  // long-duration toast
+  function longNotify(msg) {
+    var n = document.createElement('div');
+    n.className = 'toast-notice';
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(function(){ n.classList.add('visible'); }, 10);
+    setTimeout(function(){ n.classList.remove('visible'); }, 4000);
+    setTimeout(function(){ n.remove(); }, 4500);
+  }
+
+  // IMPORT click
   document.getElementById('import-ok').onclick = function(){
-    var input = area.value.trim().split(/\s+/);
+    var tokens = (area.value||'').trim().split(/\s+/);
+    // optional clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
-      updateCount();
-      saveState();
+      updateCount(); saveState();
     }
-    input.forEach(function(tok){
-      // parse XXX-XXX-YY but ignore YY
+    // process tokens
+    var added = 0, errors = [];
+    tokens.forEach(function(tok){
       var parts = tok.split('-');
-      if (parts.length < 2) return;
+      if (parts.length < 2) {
+        errors.push(tok);
+        return;
+      }
       var vn = parts[0] + '-' + parts[1];
+      var pre = window.cardCounts[vn]||0;
       window.addCard(vn);
+      var post = window.cardCounts[vn]||0;
+      if (post > pre) added++;
+      else errors.push(vn);
     });
+
+    // close modal first
+    closeModal();
     saveState();
-    close();
-    notify('Deck imported');
+
+    // show results
+    if (added)
+      longNotify(added + ' card' + (added>1?'s':'') + ' added');
+    errors.forEach(function(vn){
+      notify(vn + \" can't be found\");
+    });
   };
 });
-
-
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
