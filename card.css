@@ -129,51 +129,33 @@
   white-space: nowrap;
 }
 
-/* === Battlefield Cards === */
+/* === Battlefield Cards – Improved Side Text Positioning === */
 .card.battlefield {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border: 1px solid #000;
-  background: #fff;
-  box-sizing: border-box;
-  overflow: visible;   /* allow rotated text to show */
+  overflow: visible; /* keep this so side panels show*/
 }
 
-/* Three‐column container */
-.card.battlefield .bf-columns {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
-
-/* Side panels – fixed width, centered content */
+/* Side panels – fixed width */
 .card.battlefield .bf-col.side {
-  flex: 0 0 20mm;      /* exactly 20 mm wide */
+  flex: 0 0 20mm;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2px;
   box-sizing: border-box;
-  padding: 4px;
 }
 
-/* Left panel text: rotate so bottom of text faces outside edge */
-.card.battlefield .bf-col.side.left .bf-text {
-  transform: rotate(-90deg);
-  transform-origin: bottom left;
+/* Use vertical writing mode for side text */
+.card.battlefield .bf-col.side .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
   white-space: nowrap;
   font-size: 8pt;
+  text-align: center;
   color: #000;
+  margin: 0;  /* remove any default margins that might push it away */
 }
 
-/* Right panel text: rotate opposite direction */
-.card.battlefield .bf-col.side.right .bf-text {
-  transform: rotate(90deg);
-  transform-origin: top left;
-  white-space: nowrap;
-  font-size: 8pt;
-  color: #000;
-}
+/* Center panel unchanged */
 
 /* Center panel – fill remaining space */
 .card.battlefield .bf-col.center {
