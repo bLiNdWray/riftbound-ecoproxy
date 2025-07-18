@@ -252,7 +252,7 @@
   overflow: hidden;
 }
 
-/* Title at top */
+/* Title at top (no bottom border) */
 .card.rune .rune-title {
   flex: 0 0 auto;
   padding: 8px 6px;
@@ -260,7 +260,7 @@
   font-size: 14pt;
   font-weight: bold;
   text-transform: uppercase;
-  border-bottom: 1px solid #000;
+  /* border-bottom: 1px solid #000;  <-- removed */
   box-sizing: border-box;
 }
 
@@ -278,7 +278,6 @@
   max-height: 80%;
   object-fit: contain;
 }
-
 
 /* Inline icons (shared) */
 .inline-icon {
