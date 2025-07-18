@@ -198,15 +198,12 @@ function makeSpell(c) {
   `);
 }
 function makeRune(c) {
-  // Name
   const title = c.name || '';
-
-  // Rune symbol image URL
-  // Assuming your sheet has an 'imageUrl' field for the rune art
-  // Otherwise build path from variantNumber or color
-  const imgSrc = c.imageUrl 
-    || `images/${c.variantNumber}.png`
-    || '';
+  // Pull the first color (e.g. “Fury”, “Body”, etc.)
+  const cols   = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const color  = cols[0] || 'Body';  
+  // Use the color name to choose the image file
+  const imgSrc = `images/${color}.png`;
 
   return build(c.variantNumber, `
     <div class="rune-title">${title}</div>
@@ -215,8 +212,6 @@ function makeRune(c) {
     </div>
   `);
 }
-
-
   // Generic build
   function build(id, html) {
     const wrapper = document.createElement('div'); wrapper.className='card'; wrapper.setAttribute('data-variant',id); wrapper.innerHTML=html;
