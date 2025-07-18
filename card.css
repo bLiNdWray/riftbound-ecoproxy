@@ -167,52 +167,65 @@
   text-align: center;
 }
 
-/* === Legend === */
+/* === Legend Cards === */
 .card.legend {
   display: flex;
   flex-direction: column;
   height: 100%;
+  border: 1px solid #000;
+  background: #fff;
 }
+
+/* Header with color icons on left, “LEGEND” on right */
 .card.legend .legend-header {
   display: flex;
   align-items: center;
-  padding: 6px;
-  background: #000;
-  color: #fff;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
-.card.legend .legend-header img {
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
+.card.legend .legend-header .legend-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.card.legend .legend-header .legend-icons img {
+  width: 18px;
+  height: 18px;
 }
 .card.legend .legend-header .legend-title {
-  font-size: 12pt;
+  font-size: 10pt;
   font-weight: bold;
-  margin-left: auto;
+  text-transform: uppercase;
 }
+
+/* Name area: moniker (subtitle) above card name */
 .card.legend .legend-name {
-  padding: 8px;
+  padding: 8px 6px;
   text-align: center;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 .card.legend .legend-name .subtitle {
   font-size: 9pt;
   font-style: italic;
   margin-bottom: 4px;
+  color: #333;
 }
 .card.legend .legend-name .main-title {
   font-size: 14pt;
   font-weight: bold;
+  margin: 0;
 }
-.card.legend .legend-divider {
-  border-top: 1px solid #000;
-  margin: 0 8px;
-  flex-shrink: 0;
-}
+
+/* Body text area */
 .card.legend .legend-body {
-  padding: 8px;
+  padding: 6px;
   font-size: 8pt;
+  line-height: 1.3;
   overflow-y: auto;
   flex: 1;
 }
