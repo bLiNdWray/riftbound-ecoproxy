@@ -211,15 +211,21 @@
   padding: 0 8px;
   box-sizing: border-box;
   text-align: center;
-  /* border-bottom removed */
+  /* no border */
 }
 .card.legend .legend-name .main-title {
-  font-size: 14pt;      /* down from 16pt */
-  font-weight: normal;  /* remove bold */
+  font-size: 18pt;      /* a bit larger for the character name */
+  font-weight: bold;
   line-height: 1.2;
   margin: 0;
 }
-
+.card.legend .legend-name .subtitle {
+  font-size: 12pt;      /* slightly smaller moniker */
+  font-weight: normal;  /* remove bold */
+  font-style: italic;
+  margin: 4px 0 0 0;
+  color: #333;
+}
 /* 3) Bottom third: legend-body */
 .card.legend .legend-body {
   flex: 1 1 33.33%;
