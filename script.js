@@ -1,5 +1,5 @@
 (async () => {
-  const API_BASE   = 'https://script.google.com/macros/s/…/exec';
+  const API_BASE   = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME = 'Riftbound Cards';
 
   const container = document.getElementById('card-container');
