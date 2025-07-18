@@ -124,7 +124,7 @@ function formatDescription(txt = '', color) {
   }
 
   // Do all your replacements
-  replaceCode('[Tap]:',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+  replaceCode('[Tap]',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
   replaceCode('[Might]', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
   replaceCode('[Power]',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
 
