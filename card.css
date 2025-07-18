@@ -137,34 +137,46 @@
   border: 1px solid #000;
   background: #fff;
   box-sizing: border-box;
-  overflow: hidden;  /* side text now flex-centered, so no need for visible overflow */
+  overflow: hidden;
 }
 
-/* Three-column layout */
+/* Three-column container */
 .card.battlefield .bf-columns {
   display: flex;
   width: 100%;
   height: 100%;
 }
 
-/* Side panels – fixed 20 mm width, flex-centered content */
+/* Side panels – fixed 20 mm width */
 .card.battlefield .bf-col.side {
   flex: 0 0 20mm;
   display: flex;
-  align-items: center;     /* vertical centering */
-  justify-content: center; /* horizontal centering */
+  align-items: center;
+  justify-content: center;
   padding: 4px;
   box-sizing: border-box;
 }
 
-/* Vertical text in side panels */
-.card.battlefield .bf-col.side .bf-text {
+/* Left panel: top-to-bottom */
+.card.battlefield .bf-col.side.left .bf-text {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  white-space: nowrap;
+  font-size: 8pt;
+  text-align: center;
+  color: #000;
+  margin: 0;
+}
+
+/* Right panel: bottom-to-top */
+.card.battlefield .bf-col.side.right .bf-text {
   writing-mode: vertical-rl;
   text-orientation: upright;
   white-space: nowrap;
   font-size: 8pt;
   text-align: center;
   color: #000;
+  margin: 0;
 }
 
 /* Center panel – fills remaining space */
@@ -194,7 +206,6 @@
   text-align: center;
   color: #000;
 }
-
 
 /* === Legend Cards === */
 .card.legend {
