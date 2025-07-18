@@ -147,59 +147,49 @@
 
   // Card builders
   function makeUnit(c) {
-    const cols    = (c.colors||'').split(/[;]\s*/).filter(Boolean);
-    const force   = cols.map(col => `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join(' ');
-    const might   = c.might ? `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might"> ${c.might}` : '';
-    const desc    = formatDescription(c.description, cols[0]||'');
-    const tags    = c.tags ? ` • ${c.tags}` : '';
-    const colorIcons = cols.map(col => `<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join(' ');
-    const colorText  = cols.join(', ');
-    return build(c.variantNumber, `
-      <div class="top-bar">
-        <span class="cost">${c.energy} ${force}</span>
-        <span class="might">${might}</span>
-      </div>
-      <div class="name">${c.name}</div>
-      <div class="middle">${desc}
-        <div class="color-indicator">${colorIcons}<span class="color-text">${colorText}</span></div>
+  const cols    = (c.colors||'').split(/[;]\s*/).filter(Boolean);
+  const force   = cols.map(col => `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
+  const might   = c.might ? `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might"> ${c.might}` : '';
+  const desc    = formatDescription(c.description, cols[0]||'');
+  const tags    = (c.tags||'').replace(/:/g,' ');
+  return build(c.variantNumber, `
+    <div class="top-bar">
+      <span class="cost">${c.energy}${force}</span>
+      <span class="might">${might}</span>
+    </div>
+    <div class="name">${c.name}</div>
+    <div class="middle">${desc}
+      <div class="color-indicator">${cols.map(col => `<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}
+      <span class="color-text">${cols.join(', ')}</span></div>
+    </div>
+    <div class="bottom-bar">
+      <span class="type-line">
+        ${c.type}${tags ? ' · ' + tags : ''}
+      </span>
+    </div>`);
+}
 
-      </div>
-      <div class="bottom-bar"><span class="type-line">${c.type} — ${c.variantType}${tags}</span></div>`);
-  }
+function makeSpell(c) {
+  const cols  = (c.colors||'').split(/[;]\s*/).filter(Boolean);
+  const force = cols.map(col => `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
+  const desc  = formatDescription(c.description, cols[0]||'');
+  const tags  = (c.tags||'').replace(/:/g,' ');
+  return build(c.variantNumber, `
+    <div class="top-bar">
+      <span class="cost">${c.energy}${force}</span>
+    </div>
+    <div class="name">${c.name}</div>
+    <div class="middle">${desc}
+      <div class="color-indicator">${cols.map(col => `<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}
+      <span class="color-text">${cols.join(', ')}</span></div>
+    </div>
+    <div class="bottom-bar">
+      <span class="type-line">
+        ${c.type}${tags ? ' · ' + tags : ''}
+      </span>
+    </div>`);
+}
 
-function makeUnit(c) {
-    const cols    = (c.colors||'').split(/[;]\s*/).filter(Boolean);
-    const force   = cols.map(col => `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
-    const might   = c.might ? `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might"> ${c.might}` : '';
-    const desc    = formatDescription(c.description, cols[0]||'');
-    return build(c.variantNumber, `
-      <div class="top-bar">
-        <span class="cost">${c.energy}${force}</span>
-        <span class="might">${might}</span>
-      </div>
-      <div class="name">${c.name}</div>
-      <div class="middle">${desc}
-        <div class="color-indicator">${cols.map(col => `<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}
-        <span class="color-text">${cols.join(', ')}</span></div>
-      </div>
-      <div class="bottom-bar"><span class="type-line">${c.type}</span></div>`);
-  }
-
-  function makeSpell(c) {
-    const cols  = (c.colors||'').split(/[;]\s*/).filter(Boolean);
-    const force = cols.map(col => `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
-    const desc  = formatDescription(c.description, cols[0]||'');
-    return build(c.variantNumber, `
-      <div class="top-bar">
-        <span class="cost">${c.energy}${force}</span>
-      </div>
-      <div class="name">${c.name}</div>
-      <div class="middle">${desc}
-        <div class="color-indicator">${cols.map(col => `<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}
-        <span class="color-text">${cols.join(', ')}</span></div>
-      </div>
-      <div class="bottom-bar"><span class="type-line">${c.type}</span></div>`);
-  }
 
   function makeBattlefield(c) {
     const desc = formatDescription(c.description, '');
