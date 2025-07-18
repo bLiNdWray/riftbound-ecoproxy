@@ -14,7 +14,8 @@
   <!-- Fixed Top Bar -->
   <nav id="top-bar">
     <div class="topbar-left">
-      <button id="btn-add" class="topbar-btn">Add Cards</button>
+      <!-- restore the original hook for script.js (openBtn) -->
+      <button id="open-search" class="topbar-btn">Add Cards</button>
       <button id="btn-import" class="topbar-btn">Import List</button>
       <button id="btn-print" class="topbar-btn">Print</button>
       <button id="btn-overview" class="topbar-btn">Overview</button>
@@ -37,7 +38,7 @@
   <!-- Main card container -->
   <main id="card-container" class="layout-horizontal"></main>
 
-  <!-- Full-screen Search Modal (anchored under top bar) -->
+  <!-- Full-screen Search Modal -->
   <div id="search-modal" class="search-modal hidden">
     <div class="modal-content">
       <button id="close-search" class="modal-close">×</button>
