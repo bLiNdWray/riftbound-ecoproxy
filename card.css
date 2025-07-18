@@ -129,7 +129,7 @@
   white-space: nowrap;
 }
 
-/* === Battlefield Cards (auto-sizing side panels + wrap) === */
+/* === Battlefield Cards === */
 .card.battlefield {
   display: flex;
   flex-direction: column;
@@ -137,53 +137,52 @@
   border: 1px solid #000;
   background: #fff;
   box-sizing: border-box;
-  overflow: visible; /* allow side text to show */
+  overflow: visible;
 }
 
-/* Three-column layout */
 .card.battlefield .bf-columns {
   display: flex;
   width: 100%;
   height: 100%;
 }
 
-/* Side panels – auto width, center content */
+/* Side panels – auto width, centered content */
 .card.battlefield .bf-col.side {
-  flex: 0 0 auto;         /* size to content */
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
   box-sizing: border-box;
-  overflow-wrap: break-word;  /* allow wrapping */
+  overflow-wrap: break-word;
 }
 
-/* Left panel: text flows top→bottom, wraps */
+/* LEFT panel: vertical-rl, no extra rotation/orientation property */
 .card.battlefield .bf-col.side.left .bf-text {
-  writing-mode: vertical-lr;
-  text-orientation: upright;
-  white-space: normal;   /* allow wrapping */
-  font-size: 8pt;
-  line-height: 1.2;
-  max-height: 100%;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  word-break: break-word;
-}
-
-/* Right panel: text flows bottom→top, wraps */
-.card.battlefield .bf-col.side.right .bf-text {
   writing-mode: vertical-rl;
-  text-orientation: upright;
+  /* remove text-orientation entirely so browser default applies */
   white-space: normal;
   font-size: 8pt;
   line-height: 1.2;
-  max-height: 100%;
   text-align: center;
   margin: 0;
   padding: 0;
   word-break: break-word;
+}
+
+/* RIGHT panel: vertical-rl + 180° rotation */
+.card.battlefield .bf-col.side.right .bf-text {
+  writing-mode: vertical-rl;
+  white-space: normal;
+  font-size: 8pt;
+  line-height: 1.2;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  word-break: break-word;
+  /* flip end-to-end */
+  transform: rotate(180deg);
+  transform-origin: center;
 }
 
 /* Center panel – fill remaining space */
@@ -213,6 +212,7 @@
   text-align: center;
   color: #000;
 }
+
 /* === Legend Cards === */
 .card.legend {
   display: flex;
