@@ -9,246 +9,199 @@
   const input      = document.getElementById('card-search-input');
   const results    = document.getElementById('search-results');
 
-  const addedCounts = {};
   let allCards = [];
 
-  /** JSONP helper */
+  /**
+   * JSONP fetch helper.
+   */
   function jsonpFetch(params, cb) {
-    const callbackName = 'jsonp_cb_' + Date.now();
-    window[callbackName] = data => {
-      delete window[callbackName];
+    const cbName = 'jsonp_cb_' + Date.now();
+    window[cbName] = data => {
+      delete window[cbName];
       document.head.removeChild(script);
       cb(data);
     };
     const qs = Object.entries(params)
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
     const script = document.createElement('script');
-    script.src = `${API_BASE}?${qs}&callback=${callbackName}`;
+    script.src = `${API_BASE}?${qs}&callback=${cbName}`;
     document.head.appendChild(script);
   }
 
-  /** Toast notification */
+  /**
+   * Tiny toast notification
+   */
   function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
     setTimeout(() => {
-      toast.classList.add('hide');
-      toast.addEventListener('transitionend', () => toast.remove());
-    }, 2000);
+      t.classList.add('hide');
+      t.addEventListener('transitionend', () => t.remove());
+    }, 1500);
   }
 
-  /** Replace bracketed tokens */
-  function formatDescription(text = '', colorCode) {
-    let out = text
-      .replace(/\[Tap\]/gi,   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\[Might\]/gi, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[power\]/gi, `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`)
-      .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
-    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-      out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
-        `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
-    });
-    return out;
+  /**
+   * Replace tokens in effect text.
+   */
+  function formatDescription(txt = '', colorCode) {
+    return txt
+      .replace(/\[Tap\]/gi,   `<img src="images/Tap.png" class="icon" alt="Tap">`)
+      .replace(/\[Might\]/gi, `<img src="images/SwordIconRB.png" class="icon" alt="Might">`)
+      .replace(/\[power\]/gi, `<img src="images/RainbowRune.png" class="icon" alt="Rune">`)
+      .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="icon" alt="S">`)
+      .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="icon" alt="C">`)
+      .replace(/\n/g, '<br>');
   }
 
-  // 1) Load all cards
-  await new Promise(resolve => {
+  // 1) Load full sheet for search
+  await new Promise(r => {
     jsonpFetch({ sheet: SHEET_NAME }, data => {
       allCards = Array.isArray(data) ? data : [];
-      resolve();
+      r();
     });
   });
 
-  // 2) Initial render from URL
-  const params     = new URLSearchParams(window.location.search);
-  const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
-  if (initialIds.length) {
-    renderCards(initialIds, true);
-    initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
+  // 2) Initial render from ?id=
+  const params = new URLSearchParams(location.search);
+  const initial = (params.get('id')||'')
+    .split(',').map(s=>s.trim()).filter(Boolean);
+  if (initial.length) {
+    renderCards(initial, true);
   }
 
-  /** Fetch & render */
-  function renderCards(ids, clear = true) {
-    if (clear) container.innerHTML = '';
-    ids.forEach(vn => {
-      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
-        if (!Array.isArray(data) || !data.length) return;
-        const c = data[0];
-        let el;
-        switch ((c.type||'').toLowerCase()) {
-          case 'unit':        el = makeUnit(c);        break;
-          case 'spell':
-          case 'gear':        el = makeSpell(c);       break;
-          case 'battlefield': el = makeBattlefield(c); break;
-          case 'legend':      el = makeLegend(c);      break;
-          case 'rune':        el = makeRune(c);        break;
-          default: return;
-        }
-        container.appendChild(el);
-      });
-    });
-  }
-
-  function addCard(vn) {
-    renderCards([vn], false);
-    addedCounts[vn] = (addedCounts[vn]||0) + 1;
-    showToast('Card added!');
-  }
-
-  function removeCard(vn, el) {
-    if ((addedCounts[vn]||0) > 0) {
-      addedCounts[vn]--;
-      el.remove();
-    }
-  }
-
-  /** Builders */
-
-  function makeUnit(c) {
-    const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const forceHTML = c.power
-      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
-      : '';
-    const mightHTML = c.might
-      ? `<img src="images/SwordIconRB.png" class="might-icon-alt" alt="Might"> ${c.might}`
-      : '';
-    const descHTML  = formatDescription(c.description, colors[0]||'');
-    const tagsClean = (c.tags||'').replace(/;/g,' ');
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join(' ');
-    const colorText = colors.join(', ');
-
-    return build('unit-alt', c.variantNumber, `
-      <div class="top-bar-alt">
-        <span class="cost-alt">${c.energy} ${forceHTML}</span>
-        <span class="might-alt">${mightHTML}</span>
-      </div>
-      <div class="name-alt">${c.name}</div>
-      <div class="middle-alt">
-        <p>${descHTML}</p>
-        <div class="color-indicator-alt">
-          ${colorIcons}<span class="color-text-alt">${colorText}</span>
-        </div>
-      </div>
-      <div class="bottom-bar-alt">
-        <span class="type-line-alt">${c.type}${tagsClean ? ` • ${tagsClean}` : ''}</span>
-      </div>`);
-  }
-
-  function makeSpell(c) {
-    const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const forceHTML = c.power
-      ? colors.map(col => `<img src="images/${col}2.png" class="force-icon-alt" alt="${col}">`).join(' ')
-      : '';
-    const descHTML  = formatDescription(c.description, colors[0]||'');
-    const tagsClean = (c.tags||'').replace(/;/g,' ');
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="color-icon-alt" alt="${col}">`).join(' ');
-    const colorText = colors.join(', ');
-
-    return build('spell-alt', c.variantNumber, `
-      <div class="top-bar-alt">
-        <span class="cost-alt">${c.energy} ${forceHTML}</span>
-      </div>
-      <div class="name-alt">${c.name}</div>
-      <div class="middle-alt">
-        <p>${descHTML}</p>
-        <div class="color-indicator-alt">
-          ${colorIcons}<span class="color-text-alt">${colorText}</span>
-        </div>
-      </div>
-      <div class="bottom-bar-alt">
-        <span class="type-line-alt">${c.type}${tagsClean ? ` • ${tagsClean}` : ''}</span>
-      </div>`);
-  }
-
-  function makeBattlefield(c) {
-    const descHTML = formatDescription(c.description, '');
-    return build('battlefield', c.variantNumber, `
-      <div class="bf-columns">
-        <div class="bf-col side left"><div class="bf-text">${descHTML}</div></div>
-        <div class="bf-col center">
-          <div class="bf-type-text">${c.type}</div>
-          <div class="bf-name">${c.name}</div>
-        </div>
-        <div class="bf-col side right"><div class="bf-text">${descHTML}</div></div>
-      </div>`);
-  }
-
-  function makeLegend(c) {
-    const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const colorIcons= colors.map(col => `<img src="images/${col}.png" class="legend-color-icon" alt="${col}">`).join(' ');
-    const tagsClean = (c.tags||'').replace(/;/g,' ');
-    const descHTML  = formatDescription(c.description, '');
-
-    return build('legend-alt', c.variantNumber, `
-      <div class="legend-top">
-        <div class="legend-colors">${colorIcons}</div>
-        <div class="legend-label">Legend</div>
-      </div>
-      <div class="legend-center">
-        <div class="legend-tags">${tagsClean}</div>
-        <div class="legend-name">${c.name}</div>
-      </div>
-      <div class="legend-bottom"><p>${descHTML}</p></div>`);
-  }
-
-  function makeRune(c) {
-    const col = (c.colors||'').split(/[;,]\s*/)[0]||'';
-    return build('rune', c.variantNumber, `
-      <div class="rune-top"><span class="rune-name">${c.name}</span></div>
-      <div class="rune-middle"><img src="images/${col}.png" class="rune-icon" alt="${col}"></div>`);
-  }
-
-  /** Generic builder */
-  function build(cssClass, variantNumber, innerHTML) {
-    const el = document.createElement('div');
-    el.className = `card ${cssClass}`;
-    el.innerHTML = innerHTML + `
-      <div class="hover-controls">
-        <button class="add-btn">+</button>
-        <button class="remove-btn">–</button>
-      </div>`;
-
-    // Attach handlers
-    el.querySelector('.add-btn').onclick = () => addCard(variantNumber);
-    el.querySelector('.remove-btn').onclick = () => removeCard(variantNumber, el);
-
-    return el;
-  }
-
-  /** Search modal */
+  // 3) Search modal wiring
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
     results.innerHTML = '';
     input.focus();
   });
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (!q) return results.innerHTML = '';
-    const filtered = allCards.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.variantNumber.toLowerCase().includes(q)
+    const matches = allCards.filter(c =>
+      (c.name||'').toLowerCase().includes(q) ||
+      (c.variantNumber||'').toLowerCase().includes(q)
     );
-    results.innerHTML = '';
-    filtered.forEach(c => {
-      let el;
-      switch ((c.type||'').toLowerCase()) {
-        case 'unit':        el = makeUnit(c);        break;
-        case 'spell':
-        case 'gear':        el = makeSpell(c);       break;
-        case 'battlefield': el = makeBattlefield(c); break;
-        case 'legend':      el = makeLegend(c);      break;
-        case 'rune':        el = makeRune(c);        break;
-        default: return;
-      }
-      results.appendChild(el);
-    });
+    renderSearchResults(matches);
   });
 
+  /**
+   * Render an array of variantNumbers
+   */
+  function renderCards(vns, clear = false) {
+    if (clear) container.innerHTML = '';
+    vns.forEach(vn => {
+      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
+        if (!Array.isArray(data) || !data[0]) return;
+        container.appendChild(buildCard(data[0]));
+      });
+    });
+  }
+
+  /**
+   * Render a list of card objects into the search-results
+   */
+  function renderSearchResults(list) {
+    results.innerHTML = '';
+    list.forEach(c => results.appendChild(buildCard(c)));
+  }
+
+  /**
+   * Build one .card DOM node from a record c
+   */
+  function buildCard(c) {
+    const tagsClean  = (c.tags || '').replace(/;/g,' ');
+    const colors     = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const colorCode  = colors[0] || '';
+    const descHTML   = formatDescription(c.description, colorCode);
+
+    let html = '';
+    switch ((c.type||'').toLowerCase()) {
+      case 'unit':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+            <span class="cost">${c.energy}</span>
+          </div>
+          <div class="middle"><p>${descHTML}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Unit • ${tagsClean}</span>
+            <span class="might">${c.might
+              ? `<img src="images/SwordIconRB.png" class="icon" alt="Might">${c.might}`
+              : ''}</span>
+          </div>`;
+        break;
+
+      case 'spell':
+      case 'gear':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+            <span class="cost">${c.energy}</span>
+          </div>
+          <div class="middle"><p>${descHTML}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Spell • ${tagsClean}</span>
+          </div>`;
+        break;
+
+      case 'battlefield':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+          </div>
+          <div class="middle"><p>${descHTML}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Battlefield</span>
+          </div>`;
+        break;
+
+      case 'legend':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+          </div>
+          <div class="middle"><p>${descHTML}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Legend • ${tagsClean}</span>
+          </div>`;
+        break;
+
+      case 'rune':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+          </div>
+          <div class="middle">
+            <img src="images/${colorCode}.png" alt="${colorCode}" class="icon" />
+          </div>`;
+        break;
+
+      default:
+        html = `<div class="middle"><p>Unknown card type.</p></div>`;
+    }
+
+    const el = document.createElement('div');
+    el.className = `card ${c.type.toLowerCase()}`;
+    el.innerHTML = html + `
+      <div class="hover-controls">
+        <button class="add-btn">+</button>
+        <button class="remove-btn">–</button>
+      </div>`;
+
+    el.querySelector('.add-btn').onclick = () => {
+      renderCards([c.variantNumber], false);
+      showToast('Card added!');
+    };
+    el.querySelector('.remove-btn').onclick = () => el.remove();
+
+    return el;
+  }
 })();
