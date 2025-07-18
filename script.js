@@ -108,37 +108,32 @@ function formatDescription(text = '', colorCode) {
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
 function makeUnit(c) {
-  const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-  const costN     = Number(c.energy) || 0;
-  const powN      = Number(c.power)  || 0;
-  const costIcons = Array(powN).fill().map(_=>
-    `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
+  const colors    = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const forceHTML = colors.map(col =>
+    `<img src="images/${col}2.png" class="inline-icon" alt="${col}">`
   ).join('');
   const mightHTML = c.might
-    ? `<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`
+    ? `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might"> ${c.might}`
     : '';
-  const descHTML  = formatDescription(c.description, cols[0]||'');
+  const descHTML  = formatDescription(c.description, colors[0]||'');
   const tags      = (c.tags||'').split(/;\s*/).join(' ');
-  const colorText = cols.join(' ');
-  const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
-
+  const tagText   = tags ? ` - ${tags}` : '';
   return build(c.variantNumber, `
     <div class="top-bar">
-      <span class="cost">${costN}${costIcons}</span>
+      <span class="cost">${c.energy}${forceHTML}</span>
       <span class="might">${mightHTML}</span>
     </div>
     <div class="name">${c.name}</div>
-    <div class="middle">
-      ${descHTML}
+    <div class="middle">${descHTML}
       <div class="color-indicator">
-        ${colorIcon}<span class="color-text">${colorText}</span>
+        <img src="images/${colors[0]||'Body'}.png" class="inline-icon" alt="">
+        <span class="color-text">${colors.join(', ')}</span>
       </div>
     </div>
     <div class="bottom-bar">
-      <span class="type-line">${c.type}${ tags ? ' - '+tags : '' }</span>
+      <span class="type-line">${c.type}${tagText}</span>
     </div>`);
 }
-
 function makeSpell(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
   const costN     = Number(c.energy) || 0;
