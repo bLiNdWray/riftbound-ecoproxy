@@ -40,18 +40,18 @@
     }, 1500);
   }
 
-  // Format tokens (Tap, Might, power, etc.)
-  function formatDescription(txt = '', colorCode) {
+  // Format effect text tokens
+  function formatDescription(txt = '', color) {
     return txt
       .replace(/\[Tap\]/gi,   `<img src="images/Tap.png" class="icon" alt="Tap">`)
       .replace(/\[Might\]/gi, `<img src="images/SwordIconRB.png" class="icon" alt="Might">`)
       .replace(/\[power\]/gi, `<img src="images/RainbowRune.png" class="icon" alt="Power">`)
       .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="icon" alt="S">`)
-      .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="icon" alt="C">`)
+      .replace(/\[C\]/g,      `<img src="images/${color}2.png" class="icon" alt="C">`)
       .replace(/\n/g, '<br>');
   }
 
-  // 1) Load all cards
+  // 1) Load sheet
   await new Promise(res =>
     jsonpFetch({ sheet: SHEET_NAME }, data => {
       allCards = Array.isArray(data) ? data : [];
@@ -88,7 +88,7 @@
       row.className = 'search-row';
       row.textContent = `${c.name} (${c.variantNumber})`;
       row.onclick = () => {
-        container.appendChild(buildCard(c));
+        container.appendChild(renderCard(c));
         showToast('Card added!');
         modal.classList.add('hidden');
       };
@@ -96,26 +96,86 @@
     });
   };
 
-  // Build a card with hover‐controls
-  function buildCard(c) {
-    const name  = c.name;
-    const cost  = c.energy;
-    const desc  = formatDescription(c.description, (c.colors||'').split(/[;,]\s*/)[0]||'');
-    const type  = c.type;
-    const might = c.might || '';
+  // Renders full card based on type
+  function renderCard(c) {
+    const colors = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const mainColor = colors[0] || '';
+    const desc = formatDescription(c.description, mainColor);
+
+    let html = '';
+    switch ((c.type||'').toLowerCase()) {
+      case 'unit':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+            <span class="cost">${c.energy}</span>
+          </div>
+          <div class="middle"><p>${desc}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Unit • ${c.tags.replace(/;/g,' ') || ''}</span>
+            <span class="might">
+              <img src="images/SwordIconRB.png" class="icon" alt="Might">${c.might}
+            </span>
+          </div>`;
+        break;
+
+      case 'spell':
+      case 'gear':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+            <span class="cost">${c.energy}</span>
+          </div>
+          <div class="middle"><p>${desc}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">${c.type} • ${c.tags.replace(/;/g,' ')}</span>
+          </div>`;
+        break;
+
+      case 'battlefield':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+          </div>
+          <div class="middle"><p>${desc}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Battlefield</span>
+          </div>`;
+        break;
+
+      case 'legend':
+        // two-color icons
+        const colorIcons = colors.map(col =>
+          `<img src="images/${col}.png" class="icon" alt="${col}">`
+        ).join('');
+        html = `
+          <div class="top-bar">
+            <div class="legend-colors">${colorIcons}</div>
+            <span class="legend-label">Legend</span>
+          </div>
+          <div class="middle"><p>${desc}</p></div>
+          <div class="bottom-bar">
+            <span class="type-line">Legend • ${c.tags.replace(/;/g,' ')}</span>
+          </div>`;
+        break;
+
+      case 'rune':
+        html = `
+          <div class="top-bar">
+            <span class="name">${c.name}</span>
+          </div>
+          <div class="middle rune-middle">
+            <img src="images/${mainColor}.png" class="rune-icon" alt="${mainColor}">
+          </div>`;
+        break;
+
+      default:
+        html = `<div class="middle"><p>Unknown type</p></div>`;
+    }
 
     const el = document.createElement('div');
-    el.className = `card ${type.toLowerCase()}`;
-    el.innerHTML = `
-      <div class="top-bar">
-        <span class="name">${name}</span>
-        <span class="cost">${cost}</span>
-      </div>
-      <div class="middle"><p>${desc}</p></div>
-      <div class="bottom-bar">
-        <span class="type-line">${type}</span>
-        <span class="might">${might}</span>
-      </div>
+    el.className = `card ${c.type.toLowerCase()}`;
+    el.innerHTML = html + `
       <div class="hover-controls">
         <button class="remove-btn">Remove</button>
       </div>`;
