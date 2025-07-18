@@ -22,14 +22,11 @@
 
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // ensure state
   window.cardCounts = window.cardCounts || {};
 
-  // remove old modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // build overlay + modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -52,19 +49,15 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
-  // grab UI elements
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
   document.getElementById('close-import').onclick = closeModal;
   document.getElementById('import-cancel').onclick = closeModal;
 
-  // prefill with variants only
-  area.value = Object.keys(window.cardCounts || {}).join(' ');
+  area.value = Object.keys(window.cardCounts).join(' ');
 
-  // helper to close
   function closeModal() { overlay.remove(); }
 
-  // long-duration toast
   function longNotify(msg) {
     var n = document.createElement('div');
     n.className = 'toast-notice';
@@ -75,16 +68,13 @@ btnImport.addEventListener('click', function(){
     setTimeout(function(){ n.remove(); }, 4500);
   }
 
-  // IMPORT click
   document.getElementById('import-ok').onclick = function(){
     var tokens = (area.value||'').trim().split(/\s+/);
-    // optional clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
       updateCount(); saveState();
     }
-    // process tokens
     var added = 0, errors = [];
     tokens.forEach(function(tok){
       var parts = tok.split('-');
@@ -93,25 +83,23 @@ btnImport.addEventListener('click', function(){
         return;
       }
       var vn = parts[0] + '-' + parts[1];
-      var pre = window.cardCounts[vn]||0;
+      var before = window.cardCounts[vn] || 0;
       window.addCard(vn);
-      var post = window.cardCounts[vn]||0;
-      if (post > pre) added++;
+      var after = window.cardCounts[vn] || 0;
+      if (after > before) added++;
       else errors.push(vn);
     });
 
-    // close modal first
     closeModal();
     saveState();
 
-    // show results
-    if (added)
-      longNotify(added + ' card' + (added>1?'s':'') + ' added');
+    if (added) longNotify(added + ' card' + (added>1?'s':'') + ' added');
     errors.forEach(function(vn){
-      notify(vn + \" can't be found\");
+      notify(vn + " can't be found");
     });
   };
 });
+
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
