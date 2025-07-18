@@ -82,9 +82,9 @@
   flex-shrink: 0;
 }
 
-/* Middle body */
+/* Middle body (no other changes above) */
 .card .middle {
-  position: relative;        /* to anchor color-indicator */
+  position: relative;
   flex: 1;
   padding: 6px;
   display: flex;
@@ -95,15 +95,16 @@
   overflow-y: auto;
 }
 
-/* Color indicator now sits just above the bottom-bar */
+/* Color indicator now sits *exactly* above the bottom bar */
 .card .middle .color-indicator {
   position: absolute;
-  /* bottom-bar is 10mm tall + 4px top padding in bottom-bar */
-  bottom: calc(10mm + 4px);
-  right: 4px;
+  bottom: 10mm;    /* height of bottom-bar */
+  right: 6px;      /* same inset as bottom-bar padding */
   display: flex;
   align-items: center;
   gap: 4px;
+  background: rgba(255,255,255,0.8); /* optional white backdrop for contrast */
+  padding: 0 2px;                  /* small padding so text doesn’t butt the edge */
 }
 .card .middle .color-indicator img {
   width: 18px;
@@ -113,8 +114,8 @@
   font-size: 8pt;
   font-weight: bold;
   text-transform: capitalize;
+  color: #000;
 }
-
 /* Bottom bar: type/tags + faction icon */
 .card .bottom-bar {
   padding: 4px 6px;
