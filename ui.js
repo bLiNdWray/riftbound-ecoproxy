@@ -10,27 +10,28 @@
   window.addedVariants = window.addedVariants || [];
   var fullProxy = false;
 
- // Toast helper (short)
-  function notify(msg) {
-    var n = document.createElement('div');
-    n.className = 'toast-notice';
-    n.textContent = msg;
-    document.body.appendChild(n);
-    setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 2000);
-    setTimeout(function(){ n.remove(); }, 2500);
-  }
+// Short toast
+function notify(msg) {
+  var n = document.createElement('div');
+  n.className = 'toast-notice';
+  n.textContent = msg;
+  document.getElementById('toast-container').appendChild(n);
+  // fade in/out
+  setTimeout(function(){ n.classList.add('visible'); }, 10);
+  setTimeout(function(){ n.classList.remove('visible'); }, 2000);
+  setTimeout(function(){ n.remove(); }, 2500);
+}
 
-  // Toast helper (long for imports)
-  function longNotify(msg) {
-    var n = document.createElement('div');
-    n.className = 'toast-notice';
-    n.textContent = msg;
-    document.body.appendChild(n);
-    setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 4000);
-    setTimeout(function(){ n.remove(); }, 4500);
-  }
+ // Long toast (4s)
+function longNotify(msg) {
+  var n = document.createElement('div');
+  n.className = 'toast-notice';
+  n.textContent = msg;
+  document.getElementById('toast-container').appendChild(n);
+  setTimeout(function(){ n.classList.add('visible'); }, 10);
+  setTimeout(function(){ n.classList.remove('visible'); }, 4000);
+  setTimeout(function(){ n.remove(); }, 4500);
+}
 
   // Persistence helpers
   function saveState() {
