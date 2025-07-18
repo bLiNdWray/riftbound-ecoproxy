@@ -80,15 +80,19 @@
 .card .middle {
   position: relative;
   flex: 1;
-  padding: 6px 6px 6px 9px;  /* extra left padding preserved */
+  padding: 6px 6px 6px 9px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;   /* was center */
+  align-items: flex-start;       /* ensure inline content starts at left */
   text-align: justify;
   font-size: 8pt;
   overflow-y: auto;
   overflow-x: visible;
-  white-space: normal;
+}
+.card .middle .desc-wrap {
+  display: block;                /* not a flex item */
+  width: 100%;
 }
 
 /* Color indicator inside middle */
