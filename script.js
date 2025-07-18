@@ -221,11 +221,43 @@ function makeRune(c) {
     </div>
   `);
 }
-  // Generic build
-  function build(id, html) {
-    const wrapper = document.createElement('div'); wrapper.className='card'; wrapper.setAttribute('data-variant',id); wrapper.innerHTML=html;
-    const badge = document.createElement('div'); badge.className='qty-badge'; badge.textContent=addedCounts[id]||0; wrapper.appendChild(badge);
-    wrapper.addEventListener('click',()=>{if(wrapper.classList.toggle('added')) addCard(id); else removeCard(id,wrapper); badge.textContent=addedCounts[id]||0;});
-    return wrapper;
-  }
-})();
+// In script.js, replace the existing build() function with:
+
+function build(id, html) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'card';
+  wrapper.setAttribute('data-variant', id);
+  wrapper.innerHTML = html;
+
+  // Quantity badge in bottom-right
+  const badge = document.createElement('div');
+  badge.className = 'qty-badge';
+  badge.textContent = addedCounts[id] || 0;
+  wrapper.appendChild(badge);
+
+  // Hover bar with add/remove buttons
+  const hoverBar = document.createElement('div');
+  hoverBar.className = 'hover-bar';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '+';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-btn';
+  removeBtn.textContent = '–';
+  hoverBar.append(addBtn, removeBtn);
+  wrapper.appendChild(hoverBar);
+
+  // Event handlers
+  addBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    addCard(id);
+    badge.textContent = addedCounts[id] || 0;
+  });
+  removeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    removeCard(id, wrapper);
+    badge.textContent = addedCounts[id] || 0;
+  });
+
+  return wrapper;
+}
