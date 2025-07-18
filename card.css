@@ -140,14 +140,14 @@
   overflow: hidden;
 }
 
-/* Three-column container */
+/* Three-column layout */
 .card.battlefield .bf-columns {
   display: flex;
   width: 100%;
   height: 100%;
 }
 
-/* Side panels – fixed 20 mm width */
+/* Side panels – fixed width, center with padding */
 .card.battlefield .bf-col.side {
   flex: 0 0 20mm;
   display: flex;
@@ -157,25 +157,21 @@
   box-sizing: border-box;
 }
 
-/* Left panel: top-to-bottom */
+/* Left panel text (top→bottom) */
 .card.battlefield .bf-col.side.left .bf-text {
-  writing-mode: vertical-lr;
-  text-orientation: upright;
-  white-space: nowrap;
+  transform: rotate(90deg);
+  transform-origin: 0 0;
   font-size: 8pt;
-  text-align: center;
-  color: #000;
+  white-space: nowrap;
   margin: 0;
 }
 
-/* Right panel: bottom-to-top */
+/* Right panel text (bottom→top) */
 .card.battlefield .bf-col.side.right .bf-text {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  white-space: nowrap;
+  transform: rotate(-90deg);
+  transform-origin: 100% 100%;
   font-size: 8pt;
-  text-align: center;
-  color: #000;
+  white-space: nowrap;
   margin: 0;
 }
 
