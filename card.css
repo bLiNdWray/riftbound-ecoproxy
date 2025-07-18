@@ -137,18 +137,17 @@
 /* Side panels – fixed width and relative container */
 .card.battlefield .bf-col.side {
   flex: 0 0 20mm;
-  position: relative;        /* for absolutely positioned .bf-text */
+  position: relative;
   box-sizing: border-box;
-  /* remove flex centering/padding here */
 }
 
-/* Left panel text: pin to top inner corner, rotated */
+/* LEFT panel: use the previous “right” style */
 .card.battlefield .bf-col.side.left .bf-text {
   position: absolute;
-  top: 4px;                  /* inset from top edge */
+  bottom: 4px;               /* inset from bottom */
   left: 0;
-  transform: rotate(-90deg);
-  transform-origin: top left;
+  transform: rotate(90deg);
+  transform-origin: bottom left;
   white-space: nowrap;
   font-size: 8pt;
   color: #000;
@@ -156,21 +155,19 @@
   padding: 0;
 }
 
-/* Right panel text: pin to bottom inner corner, rotated */
+/* RIGHT panel: use the previous “left” style */
 .card.battlefield .bf-col.side.right .bf-text {
   position: absolute;
-  bottom: 4px;               /* inset from bottom edge */
+  top: 4px;                  /* inset from top */
   right: 0;
-  transform: rotate(90deg);
-  transform-origin: bottom right;
+  transform: rotate(-90deg);
+  transform-origin: top right;
   white-space: nowrap;
   font-size: 8pt;
   color: #000;
   margin: 0;
   padding: 0;
 }
-
-/* Center panel unchanged */
 
 /* Center panel – fill remaining space */
 .card.battlefield .bf-col.center {
