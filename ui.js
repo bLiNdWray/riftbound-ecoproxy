@@ -138,12 +138,11 @@ const list = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     window.addedVariants.forEach(vn => params.append('id', vn));
     history.replaceState({}, '', `${window.location.pathname}?${params}`);
   }
-
-  // Monkey-patch addCard/removeCard
-  const origAdd = (typeof window.addCard === 'function') ? window.addCard : function(vn){ console.warn('addCard not defined'); };
-  const origRm  = (typeof window.removeCard === 'function') ? window.removeCard : function(vn,el){ console.warn('removeCard not defined'); }  = window.removeCard;
-  window.addCard = vn => { origAdd(vn); updateCount(); window.addedVariants.push(vn); cacheState(); };
-  window.removeCard = (vn, el) => { origRm(vn, el); window.addedVariants = window.addedVariants.filter(x=>x!==vn); updateCount(); cacheState(); };
+ // Monkey-patch addCard/removeCard
+  const origAdd = (typeof window.addCard === 'function') ? window.addCard : function(vn) { console.warn('addCard not defined'); };
+  const origRm  = (typeof window.removeCard === 'function') ? window.removeCard : function(vn, el) { console.warn('removeCard not defined'); };
+  window.addCard = function(vn) { origAdd(vn); updateCount(); window.addedVariants.push(vn); cacheState(); };
+  window.removeCard = function(vn, el) { origRm(vn, el); window.addedVariants = window.addedVariants.filter(x => x !== vn); updateCount(); cacheState(); } => { origRm(vn, el); window.addedVariants = window.addedVariants.filter(x=>x!==vn); updateCount(); cacheState(); };
 
   // On load: restore from URL
   window.addEventListener('DOMContentLoaded', () => {
