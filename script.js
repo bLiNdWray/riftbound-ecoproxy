@@ -137,7 +137,7 @@ function formatDescription(txt = '', color) {
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-}
+
   // Builders with dash separator
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
