@@ -214,8 +214,8 @@
   /* border-bottom removed */
 }
 .card.legend .legend-name .main-title {
-  font-size: 16pt;
-  font-weight: bold;
+  font-size: 14pt;      /* down from 16pt */
+  font-weight: normal;  /* remove bold */
   line-height: 1.2;
   margin: 0;
 }
