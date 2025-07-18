@@ -354,6 +354,11 @@
   cursor: pointer;
 }
 
+/* Button hover state: dark→light gray */
+.card .add-btn:hover,
+.card .remove-btn:hover {
+  background: rgba(200, 200, 200, 0.9);
+}
 .card:hover .hover-bar {
   display: flex;
 }
@@ -363,6 +368,7 @@
   top: auto;
   bottom: 4px;
   right: 4px;
+  z-index: 10;
 }
 
 #close-search {
