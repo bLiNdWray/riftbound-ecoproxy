@@ -95,22 +95,28 @@
   overflow-y: auto;
 }
 
-/* Color indicator now sits *exactly* above the bottom bar */
-.card .middle .color-indicator {
+/* Allow middle to show overflow for our indicator */
+.card .middle {
+  overflow: visible;    /* was overflow-y:auto */
+}
+
+/* Global color‐indicator (not nested under .middle) */
+.card .color-indicator {
   position: absolute;
-  bottom: 10mm;    /* height of bottom-bar */
-  right: 6px;      /* same inset as bottom-bar padding */
+  bottom: calc(10mm + 4px);  /* 10mm bottom-bar + its top padding */
+  right: 6px;                /* matches bottom-bar horizontal padding */
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.8); /* optional white backdrop for contrast */
-  padding: 0 2px;                  /* small padding so text doesn’t butt the edge */
+  background: rgba(255,255,255,0.8);
+  padding: 2px 4px;
+  z-index: 2;
 }
-.card .middle .color-indicator img {
+.card .color-indicator img {
   width: 18px;
   height: 18px;
 }
-.card .middle .color-text {
+.card .color-text {
   font-size: 8pt;
   font-weight: bold;
   text-transform: capitalize;
