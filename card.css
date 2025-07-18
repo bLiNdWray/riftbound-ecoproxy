@@ -336,7 +336,6 @@
   bottom: 4px;
   left: 0;
   width: 100%;
-  transform: translateX(-50%);
   display: none;
   gap: 8px;
 }
