@@ -91,11 +91,9 @@ function renderSearchResults(list) {
 // 3) Description formatter
   function formatDescription(text = '', colorCode) {
     let out = text
-      .replace(/\[Tap\]:/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\[Tap\]/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
       .replace(/\[Might\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[Rune\]/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-      .replace(/\[S\]/g,         `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\[C\]/g,         `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+      .replace(/\[power\]/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
       out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
         `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
