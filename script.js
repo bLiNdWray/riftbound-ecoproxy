@@ -91,7 +91,7 @@ function renderSearchResults(list) {
 // 3) Description formatter
   function formatDescription(text = '', colorCode) {
     let out = text
-      .replace(/\[Tap\]/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\[tap\]/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
       .replace(/\[Might\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
       .replace(/\[power\]/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
