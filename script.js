@@ -261,3 +261,4 @@ function build(id, html) {
 
   return wrapper;
 }
+})();
