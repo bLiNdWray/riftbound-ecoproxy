@@ -299,5 +299,11 @@ function build(id, html) {
 
   return wrapper;
 }
+function addCard(vn) { … }
+  function removeCard(vn, el) { … }
 
+  // **Expose** to window for ui.js
+  window.addCard    = addCard;
+  window.removeCard = removeCard;
+  
 })();
