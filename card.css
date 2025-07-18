@@ -1,4 +1,4 @@
-/* card.css – Up-to-date Card Layout Styles for Riftbound Eco Proxy */
+/* card.css – Final Layout Tweaks */
 
 /* Container in horizontal mode */
 #card-container.layout-horizontal {
@@ -48,7 +48,6 @@
   align-items: center;
   padding: 4px 6px;
   height: 12mm;
-  box-sizing: border-box;
 }
 .card .cost {
   font-size: 18px;
@@ -84,7 +83,7 @@
 
 /* Middle body */
 .card .middle {
-  position: relative;   /* for absolutely positioned children */
+  position: relative;
   flex: 1;
   padding: 6px;
   display: flex;
@@ -92,18 +91,17 @@
   justify-content: center;
   text-align: justify;
   font-size: 8pt;
-  overflow: hidden;     /* clip overflow except our indicator */
+  overflow: hidden;
 }
 
 /* Color indicator (icon + text) above bottom bar */
 .card .color-indicator {
   position: absolute;
-  bottom: 10mm;       /* exactly at the top edge of the 10mm bottom bar */
-  right: 6px;         /* match bottom-bar padding */
+  bottom: 10mm;      /* sits flush on top of the 10mm bottom bar */
+  right: 6px;        /* align with bottom-bar padding */
   display: flex;
   align-items: center;
   gap: 4px;
-  /* no background here so it floats cleanly */
   padding: 0;
   z-index: 2;
 }
@@ -118,23 +116,21 @@
   color: #000;
 }
 
-/* Bottom bar: type/tags (no more faction icon) */
+/* Bottom bar: type/tags only, left-justified */
 .card .bottom-bar {
   padding: 4px 6px;
   border-top: 1px solid #000;
   height: 10mm;
-  box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: center; /* center the type-line now */
-  flex-shrink: 0;
+  justify-content: flex-start;  /* left-justify */
+  gap: 4px;
   font-size: 8pt;
   font-weight: bold;
 }
 .card .type-line {
   white-space: nowrap;
 }
-
 
 /* === Battlefield === */
 .card.battlefield .bf-columns {
@@ -144,7 +140,6 @@
 .card.battlefield .bf-col {
   flex: 1;
   padding: 6px;
-  box-sizing: border-box;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -235,12 +230,11 @@
   padding: 8px;
   font-size: 8pt;
   flex: 1;
-  box-sizing: border-box;
-  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  overflow: auto;
 }
 
 /* Inline icons */
