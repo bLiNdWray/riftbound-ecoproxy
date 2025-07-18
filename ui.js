@@ -1,4 +1,5 @@
 (function(){
+  // Button references
   var openBtn       = document.getElementById('open-search');
   var btnImport     = document.getElementById('btn-import');
   var btnPrint      = document.getElementById('btn-print');
@@ -7,9 +8,11 @@
   var btnReset      = document.getElementById('btn-reset');
   var countLabel    = document.getElementById('card-count');
 
+  // State
   window.addedVariants = window.addedVariants || [];
   var fullProxy = false;
 
+  // Simple toast notification
   function notify(message) {
     var n = document.createElement('div');
     n.className = 'toast-notice';
@@ -20,6 +23,7 @@
     setTimeout(function(){ n.remove(); }, 3000);
   }
 
+  // IMPORT LIST: prompt for newline-separated variant IDs
   btnImport.addEventListener('click', function(){
     var text = prompt('Paste your list of variant numbers (one per line):');
     if (!text) return;
@@ -33,10 +37,12 @@
         imported++;
       }
     });
-    updateCount(); cacheState();
+    updateCount();
+    cacheState();
     notify(imported + ' cards imported');
   });
 
+  // PRINT: hide UI, print, then restore
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
     bar.style.display = 'none';
@@ -45,88 +51,135 @@
     setTimeout(function(){ bar.style.display = ''; }, 0);
   });
 
+  // OVERVIEW MODAL: grouped by type
   function buildOverview(){
     var existing = document.getElementById('overview-modal');
-    if(existing) existing.remove();
+    if (existing) existing.remove();
+
     var modal = document.createElement('div');
     modal.id = 'overview-modal';
     modal.className = 'modal-overlay';
-    modal.innerHTML = '<div class="modal-content small">'
-      + '<button id="close-overview" class="modal-close">×</button>'
-      + '<h2>Overview</h2><div id="overview-list"></div></div>';
+    modal.innerHTML =
+      '<div class="modal-content small">' +
+        '<button id="close-overview" class="modal-close">×</button>' +
+        '<h2>Overview</h2>' +
+        '<div id="overview-list"></div>' +
+      '</div>';
     document.body.appendChild(modal);
     document.getElementById('close-overview').onclick = function(){ modal.remove(); };
 
     var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
     var grouped = {};
+
     window.addedVariants.forEach(function(vn){
-      var el = document.querySelector('[data-variant-number="'+vn+'"]');
-      var type = el && el.dataset.type ? el.dataset.type : 'Other';
+      var el = document.querySelector('[data-variant="' + vn + '"]');
+      var type = (el && el.dataset.type) ? el.dataset.type : 'Other';
       grouped[type] = grouped[type] || [];
       grouped[type].push(vn);
     });
 
     var container = document.getElementById('overview-list');
     order.forEach(function(type){
-      if(grouped[type]){
+      if (grouped[type]) {
         var sec = document.createElement('div');
         var h = document.createElement('h3'); h.textContent = type;
         sec.appendChild(h);
+
         grouped[type].forEach(function(vn){
-          var el = document.querySelector('[data-variant-number="'+vn+'"]');
-          var name = el&&el.dataset.name||vn;
-          var setNo = el&&el.dataset.set||'';
-          var logo = el&&el.dataset.colorLogo||'';
+          var el = document.querySelector('[data-variant="' + vn + '"]');
+          var name = (el && el.dataset.name) ? el.dataset.name : vn;
+          var setNo = (el && el.dataset.set)    ? el.dataset.set    : '';
+          var logo  = (el && el.dataset.colorLogo) ? el.dataset.colorLogo : '';
+
           var row = document.createElement('div');
-          row.className='overview-item';
-          row.innerHTML='<img src="'+logo+'" class="overview-logo">'
-            +'<span>'+name+' ('+setNo+')</span>'
-            +'<button class="overview-dec" data-vn="'+vn+'">–</button>'
-            +'<span class="overview-count">1</span>'
-            +'<button class="overview-inc" data-vn="'+vn+'">+</button>';
+          row.className = 'overview-item';
+          row.innerHTML =
+            '<img src="' + logo + '" class="overview-logo" />' +
+            '<span>' + name + ' (' + setNo + ')</span>' +
+            '<button class="overview-dec" data-vn="' + vn + '">–</button>' +
+            '<span class="overview-count">1</span>' +
+            '<button class="overview-inc" data-vn="' + vn + '">+</button>';
           sec.appendChild(row);
         });
+
         container.appendChild(sec);
       }
     });
   }
-  btnOverview.addEventListener('click', function(){ buildOverview(); notify('Overview opened'); });
+  btnOverview.addEventListener('click', function(){
+    buildOverview();
+    notify('Overview opened');
+  });
 
+  // FULL PROXY: toggle between proxy and full-art
   btnFullProxy.addEventListener('click', function(){
-    fullProxy=!fullProxy;
+    fullProxy = !fullProxy;
     window.addedVariants.forEach(function(vn){
-      var img = document.querySelector('[data-variant-number="'+vn+'"] img.card-img');
-      if(!img) return;
+      var img = document.querySelector('[data-variant="' + vn + '"] img.card-img');
+      if (!img) return;
       img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
     });
-    notify(fullProxy?'Full art ON':'Proxy art ON');
+    notify(fullProxy ? 'Full art ON' : 'Proxy art ON');
   });
 
+  // RESET: clear state, UI, and URL
   btnReset.addEventListener('click', function(){
-    history.replaceState({},'',window.location.pathname);
-    window.addedVariants=[];
-    document.getElementById('card-container').innerHTML='';
-    updateCount(); notify('Reset complete');
+    history.replaceState({}, '', window.location.pathname);
+    window.addedVariants = [];
+    document.getElementById('card-container').innerHTML = '';
+    updateCount();
+    notify('Reset complete');
   });
 
+  // update card counter badge
   function updateCount(){
-    var t=window.addedVariants.length;
-    countLabel.textContent=t+' card'+(t!==1?'s':'');
+    var t = window.addedVariants.length;
+    countLabel.textContent = t + ' card' + (t !== 1 ? 's' : '');
   }
 
+  // cache current list to URL params
   function cacheState(){
-    var p=new URLSearchParams();
-    window.addedVariants.forEach(function(vn){p.append('id',vn);});
-    history.replaceState({},'',window.location.pathname+'?'+p);
+    var p = new URLSearchParams();
+    window.addedVariants.forEach(function(vn){
+      p.append('id', vn);
+    });
+    history.replaceState({}, '', window.location.pathname + '?' + p.toString());
   }
 
-  var origAdd = typeof window.addCard==='function'?window.addCard:function(v){console.warn('addCard not defined');};
-  var origRm  = typeof window.removeCard==='function'?window.removeCard:function(v,e){console.warn('removeCard not defined');};
-  window.addCard=function(vn){ origAdd(vn); updateCount(); window.addedVariants.push(vn); cacheState();};
-  window.removeCard=function(vn,el){ origRm(vn,el); window.addedVariants=window.addedVariants.filter(function(x){return x!==vn;}); updateCount(); cacheState();};
+  // wrap original addCard/removeCard safely
+  var origAdd = typeof window.addCard === 'function'
+    ? window.addCard
+    : function(vn){ console.warn('addCard not defined'); };
+  var origRm  = typeof window.removeCard === 'function'
+    ? window.removeCard
+    : function(vn,el){ console.warn('removeCard not defined'); };
 
-  document.addEventListener('DOMContentLoaded',function(){
-    var ps=new URLSearchParams(window.location.search);
-    ps.getAll('id').forEach(function(vn){window.addCard(vn);}); updateCount();
+  window.addCard = function(vn){
+    origAdd(vn);
+    if (window.addedVariants.indexOf(vn) === -1) {
+      window.addedVariants.push(vn);
+    }
+    updateCount();
+    cacheState();
+  };
+  window.removeCard = function(vn,el){
+    origRm(vn,el);
+    window.addedVariants = window.addedVariants.filter(function(x){
+      return x !== vn;
+    });
+    updateCount();
+    cacheState();
+  };
+
+  // on-load: restore from URL
+  document.addEventListener('DOMContentLoaded', function(){
+    var ps = new URLSearchParams(window.location.search);
+    ps.getAll('id').forEach(function(vn){
+      window.addCard(vn);
+    });
+    updateCount();
+    var searchModal = document.getElementById('search-modal');
+    if (searchModal) searchModal.style.top = '50px';
   });
+
 })();
