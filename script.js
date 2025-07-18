@@ -114,20 +114,32 @@ function renderCards(ids, clear = true) {
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
-// 3) Description formatter
-  function formatDescription(text = '', colorCode) {
-    let out = text
-      .replace(/\[tap\]/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\[Might\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[power\]/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
-    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-      out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
-        `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
-    });
-    return out;
+function formatDescription(txt = '', color) {
+  let out = String(txt);
+
+  // Generic helper to replace a code like [Tap] case-insensitively
+  function replaceCode(code, imgTag) {
+    const re = new RegExp(`\\s*\\[${code}\\]\\s*`, 'gi');  // g = global, i = ignore case
+    out = out.replace(re, imgTag);
   }
-  // Builders with dash separator
-  // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
+
+  // Do all your replacements
+  replaceCode('Tap:',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+  replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+  replaceCode('Rune',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
+  replaceCode('S',     `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`);
+  replaceCode('C',     `<img src="images/${color}2.png" class="inline-icon" alt="C">`);
+
+  // Elemental runes
+  ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+    const imgTag = `<img src="images/${col}.png" class="inline-icon" alt="${col}">`;
+    replaceCode(col, imgTag);
+  });
+
+  // Collapse any stray whitespace between tags
+  out = out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
+  return out;
+}
 
 function makeUnit(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
