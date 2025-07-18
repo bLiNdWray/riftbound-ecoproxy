@@ -129,42 +129,69 @@
   white-space: nowrap;
 }
 
-/* === Battlefield === */
+/* === Battlefield Cards === */
+.card.battlefield {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #000;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 .card.battlefield .bf-columns {
   display: flex;
   height: 100%;
+  width: 100%;
 }
+
 .card.battlefield .bf-col {
   flex: 1;
-  padding: 6px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.card.battlefield .bf-col.center {
-  flex-direction: column;
-}
-.card.battlefield .bf-col.side {
-  width: 20mm;
-  background: #fafafa;
   position: relative;
+  box-sizing: border-box;
 }
-.card.battlefield .bf-col.side .bf-text {
-  font-size: 8pt;
+
+/* Left & Right side panels */
+.card.battlefield .bf-col.side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.card.battlefield .bf-col.side.left .bf-text {
   transform: rotate(-90deg);
   transform-origin: bottom left;
   white-space: nowrap;
+  font-size: 8pt;
 }
+
+.card.battlefield .bf-col.side.right .bf-text {
+  transform: rotate(90deg);
+  transform-origin: top left;
+  white-space: nowrap;
+  font-size: 8pt;
+}
+
+/* Center panel */
+.card.battlefield .bf-col.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
 .card.battlefield .bf-type-text {
-  font-size: 10pt;
-  font-weight: bold;
-  margin-bottom: 4px;
-  text-align: center;
-}
-.card.battlefield .bf-name {
   font-size: 12pt;
   font-weight: bold;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.card.battlefield .bf-name {
+  font-size: 10pt;
   text-align: center;
 }
 
