@@ -104,70 +104,65 @@
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
 function makeUnit(c) {
-  const cols     = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-  const costN    = Number(c.energy) || 0;
-  const powN     = Number(c.power)  || 0;
-  const icons    = Array(powN).fill().map(_=>
+  const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const costN     = Number(c.energy) || 0;
+  const powN      = Number(c.power)  || 0;
+  const costIcons = Array(powN).fill().map(_=>
     `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
   ).join('');
   const mightHTML = c.might
     ? `<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`
     : '';
-  const descHTML = formatDescription(c.description, cols[0]||'');
-  const tags     = (c.tags||'').split(/;\s*/).join(' ');
+  const descHTML  = formatDescription(c.description, cols[0]||'');
+  const tags      = (c.tags||'').split(/;\s*/).join(' ');
   const colorText = cols.join(' ');
-  const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="${cols[0]||''}">`;
+  const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
 
   return build(c.variantNumber, `
     <div class="top-bar">
-      <span class="cost">${costN}${icons}</span>
+      <span class="cost">${costN}${costIcons}</span>
       <span class="might">${mightHTML}</span>
     </div>
     <div class="name">${c.name}</div>
     <div class="middle">
       ${descHTML}
-      <!-- color-indicator injected here -->
       <div class="color-indicator">
         ${colorIcon}<span class="color-text">${colorText}</span>
       </div>
     </div>
     <div class="bottom-bar">
       <span class="type-line">${c.type}${ tags ? ' - '+tags : '' }</span>
-      <img src="images/${cols[0]||'Body'}.png" class="faction-icon" alt="">
     </div>`);
 }
 
 function makeSpell(c) {
-  const cols     = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-  const costN    = Number(c.energy) || 0;
-  const powN     = Number(c.power)  || 0;
-  const icons    = Array(powN).fill().map(_=>
+  const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const costN     = Number(c.energy) || 0;
+  const powN      = Number(c.power)  || 0;
+  const costIcons = Array(powN).fill().map(_=>
     `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
   ).join('');
   const descHTML  = formatDescription(c.description, cols[0]||'');
   const tags      = (c.tags||'').split(/;\s*/).join(' ');
   const colorText = cols.join(' ');
-  const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="${cols[0]||''}">`;
+  const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
 
   return build(c.variantNumber, `
     <div class="top-bar">
-      <span class="cost">${costN}${icons}</span>
+      <span class="cost">${costN}${costIcons}</span>
       <span class="might"></span>
     </div>
     <div class="name">${c.name}</div>
     <div class="middle">
       ${descHTML}
-      <!-- color-indicator injected here -->
       <div class="color-indicator">
         ${colorIcon}<span class="color-text">${colorText}</span>
       </div>
     </div>
     <div class="bottom-bar">
       <span class="type-line">${c.type}${ tags ? ' - '+tags : '' }</span>
-      <img src="images/${cols[0]||'Body'}.png" class="faction-icon" alt="">
     </div>`);
 }
-
 
   function makeBattlefield(c) {
     const desc = formatDescription(c.description, '');
