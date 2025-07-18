@@ -1,4 +1,3 @@
-// script.js
 (async () => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME = 'Riftbound Cards';
@@ -12,6 +11,7 @@
 
   let allCards = [];
 
+  // JSONP helper
   function jsonpFetch(params, cb) {
     const cbName = 'jsonp_cb_' + Date.now();
     window[cbName] = data => {
@@ -20,13 +20,14 @@
       cb(data);
     };
     const qs = Object.entries(params)
-      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
     const script = document.createElement('script');
     script.src = `${API_BASE}?${qs}&callback=${cbName}`;
     document.head.appendChild(script);
   }
 
+  // Toast
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
@@ -38,66 +39,74 @@
     }, 1500);
   }
 
+  // Format tokens
   function formatDescription(txt = '', colorCode) {
     return txt
-      .replace(/\[Tap\]/gi,   `<img src="images/Tap.png" class="icon" alt="Tap">`)
+      .replace(/\[Tap\]/gi, `<img src="images/Tap.png" class="icon" alt="Tap">`)
       .replace(/\[Might\]/gi, `<img src="images/SwordIconRB.png" class="icon" alt="Might">`)
       .replace(/\[power\]/gi, `<img src="images/RainbowRune.png" class="icon" alt="Power">`)
-      .replace(/\[S\]/g,      `<img src="images/SwordIconRB.png" class="icon" alt="S">`)
-      .replace(/\[C\]/g,      `<img src="images/${colorCode}2.png" class="icon" alt="C">`)
+      .replace(/\[S\]/g, `<img src="images/SwordIconRB.png" class="icon" alt="S">`)
+      .replace(/\[C\]/g, `<img src="images/${colorCode}2.png" class="icon" alt="C">`)
       .replace(/\n/g, '<br>');
   }
 
-  // Load all cards
-  await new Promise(r => {
+  // Load all cards for search
+  await new Promise(resolve =>
     jsonpFetch({ sheet: SHEET_NAME }, data => {
       allCards = Array.isArray(data) ? data : [];
-      r();
-    });
-  });
+      resolve();
+    })
+  );
 
-  // Initial render
+  // Initial render from URL
   const params = new URLSearchParams(location.search);
-  const initial = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const initial = (params.get('id') || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
   if (initial.length) renderCards(initial, true);
 
   // Modal logic
-  openBtn.onclick  = () => {
+  openBtn.onclick = () => {
     modal.classList.remove('hidden');
     input.value = '';
     results.innerHTML = '';
     input.focus();
   };
   closeBtn.onclick = () => modal.classList.add('hidden');
-  input.oninput   = () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) return results.innerHTML = '';
-    const matches = allCards.filter(c =>
-      (c.name||'').toLowerCase().includes(q) ||
-      (c.variantNumber||'').toLowerCase().includes(q)
+  input.oninput = () => {
+    const q = input.value.toLowerCase().trim();
+    if (!q) return (results.innerHTML = '');
+    const matches = allCards.filter(
+      c =>
+        (c.name || '').toLowerCase().includes(q) ||
+        (c.variantNumber || '').toLowerCase().includes(q)
     );
     results.innerHTML = '';
     matches.forEach(c => results.appendChild(buildCard(c)));
   };
 
-  function renderCards(vns, clear=false) {
+  // Render a list of variantNumbers
+  function renderCards(vns, clear = false) {
     if (clear) container.innerHTML = '';
-    vns.forEach(vn => {
+    vns.forEach(vn =>
       jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
-        if (!Array.isArray(data) || !data[0]) return;
-        container.appendChild(buildCard(data[0]));
-      });
-    });
+        if (Array.isArray(data) && data[0]) {
+          container.appendChild(buildCard(data[0]));
+        }
+      })
+    );
   }
 
+  // Build single card node
   function buildCard(c) {
-    const tags  = (c.tags||'').replace(/;/g,' ');
-    const cols  = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const code  = cols[0]||'';
-    const desc  = formatDescription(c.description, code);
+    const tags = (c.tags || '').replace(/;/g, ' ');
+    const cols = (c.colors || '').split(/[;,]\s*/).filter(Boolean);
+    const code = cols[0] || '';
+    const desc = formatDescription(c.description, code);
 
     let html = '';
-    switch ((c.type||'').toLowerCase()) {
+    switch ((c.type || '').toLowerCase()) {
       case 'unit':
         html = `
           <div class="top-bar">
@@ -107,11 +116,14 @@
           <div class="middle"><p>${desc}</p></div>
           <div class="bottom-bar">
             <span class="type-line">Unit • ${tags}</span>
-            <span class="might">${c.might
-              ? `<img src="images/SwordIconRB.png" class="icon" alt="Might">${c.might}`
-              : ''}</span>
+            <span class="might">${
+              c.might
+                ? `<img src="images/SwordIconRB.png" class="icon">${c.might}`
+                : ''
+            }</span>
           </div>`;
         break;
+
       case 'spell':
       case 'gear':
         html = `
@@ -124,6 +136,7 @@
             <span class="type-line">Spell • ${tags}</span>
           </div>`;
         break;
+
       case 'battlefield':
         html = `
           <div class="top-bar">
@@ -134,6 +147,7 @@
             <span class="type-line">Battlefield</span>
           </div>`;
         break;
+
       case 'legend':
         html = `
           <div class="top-bar">
@@ -144,6 +158,7 @@
             <span class="type-line">Legend • ${tags}</span>
           </div>`;
         break;
+
       case 'rune':
         html = `
           <div class="top-bar">
@@ -153,6 +168,7 @@
             <img src="images/${code}.png" class="icon" alt="${code}">
           </div>`;
         break;
+
       default:
         html = `<div class="middle"><p>Unknown type</p></div>`;
     }
