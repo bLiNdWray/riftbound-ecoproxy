@@ -1,13 +1,13 @@
 // ui.js — Handles top bar interactions and notifications
 (() => {
   // Buttons
-  const btnAdd       = document.getElementById('btn-add');
-  const btnImport    = document.getElementById('btn-import');
-  const btnPrint     = document.getElementById('btn-print');
-  const btnOverview  = document.getElementById('btn-overview');
-  const btnFullProxy = document.getElementById('btn-full-proxy');
-  const btnReset     = document.getElementById('btn-reset');
-  const countLabel   = document.getElementById('card-count');
+  const openBtn       = document.getElementById('open-search');
+  const btnImport     = document.getElementById('btn-import');
+  const btnPrint      = document.getElementById('btn-print');
+  const btnOverview   = document.getElementById('btn-overview');
+  const btnFullProxy  = document.getElementById('btn-full-proxy');
+  const btnReset      = document.getElementById('btn-reset');
+  const countLabel    = document.getElementById('card-count');
 
   // Notification helper
   function notify(message) {
@@ -20,39 +20,51 @@
     setTimeout(() => n.remove(), 3000);
   }
 
-  // TODO: Wire up events to existing search and render logic
+  // Wire up top-bar stubs
   btnImport.addEventListener('click', () => {
-    // Show a textarea dialog for paste-import
+    notify('Import List clicked');
+    // TODO: launch import-text dialog
   });
 
   btnPrint.addEventListener('click', () => {
-    // Open print dialog in a modal without helpers
+    notify('Print clicked');
+    // TODO: open print-only dialog
   });
 
   btnOverview.addEventListener('click', () => {
-    // Build and show overview modal grouped and ordered
+    notify('Overview clicked');
+    // TODO: show overview modal
   });
 
   btnFullProxy.addEventListener('click', () => {
-    // Toggle image sources between proxies and real card art
+    notify('Full Proxy toggled');
+    // TODO: swap proxy ↔ full art
   });
 
   btnReset.addEventListener('click', () => {
     history.replaceState({}, '', window.location.pathname);
-    // Clear card container and counts
+    document.getElementById('card-container').innerHTML = '';
+    notify('Reset complete');
   });
 
   // Update count whenever a card is added/removed
   function updateCount() {
-    // calculate total and update countLabel.textContent
+    const total = Object.values(window.addedCounts || {}).reduce((a,b)=>a+b,0);
+    countLabel.textContent = `${total} card${total!==1?'s':''}`;
   }
+  // Monkey-patch addCard/removeCard to also refresh count & URL
+  const origAdd = window.addCard;
+  const origRm  = window.removeCard;
+  window.addCard = vn => { origAdd(vn); updateCount(); };
+  window.removeCard = (vn, el) => { origRm(vn, el); updateCount(); };
 
   // On page load, read URL params and restore state
   window.addEventListener('DOMContentLoaded', () => {
-    // parse id params, call existing render, then updateCount()
+    updateCount();
+    // your existing init logic in script.js will fire first (renderCards, etc)
   });
 
-  // Make the search modal anchored under the top bar
+  // Anchor search modal below bar
   const searchModal = document.getElementById('search-modal');
   searchModal.style.top = '50px';
 })();
