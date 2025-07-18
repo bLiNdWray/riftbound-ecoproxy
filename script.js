@@ -123,11 +123,9 @@ function renderCards(ids, clear = true) {
     }
 
     // Core symbols
-    replaceCode('Tap:',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
-    replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
-    replaceCode('Rune',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
-    replaceCode('S',     `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`);
-    replaceCode('C',     `<img src="images/${color}2.png" class="inline-icon" alt="${color}">`);
+    replaceCode('[Tap]',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode('[Might]', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+    replaceCode('[Power]',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
 
     // Elemental runes
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
