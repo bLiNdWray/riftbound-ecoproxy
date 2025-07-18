@@ -88,35 +88,21 @@ function renderSearchResults(list) {
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
-function formatDescription(txt = '', color) {
-  // Remove any whitespace around bracket codes, then inject images
-  let out = txt
-    // Tap
-    .replace(/\s*\[Tap\]:\s*/g, `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-    // Might
-    .replace(/\s*\[Might\]\s*/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-    // Rune
-    .replace(/\s*\[Rune\]\s*/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-    // S
-    .replace(/\s*\[S\]\s*/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-    // Colored cost
-    .replace(new RegExp(`\\s*\\[C\\]\\s*`, 'g'),
-      `<img src="images/${color}2.png" class="inline-icon" alt="C">`);
+// Icon replacer with whitespace collapse
+  function formatDescription(txt='', color) {
+    let out = txt
+      .replace(/\s*\[Tap\]:\s*/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\s*\[Might\]\s*/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
+      .replace(/\s*\[Rune\]\s*/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
+      .replace(/\s*\[S\]\s*/g,         `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+      .replace(new RegExp(`\\s*\\[C\\]\\s*`, 'g'), `<img src="images/${color}2.png" class="inline-icon" alt="C">`);
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+      out = out.replace(new RegExp(`\\s*\\[${col}\\]\\s*`, 'g'), `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+    });
+    // collapse any remaining whitespace
+    return out.replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ').trim();
+  }
 
-  // Other runes
-  ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-    const re = new RegExp(`\\s*\\[${col}\\]\\s*`, 'g');
-    out = out.replace(re, `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
-  });
-
-  // Collapse any remaining newline or multiple spaces
-  out = out
-    .replace(/>\s+</g, '><')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-
-  return out;
-}
   // Builders with dash separator
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
