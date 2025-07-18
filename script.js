@@ -101,32 +101,60 @@
   }
 
   // Builders with dash separator
-  function makeUnit(c) {
-    const cols = (c.colors||'').split(/[;]\s*/).filter(Boolean);
-    const force = cols.map(col=>`<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
-    const might = c.might?`<img src="images/SwordIconRB.png" class="inline-icon" alt="Might"> ${c.might}`:'';
-    const desc = formatDescription(c.description, cols[0]||'');
-    const tagsArr = c.tags?c.tags.split(/;\s*/):[];
-    const tagsStr = tagsArr.length?` - ${tagsArr.join(' ')}`:'';
-    return build(c.variantNumber, `
-      <div class="top-bar"><span class="cost">${c.energy}${force}</span><span class="might">${might}</span></div>
-      <div class="name">${c.name}</div>
-      <div class="middle">${desc}<div class="color-indicator">${cols.map(col=>`<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}<span class="color-text">${cols.join(', ')}</span></div></div>
-      <div class="bottom-bar"><span class="type-line">${c.type}${tagsStr}</span></div>`);
-  }
+  // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
-  function makeSpell(c) {
-    const cols = (c.colors||'').split(/[;]\s*/).filter(Boolean);
-    const force = cols.map(col=>`<img src="images/${col}2.png" class="inline-icon" alt="${col}">`).join('');
-    const desc = formatDescription(c.description, cols[0]||'');
-    const tagsArr = c.tags?c.tags.split(/;\s*/):[];
-    const tagsStr = tagsArr.length?` - ${tagsArr.join(' ')}`:'';
-    return build(c.variantNumber, `
-      <div class="top-bar"><span class="cost">${c.energy}${force}</span></div>
-      <div class="name">${c.name}</div>
-      <div class="middle">${desc}<div class="color-indicator">${cols.map(col=>`<img src="images/${col}.png" class="inline-icon" alt="${col}">`).join('')}<span class="color-text">${cols.join(', ')}</span></div></div>
-      <div class="bottom-bar"><span class="type-line">${c.type}${tagsStr}</span></div>`);
-  }
+function makeUnit(c) {
+  const cols   = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const costN  = Number(c.energy) || 0;      // cost numeric
+  const powN   = Number(c.power)  || 0;      // power numeric
+  // build cost icons based on power
+  const icons  = Array(powN).fill().map(_=>
+    `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
+  ).join('');
+  const mightHTML = c.might
+    ? `<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`
+    : '';
+
+  const descHTML = formatDescription(c.description, cols[0]||'');
+  const tags     = (c.tags||'').split(/;\s*/).join(' ');
+  
+  return build(c.variantNumber, `
+    <div class="top-bar">
+      <span class="cost">${costN}${icons}</span>
+      <span class="might">${mightHTML}</span>
+    </div>
+    <div class="name">${c.name}</div>
+    <div class="middle">${descHTML}</div>
+    <div class="bottom-bar">
+      <span class="type-line">${c.type}${ tags ? ' - '+tags : '' }</span>
+      <img src="images/${cols[0]||'Body'}.png" class="faction-icon" alt="${cols[0]||''}">
+    </div>`);
+}
+
+function makeSpell(c) {
+  const cols   = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const costN  = Number(c.energy) || 0;
+  const powN   = Number(c.power)  || 0;
+  const icons  = Array(powN).fill().map(_=>
+    `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
+  ).join('');
+  const descHTML = formatDescription(c.description, cols[0]||'');
+  const tags     = (c.tags||'').split(/;\s*/).join(' ');
+  
+  return build(c.variantNumber, `
+    <div class="top-bar">
+      <span class="cost">${costN}${icons}</span>
+      <span class="might"></span>
+    </div>
+    <div class="name">${c.name}</div>
+    <div class="middle">${descHTML}</div>
+    <div class="bottom-bar">
+      <span class="type-line">${c.type}${ tags ? ' - '+tags : '' }</span>
+      <img src="images/${cols[0]||'Body'}.png" class="faction-icon" alt="${cols[0]||''}">
+    </div>`);
+}
+
+
 
   function makeBattlefield(c) {
     const desc = formatDescription(c.description, '');
