@@ -67,7 +67,6 @@
   align-items: center;
   gap: 4px;
 }
-/* Ensure any icon inside .might is sized correctly */
 .card .might img {
   width: 14px;
   height: 14px;
@@ -85,7 +84,7 @@
 
 /* Middle body */
 .card .middle {
-  position: relative;        /* to anchor the color-indicator */
+  position: relative;        /* to anchor color-indicator */
   flex: 1;
   padding: 6px;
   display: flex;
@@ -95,10 +94,12 @@
   font-size: 8pt;
   overflow-y: auto;
 }
-/* Color indicator now sits at bottom-right of .middle */
+
+/* Color indicator now sits just above the bottom-bar */
 .card .middle .color-indicator {
   position: absolute;
-  bottom: 4px;
+  /* bottom-bar is 10mm tall + 4px top padding in bottom-bar */
+  bottom: calc(10mm + 4px);
   right: 4px;
   display: flex;
   align-items: center;
@@ -130,7 +131,6 @@
 .card .type-line {
   white-space: nowrap;
 }
-/* Faction icon remains in bottom-right here */
 .card .faction-icon {
   width: 18px;
   height: 18px;
