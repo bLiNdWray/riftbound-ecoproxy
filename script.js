@@ -62,15 +62,17 @@
     );
   });
 
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const t = (c.type||'').toLowerCase(); if (!allowedTypes.includes(t)) return;
-      const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell, battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
-      el.classList.add(typeClassMap[t]);
-      results.appendChild(el);
-    });
-  }
+function renderSearchResults(list) {
+  results.innerHTML = '';
+  list.forEach(c => {
+    const t = (c.type||'').toLowerCase();
+    if (!allowedTypes.includes(t)) return;
+    const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell,
+                 battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
+    el.classList.add(typeClassMap[t]);
+    results.appendChild(el);
+  });
+}
 
   function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
