@@ -104,6 +104,8 @@
 .card .middle .color-indicator img {
   width: 18px;
   height: 18px;
+  display: inline-block;     
+  vertical-align: text-bottom;
 }
 .card .middle .color-text {
   font-size: 8pt;
@@ -396,17 +398,4 @@
   height: 100%;
 }
 
-/* Prevent inline icons from causing line‐breaks */
-.inline-icon,
-.cost-icon,
-.might-icon {
-  display: inline-block;
-  vertical-align: text-bottom;
-}
 
-/* Prevent the icon + following text from wrapping */
-.color-indicator,
-.card .top-bar .cost,
-.card .top-bar .might {
-  white-space: nowrap;
-}
