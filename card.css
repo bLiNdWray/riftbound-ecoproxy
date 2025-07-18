@@ -82,9 +82,9 @@
   flex-shrink: 0;
 }
 
-/* Middle body (no other changes above) */
+/* Middle body */
 .card .middle {
-  position: relative;
+  position: relative;   /* for absolutely positioned children */
   flex: 1;
   padding: 6px;
   display: flex;
@@ -92,19 +92,14 @@
   justify-content: center;
   text-align: justify;
   font-size: 8pt;
-  overflow-y: auto;
+  overflow: visible;    /* allow overflow for color-indicator */
 }
 
-/* Allow middle to show overflow for our indicator */
-.card .middle {
-  overflow: visible;    /* was overflow-y:auto */
-}
-
-/* Global color‐indicator (not nested under .middle) */
+/* Color indicator (icon + text) above bottom bar */
 .card .color-indicator {
   position: absolute;
-  bottom: calc(10mm + 4px);  /* 10mm bottom-bar + its top padding */
-  right: 6px;                /* matches bottom-bar horizontal padding */
+  bottom: calc(10mm + 4px);  /* bottom-bar height + its top padding */
+  right: 6px;                /* same inset as bottom-bar horizontal padding */
   display: flex;
   align-items: center;
   gap: 4px;
@@ -122,6 +117,7 @@
   text-transform: capitalize;
   color: #000;
 }
+
 /* Bottom bar: type/tags + faction icon */
 .card .bottom-bar {
   padding: 4px 6px;
