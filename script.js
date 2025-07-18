@@ -298,7 +298,7 @@ function build(id, html) {
 
   // 7) Route clicks through the shared global API
   addBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
+    
     window.addCard(id);
   });
   removeBtn.addEventListener('click', function(e) {
