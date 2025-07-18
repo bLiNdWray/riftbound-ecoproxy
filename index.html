@@ -7,32 +7,37 @@
   <link rel="stylesheet" href="style.css">
   <!-- Card component styles -->
   <link rel="stylesheet" href="card.css">
+  <!-- Top-bar styles -->
+  <link rel="stylesheet" href="topbar.css">
 </head>
 <body>
-  <header id="top-bar">
-  <div class="left-group">
-    <button id="btn-add" class="bar-btn">Add Cards</button>
-    <button id="btn-import" class="bar-btn">Import List</button>
-    <button id="btn-overview" class="bar-btn">Overview</button>
-    <button id="btn-fullproxy" class="bar-btn">Full Proxy</button>
-  </div>
-  <div class="center-group">
-    <span id="total-count">0 cards</span>
-  </div>
-  <div class="right-group">
-    <button id="btn-print" class="bar-btn">Print</button>
-    <button id="btn-reset" class="bar-btn">Reset</button>
-    <a href="https://paypal.me/yourhandle" target="_blank" class="bar-btn"><img src="images/paypal-logo.png" alt="PayPal"></a>
-    <a href="https://venmo.com/yourhandle" target="_blank" class="bar-btn"><img src="images/venmo-logo.png" alt="Venmo"></a>
-  </div>
-</header>
-  <!-- Add Cards Button -->
-  <button id="open-search" class="fab-btn">Add Cards</button>
+  <!-- Fixed Top Bar -->
+  <nav id="top-bar">
+    <div class="topbar-left">
+      <button id="btn-add" class="topbar-btn">Add Cards</button>
+      <button id="btn-import" class="topbar-btn">Import List</button>
+      <button id="btn-print" class="topbar-btn">Print</button>
+      <button id="btn-overview" class="topbar-btn">Overview</button>
+      <button id="btn-full-proxy" class="topbar-btn">Full Proxy</button>
+    </div>
+    <div class="topbar-center">
+      <span id="card-count">0 cards</span>
+    </div>
+    <div class="topbar-right">
+      <a href="https://www.paypal.com/paypalme/YourLink" target="_blank" class="donate-btn">
+        <img src="images/paypal-logo.png" alt="PayPal">
+      </a>
+      <a href="https://venmo.com/YourHandle" target="_blank" class="donate-btn">
+        <img src="images/venmo-logo.png" alt="Venmo">
+      </a>
+      <button id="btn-reset" class="topbar-btn">Reset</button>
+    </div>
+  </nav>
 
   <!-- Main card container -->
   <main id="card-container" class="layout-horizontal"></main>
 
-  <!-- Full-screen Search Modal -->
+  <!-- Full-screen Search Modal (anchored under top bar) -->
   <div id="search-modal" class="search-modal hidden">
     <div class="modal-content">
       <button id="close-search" class="modal-close">×</button>
@@ -45,6 +50,8 @@
     </div>
   </div>
 
+  <!-- Core logic scripts -->
   <script src="script.js"></script>
+  <script src="ui.js"></script>
 </body>
 </html>
