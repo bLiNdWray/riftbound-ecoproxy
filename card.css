@@ -129,7 +129,7 @@
   white-space: nowrap;
 }
 
-/* === Battlefield Cards (fixed side widths) === */
+/* === Battlefield Cards === */
 .card.battlefield {
   display: flex;
   flex-direction: column;
@@ -137,51 +137,69 @@
   border: 1px solid #000;
   background: #fff;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;   /* allow rotated text to show */
 }
 
-/* Container for the three panels */
+/* Three‐column container */
 .card.battlefield .bf-columns {
   display: flex;
   height: 100%;
   width: 100%;
 }
 
-/* Side panels: fixed width */
+/* Side panels – fixed width, centered content */
 .card.battlefield .bf-col.side {
-  flex: 0 0 20mm;     /* fixed 20 mm width */
+  flex: 0 0 20mm;      /* exactly 20 mm wide */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
   box-sizing: border-box;
+  padding: 4px;
 }
 
-/* Left side text rotated so bottom of text faces outside */
+/* Left panel text: rotate so bottom of text faces outside edge */
 .card.battlefield .bf-col.side.left .bf-text {
   transform: rotate(-90deg);
   transform-origin: bottom left;
   white-space: nowrap;
   font-size: 8pt;
+  color: #000;
 }
 
-/* Right side text rotated opposite direction */
+/* Right panel text: rotate opposite direction */
 .card.battlefield .bf-col.side.right .bf-text {
   transform: rotate(90deg);
   transform-origin: top left;
   white-space: nowrap;
   font-size: 8pt;
+  color: #000;
 }
 
-/* Center panel: fill remaining space */
+/* Center panel – fill remaining space */
 .card.battlefield .bf-col.center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px;
   box-sizing: border-box;
+  padding: 4px;
+}
+
+/* “BATTLEFIELD” label */
+.card.battlefield .bf-type-text {
+  font-size: 12pt;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  color: #000;
+}
+
+/* Name under the label */
+.card.battlefield .bf-name {
+  font-size: 10pt;
+  text-align: center;
+  color: #000;
 }
 
 /* “BATTLEFIELD” label */
