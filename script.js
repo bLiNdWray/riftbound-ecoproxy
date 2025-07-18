@@ -88,17 +88,20 @@ function renderSearchResults(list) {
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
-  // Icon replacer
-  function formatDescription(txt='', color) {
+ // Icon replacer with whitespace collapse
+function formatDescription(txt='', color) {
     let out = txt
-      .replace(/\[Tap\]:/g, `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\[Might\]/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[Rune\]/g, `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-      .replace(/\[S\]/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\[C\]/g, `<img src="images/${color}2.png" class="inline-icon" alt="C">`);
+      .replace(/\[Tap\]:/g, `<img src=\"images/Tap.png\" class=\"inline-icon\" alt=\"Tap\">`)
+      .replace(/\[Might\]/g, `<img src=\"images/SwordIconRB.png\" class=\"inline-icon\" alt=\"Might\">`)
+      .replace(/\[Rune\]/g, `<img src=\"images/RainbowRune.png\" class=\"inline-icon\" alt=\"Rune\">`)
+      .replace(/\[S\]/g, `<img src=\"images/SwordIconRB.png\" class=\"inline-icon\" alt=\"S\">`)
+      .replace(/\[C\]/g, `<img src=\"images/${color}2.png\" class=\"inline-icon\" alt=\"C\">`);
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-      out = out.replace(new RegExp(`\\[${col}\\]`, 'g'), `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+      out = out.replace(new RegExp(`\\[${col}\\]`, 'g'),
+        `<img src=\"images/${col}.png\" class=\"inline-icon\" alt=\"${col}\">`);
     });
+    // collapse whitespace and remove stray breaks
+    out = out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ');
     return out;
   }
 
