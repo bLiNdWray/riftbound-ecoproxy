@@ -129,7 +129,7 @@
   white-space: nowrap;
 }
 
-/* === Battlefield Cards === */
+/* === Battlefield Cards (fixed side widths) === */
 .card.battlefield {
   display: flex;
   flex-direction: column;
@@ -140,26 +140,24 @@
   overflow: hidden;
 }
 
+/* Container for the three panels */
 .card.battlefield .bf-columns {
   display: flex;
   height: 100%;
   width: 100%;
 }
 
-.card.battlefield .bf-col {
-  flex: 1;
-  position: relative;
-  box-sizing: border-box;
-}
-
-/* Left & Right side panels */
+/* Side panels: fixed width */
 .card.battlefield .bf-col.side {
+  flex: 0 0 20mm;     /* fixed 20 mm width */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
+  box-sizing: border-box;
 }
 
+/* Left side text rotated so bottom of text faces outside */
 .card.battlefield .bf-col.side.left .bf-text {
   transform: rotate(-90deg);
   transform-origin: bottom left;
@@ -167,6 +165,7 @@
   font-size: 8pt;
 }
 
+/* Right side text rotated opposite direction */
 .card.battlefield .bf-col.side.right .bf-text {
   transform: rotate(90deg);
   transform-origin: top left;
@@ -174,26 +173,32 @@
   font-size: 8pt;
 }
 
-/* Center panel */
+/* Center panel: fill remaining space */
 .card.battlefield .bf-col.center {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 4px;
+  box-sizing: border-box;
 }
 
+/* “BATTLEFIELD” label */
 .card.battlefield .bf-type-text {
   font-size: 12pt;
   font-weight: bold;
   margin-bottom: 4px;
   text-transform: uppercase;
+  text-align: center;
 }
 
+/* Name under the label */
 .card.battlefield .bf-name {
   font-size: 10pt;
   text-align: center;
 }
+
 
 
 /* === Legend Cards === */
