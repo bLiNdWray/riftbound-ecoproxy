@@ -197,12 +197,25 @@ function makeSpell(c) {
     <div class="legend-body">${bodyHTML}</div>
   `);
 }
-  function makeRune(c) {
-    const desc = formatDescription(c.description, '');
-    const tagsArr = c.tags?c.tags.split(/;\s*/):[];
-    const tagsStr = tagsArr.length?` - ${tagsArr.join(' ')}`:'';
-    return build(c.variantNumber, `<div class="rune-body">${desc}</div><div class="bottom-bar"><span class="type-line">${c.type}${tagsStr}</span></div>`);
-  }
+function makeRune(c) {
+  // Name
+  const title = c.name || '';
+
+  // Rune symbol image URL
+  // Assuming your sheet has an 'imageUrl' field for the rune art
+  // Otherwise build path from variantNumber or color
+  const imgSrc = c.imageUrl 
+    || `images/${c.variantNumber}.png`
+    || '';
+
+  return build(c.variantNumber, `
+    <div class="rune-title">${title}</div>
+    <div class="rune-image">
+      <img src="${imgSrc}" alt="${title}">
+    </div>
+  `);
+}
+
 
   // Generic build
   function build(id, html) {
