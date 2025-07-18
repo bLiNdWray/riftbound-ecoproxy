@@ -176,15 +176,26 @@
   background: #fff;
 }
 
-/* Header with oversized color icons on left, “LEGEND” on right */
+/* === Legend Cards Fully 1/3 Layout === */
+.card.legend {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #000;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 1) Header – top third */
 .card.legend .legend-header {
+  flex: 1 1 33.33%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
   border-bottom: 1px solid #000;
   box-sizing: border-box;
-  flex-shrink: 0;
 }
 .card.legend .legend-icons {
   display: flex;
@@ -192,36 +203,49 @@
   gap: 6px;
 }
 .card.legend .legend-icons img {
-  width: 24px;   /* increased from 18px */
-  height: 24px;
+  width: 100px;
+  height: 100px;
 }
 .card.legend .legend-title {
   font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
+  text-align: center;
 }
 
-/* Name area: only the main title, centered */
+/* 2) Name block – middle third */
 .card.legend .legend-name {
-  padding: 12px 8px;            /* more breathing room */
-  text-align: center;
+  flex: 1 1 33.33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 8px;
   border-bottom: 1px solid #000;
   box-sizing: border-box;
-  flex-shrink: 0;
+  text-align: center;
 }
 .card.legend .legend-name .main-title {
-  font-size: 16pt;              /* bumped up */
+  font-size: 16pt;
   font-weight: bold;
+  line-height: 1.2;
   margin: 0;
 }
+.card.legend .legend-name .subtitle {
+  font-size: 12pt;    /* a couple sizes smaller than main title */
+  font-style: italic;
+  margin-top: 4px;
+  color: #333;
+}
 
-/* Body text area: fill remaining space */
+/* 3) Body – bottom third */
 .card.legend .legend-body {
-  padding: 8px 10px;
+  flex: 1 1 33.33%;
+  padding: 6px 10px;
   font-size: 9pt;
   line-height: 1.4;
   overflow-y: auto;
-  flex: 1;
+  box-sizing: border-box;
 }
 
 /* === Rune === */
