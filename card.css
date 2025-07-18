@@ -1,4 +1,4 @@
-/* card.css */
+/* === card.css === */
 
 /* Page setup */
 body {
@@ -107,14 +107,18 @@ body {
 }
 
 /* Modal */
-.hidden { display: none; }
+/* Hide by default */
 #search-modal {
+  display: none;
   position: fixed;
   inset: 0;
+  z-index: 1000;
+}
+/* Show when not .hidden */
+#search-modal:not(.hidden) {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
 }
 .modal-backdrop {
   position: absolute;
@@ -134,7 +138,8 @@ body {
 }
 #close-search {
   position: absolute;
-  top: 8px; right: 8px;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -153,10 +158,11 @@ body {
   gap: 12px;
 }
 
-/* Toast */
+/* Toast Notification */
 .toast {
   position: fixed;
-  top: 16px; right: 16px;
+  top: 16px;
+  right: 16px;
   background: rgba(255,255,255,0.9);
   padding: 8px 12px;
   border-radius: 4px;
@@ -166,10 +172,18 @@ body {
   transition: opacity 0.3s ease-out;
   z-index: 1001;
 }
-.toast.hide { opacity: 0; }
+.toast.hide {
+  opacity: 0;
+}
 
-/* Print */
+/* Print Styles */
 @media print {
-  body, #search-modal { display: none; }
-  .card { margin: 0; box-shadow: none; }
+  body,
+  #search-modal {
+    display: none;
+  }
+  .card {
+    margin: 0;
+    box-shadow: none;
+  }
 }
