@@ -123,9 +123,9 @@ function renderCards(ids, clear = true) {
     }
 
     // Core symbols
-    replaceCode(/\[Tap\]/gi,  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
-    replaceCode('[Might]', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
-    replaceCode('[power]',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
+    replaceCode('Tap',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+    replaceCode('power',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
 
     // Elemental runes
     ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
