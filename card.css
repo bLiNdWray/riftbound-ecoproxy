@@ -171,44 +171,59 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  box-sizing: border-box;
 }
-.card.legend .legend-header {
-  background: #000;
-  color: #fff;
+.card.legend .legend-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 6px;
-  text-align: center;
+}
+.card.legend .legend-icons img {
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+}
+.card.legend .legend-label {
+  font-size: 10pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.card.legend .legend-divider {
+  border: none;
+  border-top: 2px solid #000;
+  margin: 0;
+}
+.card.legend .legend-name {
+  padding: 4px 6px;
   font-size: 12pt;
   font-weight: bold;
-  flex-shrink: 0;
+  text-align: center;
 }
 .card.legend .legend-body {
   padding: 8px;
   font-size: 8pt;
   flex: 1;
   overflow-y: auto;
+  text-align: left;
 }
 
-/* Rune card */
-.card.rune {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.card.rune .rune-body {
-  padding: 8px;
-  font-size: 8pt;
-  flex: 1;
-  box-sizing: border-box;
-  overflow-y: auto;
+/* Battlefield side text orientation */
+.card.battlefield .bf-col.side {
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-end;
+  padding: 6px;
+  box-sizing: border-box;
 }
-
-/* Inline icons */
-.inline-icon {
-  width: 12px;
-  height: 12px;
-  vertical-align: text-bottom;
+.card.battlefield .bf-col.side.left .bf-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+.card.battlefield .bf-col.side.right {
+  justify-content: flex-start;
+}
+.card.battlefield .bf-col.side.right .bf-text {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
 }
