@@ -299,10 +299,21 @@ function build(id, html) {
 
   return wrapper;
 }
-function addCard(vn) { … }
-  function removeCard(vn, el) { … }
+// -------------------------------------------------
+// Your core add/remove implementations
+// -------------------------------------------------
+function addCard(vn) {
+  // … your existing logic to render the card, update addedCounts, etc. …
+}
 
-  // **Expose** to window for ui.js
-  window.addCard    = addCard;
-  window.removeCard = removeCard;
-})();
+function removeCard(vn, el) {
+  // … your existing logic to remove the card element and update addedCounts …
+}
+
+// -------------------------------------------------
+// Expose to ui.js (must be before the IIFE closes)
+// -------------------------------------------------
+window.addCard    = addCard;
+window.removeCard = removeCard;
+
+})(); // <-- this closes your top-level IIFE
