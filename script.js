@@ -173,16 +173,16 @@ function makeSpell(c) {
   }
 
  function makeLegend(c) {
-  // 1) Icons
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
   const iconsHTML = cols.map(col =>
     `<img src="images/${col}.png" alt="${col}">`
   ).join('');
 
-  // 2) Name split on comma → two lines (moniker second line)
-  const mainTitle = (c.name || '').split(',').map(s => s.trim()).join('<br>');
+  // Character name and moniker
+  const [charName, moniker] = (c.name || '').split(',').map(s => s.trim());
+  const mainTitle = charName || '';
+  const subtitle  = moniker || '';  // moniker from variantType previously
 
-  // 3) Body
   const bodyHTML  = formatDescription(c.description, cols[0]||'');
 
   return build(c.variantNumber, `
@@ -192,6 +192,7 @@ function makeSpell(c) {
     </div>
     <div class="legend-name">
       <div class="main-title">${mainTitle}</div>
+      ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
     </div>
     <div class="legend-body">${bodyHTML}</div>
   `);
