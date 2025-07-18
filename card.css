@@ -172,20 +172,16 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #000;
-  background: #fff;
-  box-sizing: border-box;
-  overflow: hidden;
 }
 
-/* Header – top third */
+/* 1) Top third: legend-header */
 .card.legend .legend-header {
   flex: 1 1 33.33%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;        /* legend-title at top */
   justify-content: space-between;
   padding: 6px 8px;
-  border-bottom: 1px solid #000;
+  /* border-bottom removed */
   box-sizing: border-box;
 }
 .card.legend .legend-icons {
@@ -194,17 +190,17 @@
   gap: 6px;
 }
 .card.legend .legend-icons img {
-  width: 50px;   /* reduced from 100px */
+  width: 50px;
   height: 50px;
 }
 .card.legend .legend-title {
   font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
-  text-align: center;
+  /* push to top: no extra alignment needed beyond flex-start */
 }
 
-/* Name block – middle third */
+/* 2) Middle third: legend-name (unchanged) */
 .card.legend .legend-name {
   flex: 1 1 33.33%;
   display: flex;
@@ -223,15 +219,19 @@
   margin: 0;
 }
 
-/* Body text area – bottom third */
+/* 3) Bottom third: legend-body */
 .card.legend .legend-body {
   flex: 1 1 33.33%;
+  display: flex;                    /* for vertical centering */
+  align-items: center;              /* vertical */
+  justify-content: center;          /* horizontal */
   padding: 6px 10px;
   font-size: 9pt;
   line-height: 1.4;
-  overflow-y: auto;
   box-sizing: border-box;
-  text-align: center;   /* center the text */
+  /* border-top removed */
+  overflow: auto;
+  text-align: center;
 }
 
 /* === Rune === */
