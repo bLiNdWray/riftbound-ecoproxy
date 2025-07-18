@@ -300,112 +300,133 @@ function build(id, html) {
   return wrapper;
 }
 
-   const topBar = document.getElementById('top-bar');
-  const importInput = document.getElementById('import-file');
-  const overviewPanel = document.getElementById('overview-panel');
-  const overviewList = document.getElementById('overview-list');
-  const countLabel = document.getElementById('card-count');
-  const notification = document.getElementById('notification');
-  let fullProxy = false;
+// --- TOP BAR ELEMENTS ---
+const btnAdd      = document.getElementById('btn-add');
+const btnImport   = document.getElementById('btn-import');
+const btnPrint    = document.getElementById('btn-print');
+const btnOverview = document.getElementById('btn-overview');
+const btnFull     = document.getElementById('btn-fullproxy');
+const btnReset    = document.getElementById('btn-reset');
+const totalCount  = document.getElementById('total-count');
 
-  function updateCount() {
-    const total = Object.values(addedCounts).reduce((a,b)=>a+b,0);
-    countLabel.textContent = `${total} card${total!==1?'s':''}`;
-  }
+// move Add Cards wiring
+btnAdd.addEventListener('click', () => openBtn.click());
 
-  function showNotification(msg) {
-    notification.textContent = msg;
-    notification.classList.remove('hidden');
-    notification.classList.add('show');
-    setTimeout(() => {
-      notification.classList.remove('show');
-      notification.classList.add('hidden');
-    }, 2000);
-  }
+// IMPORT LIST (paste newline-separated IDs)
+btnImport.addEventListener('click', () => {
+  const list = prompt('Paste your list of variant IDs (comma or newline separated):');
+  if (!list) return;
+  const ids = list.split(/[\s,]+/).filter(Boolean);
+  renderCards(ids, true);
+  ids.forEach(id => addedCounts[id]=1);
+  syncURL();
+  updateCount();
+});
 
-  // Import List
-  document.getElementById('import-list').addEventListener('click', ()=> importInput.click());
-  importInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    file.text().then(txt => {
-      const ids = txt.split(/\s+/).filter(Boolean);
-      ids.forEach(vn => addCard(vn));
-      updateUrl(); updateCount();
-      showNotification('Imported list');
+// PRINT
+btnPrint.addEventListener('click', () => {
+  const dlg = document.createElement('div');
+  dlg.innerHTML = '<button id="print-confirm">Print Now</button>';
+  Object.assign(dlg.style, { position:'fixed', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'#fff', padding:'20px', zIndex:3000 });
+  document.body.appendChild(dlg);
+  document.getElementById('print-confirm')
+    .addEventListener('click', () => { window.print(); dlg.remove(); });
+});
+
+// OVERVIEW PANEL
+const overview = document.createElement('div');
+overview.id = 'overview-panel';
+overview.style = 'position:fixed;top:64px;right:16px;width:300px;height:70%;background:#fff;overflow:auto;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:2001;display:none;';
+document.body.appendChild(overview);
+btnOverview.addEventListener('click', () => {
+  overview.innerHTML = '';
+  // group by type in order
+  ['legend','rune','unit','spell','gear','battlefield'].forEach(type => {
+    const group = Array.from(container.querySelectorAll(`.card.${type}`));
+    if (!group.length) return;
+    const title = document.createElement('h4');
+    title.textContent = type.charAt(0).toUpperCase()+type.slice(1);
+    overview.appendChild(title);
+    group.forEach(card => {
+      const id = card.getAttribute('data-variant');
+      const name = card.querySelector('.name, .legend-name .main-title, .rune-title').textContent;
+      const entry = document.createElement('div');
+      entry.innerHTML = `
+        <span>${name}</span>
+        <button class="ov-sub" data-id="${id}">–</button>
+        <span>${addedCounts[id]||0}</span>
+        <button class="ov-add" data-id="${id}">+</button>
+      `;
+      overview.appendChild(entry);
     });
   });
-
-  // Print view
-  document.getElementById('print-cards').addEventListener('click', () => {
-    // hide helper UI
-    topBar.style.display = 'none';
-    document.body.classList.add('print-mode');
-    window.print();
-    // restore
-    window.onafterprint = () => { topBar.style.display = ''; document.body.classList.remove('print-mode'); };
+  overview.style.display = overview.style.display==='none'?'block':'none';
+  // delegate add/subtract
+  overview.querySelectorAll('.ov-add').forEach(b => b.onclick = e => {
+    const id = e.target.dataset.id; addCard(id); updateCount(); syncURL();
   });
-
-  // Overview toggle
-  document.getElementById('overview-toggle').addEventListener('click', () => {
-    overviewList.innerHTML = '';
-    // build grouped list by type & color
-    ['legend','rune','unit','spell','gear','battlefield'].forEach(type => {
-      const group = document.createElement('div');
-      group.innerHTML = `<h3>${type.charAt(0).toUpperCase()+type.slice(1)}</h3>`;
-      for (const [vn, count] of Object.entries(addedCounts)) {
-        if (count && getCardType(vn)===type) {
-          const entry = document.createElement('div');
-          entry.textContent = `${vn}: ${count}`;
-          group.appendChild(entry);
-        }
-      }
-      overviewList.appendChild(group);
-    });
-    overviewPanel.classList.remove('hidden');
+  overview.querySelectorAll('.ov-sub').forEach(b => b.onclick = e => {
+    const id = e.target.dataset.id; const el = container.querySelector(`.card[data-variant="${id}"]`);
+    removeCard(id, el); updateCount(); syncURL();
   });
-  document.getElementById('close-overview').addEventListener('click', ()=> overviewPanel.classList.add('hidden'));
+});
 
-  // Full Proxy toggle
-  document.getElementById('full-proxy-toggle').addEventListener('click', () => {
-    fullProxy = !fullProxy;
-    document.querySelectorAll('#card-container .card img').forEach(img => {
-      const base = img.getAttribute('src');
-      img.src = fullProxy ? base.replace('/proxy/','/full/') : base;
-    });
+// FULL PROXY (toggle image src)
+let proxyMode = true;
+btnFull.addEventListener('click', () => {
+  proxyMode = !proxyMode;
+  document.querySelectorAll('.card img').forEach(img => {
+    img.src = proxyMode ? img.src.replace('/real/', '/proxy/') : img.src.replace('/proxy/', '/real/');
   });
+  btnFull.textContent = proxyMode ? 'Full Proxy' : 'Real Images';
+});
 
-  // Reset
-  document.getElementById('reset-cards').addEventListener('click', () => {
-    container.innerHTML='';
-    Object.keys(addedCounts).forEach(k=>addedCounts[k]=0);
-    updateUrl(); updateCount();
-    showNotification('Reset all cards');
-  });
+// RESET
+btnReset.addEventListener('click', () => {
+  container.innerHTML = '';
+  addedCounts = {};
+  syncURL();
+  updateCount();
+});
 
-  // URL & caching
-  function updateUrl() {
-    const params = new URLSearchParams();
-    const ids = [];
-    for (const [vn, count] of Object.entries(addedCounts)) {
-      for (let i=0;i<count;i++) ids.push(vn);
-    }
-    if (ids.length) params.set('id', ids.join(','));
-    history.replaceState(null,'',`?${params.toString()}`);
-    localStorage.setItem('lastIds', JSON.stringify(ids));
+// URL sync & cache
+function syncURL() {
+  const ids = Object.keys(addedCounts).filter(id=>addedCounts[id]>0);
+  history.replaceState(null,'','?id='+ids.join(','));
+  localStorage.setItem('lastIds', ids.join(','));
+}
+function loadFromCache() {
+  const cached = localStorage.getItem('lastIds');
+  if (cached) {
+    const ids = cached.split(',').filter(Boolean);
+    renderCards(ids, true);
+    ids.forEach(id=>addedCounts[id]=1);
+    updateCount();
   }
-  // on load, restore
-  window.addEventListener('load', () => {
-    const saved = JSON.parse(localStorage.getItem('lastIds')||'[]');
-    saved.forEach(vn=>addCard(vn)); updateCount();
-  });
+}
+window.addEventListener('load', loadFromCache);
 
-  // Override existing addCard to include UI updates
-  const origAdd = addCard;
-  window.addCard = vn => {
-    origAdd(vn);
-    updateUrl(); updateCount();
-    showNotification(`Added ${vn}`);
-  };
+// COUNT & notification
+function updateCount() {
+  const total = Object.values(addedCounts).reduce((sum,n)=>sum+n, 0);
+  totalCount.textContent = `${total} card${total!==1?'s':''}`;
+}
+function notify(msg) {
+  const n = document.createElement('div');
+  n.textContent = msg;
+  Object.assign(n.style, { position:'fixed', bottom:'80px', right:'20px', background:'#28a745', color:'#fff', padding:'8px 12px', borderRadius:'4px', opacity:1, transition:'opacity 0.5s' });
+  document.body.appendChild(n);
+  setTimeout(()=> n.style.opacity=0, 2000);
+  setTimeout(()=> n.remove(), 2500);
+}
+// hook into addCard
+const origAdd = addCard;
+addCard = function(vn) {
+  origAdd(vn);
+  notify(`Added ${vn}`);
+  updateCount();
+  syncURL();
+};
+
 
 })();
