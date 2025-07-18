@@ -59,3 +59,42 @@
   margin-bottom: 12px;
   box-sizing: border-box;
 }
+/* Hover‐Controls */
+.hover-controls {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: none;
+  background: rgba(255,255,255,0.8);
+  padding: 4px;
+  border-radius: 4px;
+}
+.card:hover .hover-controls {
+  display: block;
+}
+.hover-controls button {
+  background: rgba(0,0,0,0.1);
+  border: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10pt;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.9);
+  padding: 8px 12px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 0.9rem;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+  z-index: 1001;
+}
+.toast.hide {
+  opacity: 0;
+}
