@@ -65,25 +65,51 @@
 function renderSearchResults(list) {
   results.innerHTML = '';
   list.forEach(c => {
-    const t = (c.type||'').toLowerCase();
+    // normalize once, up front
+    const raw = (c.type||'').trim();
+    const t   = raw.toLowerCase();
     if (!allowedTypes.includes(t)) return;
-    const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell,
-                 battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
+
+    // pick builder by lowercase key
+    const el = {
+      unit:        () => makeUnit(c),
+      spell:       () => makeSpell(c),
+      gear:        () => makeSpell(c),
+      battlefield: () => makeBattlefield(c),
+      legend:      () => makeLegend(c),
+      rune:        () => makeRune(c),
+    }[t]();
+
+    // attach the correct CSS class
     el.classList.add(typeClassMap[t]);
     results.appendChild(el);
   });
 }
 
-  function renderCards(ids, clear = true) {
-    if (clear) container.innerHTML = '';
-    ids.forEach(vn => jsonpFetch({ sheet:SHEET_NAME, id:vn }, data => {
-      if (!Array.isArray(data)||!data[0]) return;
-      const c = data[0]; const t = (c.type||'').toLowerCase(); if (!allowedTypes.includes(t)) return;
-      const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell, battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
+function renderCards(ids, clear = true) {
+  if (clear) container.innerHTML = '';
+  ids.forEach(vn => {
+    jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
+      if (!Array.isArray(data) || !data[0]) return;
+      const c   = data[0];
+      const raw = (c.type||'').trim();
+      const t   = raw.toLowerCase();
+      if (!allowedTypes.includes(t)) return;
+
+      const el = {
+        unit:        () => makeUnit(c),
+        spell:       () => makeSpell(c),
+        gear:        () => makeSpell(c),
+        battlefield: () => makeBattlefield(c),
+        legend:      () => makeLegend(c),
+        rune:        () => makeRune(c),
+      }[t]();
+
       el.classList.add(typeClassMap[t]);
       container.appendChild(el);
-    }));
-  }
+    });
+  });
+}
 
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
