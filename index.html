@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Riftbound Card Proxy</title>
-  <link rel="stylesheet" href="card.css" />
+  <meta charset="UTF-8">
+  <title>Modal Test</title>
+  <link rel="stylesheet" href="card.css">
 </head>
 <body>
   <button id="open-search">Add Cards</button>
@@ -12,17 +12,14 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button id="close-search">✕</button>
-      <input
-        id="card-search-input"
-        type="text"
-        placeholder="Search by name or set…"
-        autocomplete="off"
-      />
-      <div id="search-results"></div>
+      <input id="card-search-input" type="text" placeholder="Search…">
+      <div id="search-results">Results go here</div>
     </div>
   </div>
 
-  <div id="card-container"></div>
+  <div id="card-container">
+    <!-- Cards would render here -->
+  </div>
 
   <script src="script.js"></script>
 </body>
