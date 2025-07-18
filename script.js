@@ -265,31 +265,38 @@ function makeRune(c) {
  * Creates a card element in #card-container
  */
 function build(id, html) {
-  // wrapper & data-variant attribute
-const wrapper = document.createElement('div');
-wrapper.className = 'card';
-wrapper.setAttribute('data-variant', id);
-// inject your full template *inside* the wrapper
-wrapper.insertAdjacentHTML('beforeend', html);
+  // 1) Create wrapper and preserve your template exactly
+  const wrapper = document.createElement('div');
+  wrapper.className = 'card';
+  wrapper.setAttribute('data-variant', id);
+  // Insert your full template inside the wrapper
+  wrapper.insertAdjacentHTML('beforeend', html);
 
-  // quantity badge
-  const badge = document.createElement('span');
+  // 2) Quantity badge (styled by .qty-badge in card.css)
+  const badge = document.createElement('div');
   badge.className = 'qty-badge';
   badge.textContent = addedCounts[id] || 0;
   wrapper.appendChild(badge);
 
-  // + / – buttons
-  const addBtn    = document.createElement('button');
-  const removeBtn = document.createElement('button');
-  addBtn.className    = 'btn-add';
-  removeBtn.className = 'btn-remove';
-  addBtn.textContent    = '+';
-  removeBtn.textContent = '−';
-  wrapper.appendChild(addBtn);
-  wrapper.appendChild(removeBtn);
+  // 3) Hover-bar container (styled by .hover-bar)
+  const hoverBar = document.createElement('div');
+  hoverBar.className = 'hover-bar';
 
-  // ROUTE ALL CLICKS THROUGH THE GLOBAL API
-  // (this ensures ui.js sees every change)
+  // 4) “+” button (styled by .add-btn)
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '+';
+
+  // 5) “–” button (styled by .remove-btn)
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-btn';
+  removeBtn.textContent = '−';
+
+  // 6) Put buttons into the hover-bar and append
+  hoverBar.append(addBtn, removeBtn);
+  wrapper.appendChild(hoverBar);
+
+  // 7) Route clicks through the shared global API
   addBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     window.addCard(id);
@@ -301,7 +308,6 @@ wrapper.insertAdjacentHTML('beforeend', html);
 
   return wrapper;
 }
-
 
 // -------------------------------------------------
 // Expose to ui.js (must be before the IIFE closes)
