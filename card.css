@@ -336,6 +336,7 @@
   left: 0;
   width: 100%;
   display: none;
+  bottom: 0px;
 }
 .card .hover-bar button {
   flex: 1;
