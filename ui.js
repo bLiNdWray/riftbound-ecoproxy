@@ -28,9 +28,7 @@
   btnImport.addEventListener('click', () => {
     const text = prompt('Paste your list of variant numbers (one per line):');
     if (!text) return;
-    const list = text.split(/
-?
-/).map(l=>l.trim()).filter(Boolean);
+const list = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     list.forEach(vn => {
       if (!window.addedVariants.includes(vn)) {
         window.addCard(vn);
