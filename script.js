@@ -305,5 +305,5 @@ function addCard(vn) { … }
   // **Expose** to window for ui.js
   window.addCard    = addCard;
   window.removeCard = removeCard;
-})();
+}
 })();
