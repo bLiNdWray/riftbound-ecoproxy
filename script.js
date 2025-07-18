@@ -173,34 +173,25 @@ function makeSpell(c) {
   }
 
   function makeLegend(c) {
-  // Colors → icons
-  const cols       = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-  const iconsHTML  = cols.map(col =>
+  const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+  const iconsHTML = cols.map(col =>
     `<img src="images/${col}.png" alt="${col}">`
   ).join('');
 
-  // Moniker above the name
-  const subtitle   = c.variantType || '';   // e.g. “Volibear”
-  const mainTitle  = c.name;                // e.g. “Relentless Storm”
-
-  // Body description
-  const bodyHTML   = formatDescription(c.description, cols[0]||'');
+  const mainTitle = c.name;                // e.g. “Relentless Storm”
+  const bodyHTML  = formatDescription(c.description, cols[0]||'');
 
   return build(c.variantNumber, `
     <div class="legend-header">
-      <div class="legend-icons">
-        ${iconsHTML}
-      </div>
+      <div class="legend-icons">${iconsHTML}</div>
       <div class="legend-title">LEGEND</div>
     </div>
     <div class="legend-name">
-      <div class="subtitle">${subtitle}</div>
       <div class="main-title">${mainTitle}</div>
     </div>
     <div class="legend-body">${bodyHTML}</div>
   `);
 }
-
   function makeRune(c) {
     const desc = formatDescription(c.description, '');
     const tagsArr = c.tags?c.tags.split(/;\s*/):[];
