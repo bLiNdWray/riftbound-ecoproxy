@@ -134,15 +134,42 @@
   overflow: visible; /* keep this so side panels show*/
 }
 
-/* Side panels – fixed width */
+/* Side panels – fixed width and relative container */
 .card.battlefield .bf-col.side {
   flex: 0 0 20mm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
+  position: relative;        /* for absolutely positioned .bf-text */
   box-sizing: border-box;
+  /* remove flex centering/padding here */
 }
+
+/* Left panel text: pin to top inner corner, rotated */
+.card.battlefield .bf-col.side.left .bf-text {
+  position: absolute;
+  top: 4px;                  /* inset from top edge */
+  left: 0;
+  transform: rotate(-90deg);
+  transform-origin: top left;
+  white-space: nowrap;
+  font-size: 8pt;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+/* Right panel text: pin to bottom inner corner, rotated */
+.card.battlefield .bf-col.side.right .bf-text {
+  position: absolute;
+  bottom: 4px;               /* inset from bottom edge */
+  right: 0;
+  transform: rotate(90deg);
+  transform-origin: bottom right;
+  white-space: nowrap;
+  font-size: 8pt;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
 
 /* Use vertical writing mode for side text */
 .card.battlefield .bf-col.side .bf-text {
