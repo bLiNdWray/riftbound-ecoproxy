@@ -1,4 +1,4 @@
-// script.js
+// script.js - Riftbound Eco Proxy
 (() => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME = 'Riftbound Cards';
@@ -15,11 +15,9 @@
 
   /**
    * JSONP fetch helper.
-   * @param {{sheet?: string, id?: string}} params
-   * @param {function(Array)} cb
    */
   function jsonpFetch(params, cb) {
-    const callbackName = 'jsonp_cb_' + Date.now();
+    const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
     window[callbackName] = data => {
       delete window[callbackName];
       document.head.removeChild(script);
@@ -33,14 +31,17 @@
     document.head.appendChild(script);
   }
 
-  // 1) Load all cards for search
+  // Allowed types whitelist
+  const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
+
+  // Load all cards for search
   jsonpFetch({ sheet: SHEET_NAME }, data => {
     allCards = Array.isArray(data) ? data : [];
   });
 
-  // 2) Initial render from URL (?id=OGN-001,OGN-002,…)
+  // Initial render from URL (?id=...)
   const params = new URLSearchParams(window.location.search);
-  const initialIds = (params.get('id')||'')
+  const initialIds = (params.get('id') || '')
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
@@ -50,27 +51,7 @@
     initialIds.forEach(vn => addedCounts[vn] = (addedCounts[vn]||0) + 1);
   }
 
-  // 3) Formatter for icons in descriptions
-  function formatDescription(text = '', colorCode) {
-    let out = text
-      .replace(/\[Tap\]:/g,  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\[Might\]/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\[Rune\]/g,  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-      .replace(/\[S\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(/\[C\]/g,     `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
-    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-      out = out.replace(
-        new RegExp(`\\[${col}\\]`, 'g'),
-        `<img src="images/${col}.png" class="inline-icon" alt="${col}">`
-      );
-    });
-    return out;
-  }
-
-  // Allowed types whitelist
-  const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
-
-  // 4) Search modal logic
+  // Modal open/close
   openBtn.addEventListener('click', () => {
     modal.classList.remove('hidden');
     input.value = '';
@@ -79,7 +60,7 @@
   });
   closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
-  // 5) Live search filtering & rendering
+  // Live search filtering & rendering
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (!q) {
@@ -95,12 +76,13 @@
     renderSearchResults(filtered);
   });
 
-  // 6) Render list of search results
+  // Render list of search results
   function renderSearchResults(list) {
     results.innerHTML = '';
     list.forEach(c => {
       let el;
-      switch ((c.type||'').toLowerCase()) {
+      const type = (c.type||'').toLowerCase();
+      switch (type) {
         case 'unit':        el = makeUnit(c);        break;
         case 'spell':
         case 'gear':        el = makeSpell(c);       break;
@@ -113,7 +95,7 @@
     });
   }
 
-  // 7) Render specific cards by ID (for URL loads and “Add” clicks)
+  // Render specific cards by ID
   function renderCards(ids, clear = true) {
     if (clear) container.innerHTML = '';
     ids.forEach(vn => {
@@ -136,7 +118,7 @@
     });
   }
 
-  // 8) Add & remove helpers
+  // Add & remove helpers
   function addCard(vn) {
     renderCards([vn], false);
     addedCounts[vn] = (addedCounts[vn]||0) + 1;
@@ -148,7 +130,24 @@
     }
   }
 
-  // 9) Card builder functions
+  // Helper: format icons in descriptions
+  function formatDescription(text = '', colorCode) {
+    let out = text
+      .replace(/\[Tap\]:/g,  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+      .replace(/\[Might\]/g, `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
+      .replace(/\[Rune\]/g,  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
+      .replace(/\[S\]/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+      .replace(/\[C\]/g,     `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+      out = out.replace(
+        new RegExp(`\\[${col}\\]`, 'g'),
+        `<img src="images/${col}.png" class="inline-icon" alt="${col}">`
+      );
+    });
+    return out;
+  }
+
+  // Card builder functions
   function makeUnit(c) {
     const colors    = (c.colors||'').split(/[;]\s*/).filter(Boolean);
     const forceHTML = c.energy
@@ -189,7 +188,6 @@
     return build('spell-alt', c.variantNumber, `
       <div class="top-bar-alt">
         <span class="cost-alt">${c.energy} ${forceHTML}</span>
-        <span class="might-alt"></span>
       </div>
       <div class="name-alt">${c.name}</div>
       <div class="middle-alt">
@@ -213,4 +211,43 @@
           <div class="bf-name">${c.name}</div>
         </div>
         <div class="bf-col side right"><div class="bf-text">${descHTML}</div></div>
-      </
+      </div>`);
+  }
+
+  function makeLegend(c) {
+    const descHTML  = formatDescription(c.description, '');
+    return build('legend', c.variantNumber, `
+      <div class="legend-header"><span class="legend-title">${c.name}</span></div>
+      <div class="legend-body"><p>${descHTML}</p></div>`);
+  }
+
+  function makeRune(c) {
+    const descHTML  = formatDescription(c.description, '');
+    return build('rune', c.variantNumber, `
+      <div class="rune-body"><p>${descHTML}</p></div>`);
+  }
+
+  // Generic build helper
+  function build(typeClass, id, innerHTML) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `card ${typeClass}`;
+    wrapper.setAttribute('data-variant', id);
+
+    const qtyBadge = document.createElement('div');
+    qtyBadge.className = 'qty-badge';
+    qtyBadge.textContent = addedCounts[id] || 0;
+
+    wrapper.innerHTML = innerHTML;
+    wrapper.appendChild(qtyBadge);
+    wrapper.addEventListener('click', () => {
+      if (wrapper.classList.contains('added')) {
+        removeCard(id, wrapper);
+      } else {
+        addCard(id);
+      }
+      wrapper.classList.toggle('added');
+      qtyBadge.textContent = addedCounts[id] || 0;
+    });
+    return wrapper;
+  }
+})();
