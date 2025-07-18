@@ -114,30 +114,31 @@ function renderCards(ids, clear = true) {
   function addCard(vn) { renderCards([vn], false); addedCounts[vn] = (addedCounts[vn]||0)+1; }
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
-function formatDescription(txt = '', color) {
-  let out = String(txt);
+ function formatDescription(txt = '', color) {
+    let out = String(txt);
 
-  // Generic helper to replace a code like [Tap] case-insensitively
-  function replaceCode(code, imgTag) {
-    const re = new RegExp(`\\s*\\[${code}\\]\\s*`, 'gi');  // g = global, i = ignore case
-    out = out.replace(re, imgTag);
+    function replaceCode(code, imgTag) {
+      const re = new RegExp(`\\s*\\[${code}\\]\\s*`, 'gi');
+      out = out.replace(re, imgTag);
+    }
+
+    // Core symbols
+    replaceCode('Tap:',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+    replaceCode('Rune',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
+    replaceCode('S',     `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`);
+    replaceCode('C',     `<img src="images/${color}2.png" class="inline-icon" alt="${color}">`);
+
+    // Elemental runes
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+      const imgTag = `<img src="images/${col}.png" class="inline-icon" alt="${col}">`;
+      replaceCode(col, imgTag);
+    });
+
+    // Collapse any stray inter-tag whitespace
+    out = out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
+    return out;
   }
-
-  // Do all your replacements
-  replaceCode('[Tap]',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
-  replaceCode('[Might]', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
-  replaceCode('[Power]',  `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`);
-
-  // Elemental runes
-  ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-    const imgTag = `<img src="images/${col}.png" class="inline-icon" alt="${col}">`;
-    replaceCode(col, imgTag);
-  });
-
-  // Collapse any stray whitespace between tags
-  out = out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
-  return out;
-}
 
 function makeUnit(c) {
   const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
