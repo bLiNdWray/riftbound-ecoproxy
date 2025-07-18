@@ -21,30 +21,32 @@
   }
 
 btnImport.addEventListener('click', function(){
+  // 1) Ask for the deck code
   var input = prompt(
-    'Paste your Tabletop Simulator Deck Code here (e.g. OGN-045-1 OGN-046-1 ...):',
-    // prefill with existing codes:
-    Object.entries(window.cardCounts)
-      .map(([vn,c]) => Array(c).fill(vn+'-1').join(' '))
-      .join(' ')
+    'Paste your Tabletop Simulator Deck Code here:\n' +
+    'e.g. OGN-045-1 OGN-046-1 ...'
   );
   if (!input) return;
-  // reset
-  window.cardCounts = {};
+
+  // 2) Clear existing cards
   document.getElementById('card-container').innerHTML = '';
+  window.cardCounts = {};
   updateCount();
   saveState();
 
-  // parse and import
+  // 3) Parse and add
   input.trim().split(/\s+/).forEach(function(tok){
-    var [set, num, qty] = tok.split('-');
-    var vn = set + '-' + num;
-    qty = parseInt(qty, 10) || 1;
+    // expect format VARIANT-QUANTITY, e.g. OGN-045-3
+    var parts = tok.split('-');
+    if (parts.length < 2) return;
+    var vn  = parts[0] + '-' + parts[1];              // "OGN-045"
+    var qty = parseInt(parts[2] || '1', 10) || 1;     // default to 1
     for (var i = 0; i < qty; i++) {
       window.addCard(vn);
     }
   });
 });
+
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
