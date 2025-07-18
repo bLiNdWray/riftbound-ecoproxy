@@ -159,7 +159,7 @@ function makeSpell(c) {
     </div>
     <div class="name">${c.name}</div>
     <div class="middle">
-      ${descHTML}
+     <p class="desc-text"> ${descHTML} </p>
       <div class="color-indicator">
         ${colorIcon}<span class="color-text">${colorText}</span>
       </div>
