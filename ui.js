@@ -20,33 +20,70 @@
     setTimeout(function(){ n.remove(); }, 3000);
   }
 
+// ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // 1) Ask for the deck code
-  var input = prompt(
-    'Paste your Tabletop Simulator Deck Code here:\n' +
-    'e.g. OGN-045-1 OGN-046-1 ...'
-  );
-  if (!input) return;
+  // 1) Remove any existing import modal
+  var prev = document.getElementById('import-modal');
+  if (prev) prev.remove();
 
-  // 2) Clear existing cards
-  document.getElementById('card-container').innerHTML = '';
-  window.cardCounts = {};
-  updateCount();
-  saveState();
+  // 2) Build the overlay + modal container
+  var overlay = document.createElement('div');
+  overlay.id = 'import-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content large" style="max-width:600px; padding:16px;">
+      <button id="close-import" class="modal-close">×</button>
+      <h2>Import List</h2>
+      <p>Paste your deck codes in the format <code>VARIANT-QUANTITY</code> (space separated):</p>
+      <textarea id="import-area" 
+        style="width:100%; height:200px; font-family:monospace;" 
+        placeholder="e.g. OGN-045-3 OGN-046-2"></textarea>
+      <div style="text-align:right; margin-top:12px;">
+        <button id="import-cancel" class="action-btn">Cancel</button>
+        <button id="import-ok" class="action-btn primary">Import</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
 
-  // 3) Parse and add
-  input.trim().split(/\s+/).forEach(function(tok){
-    // expect format VARIANT-QUANTITY, e.g. OGN-045-3
-    var parts = tok.split('-');
-    if (parts.length < 2) return;
-    var vn  = parts[0] + '-' + parts[1];              // "OGN-045"
-    var qty = parseInt(parts[2] || '1', 10) || 1;     // default to 1
-    for (var i = 0; i < qty; i++) {
-      window.addCard(vn);
-    }
+  // 3) Prefill with current codes
+  var area = document.getElementById('import-area');
+  var tokens = [];
+  Object.entries(window.cardCounts).forEach(function([vn, cnt]){
+    tokens.push(vn + '-' + cnt);
   });
-});
+  area.value = tokens.join(' ');
 
+  // 4) Wire up close/cancel
+  function close() { overlay.remove(); }
+  document.getElementById('close-import').onclick = close;
+  document.getElementById('import-cancel').onclick = close;
+
+  // 5) Wire up Import button
+  document.getElementById('import-ok').onclick = function(){
+    var input = area.value.trim();
+    // clear screen and state
+    document.getElementById('card-container').innerHTML = '';
+    window.cardCounts = {};
+    updateCount();
+    saveState();
+
+    if (input) {
+      // parse tokens, then add
+      input.split(/\s+/).forEach(function(tok){
+        var parts = tok.split('-');
+        if (parts.length < 2) return;
+        var vn  = parts[0] + '-' + parts[1];
+        var qty = parseInt(parts[2]||'1',10) || 1;
+        for (var i = 0; i < qty; i++) {
+          window.addCard(vn);
+        }
+      });
+    }
+    saveState();
+    close();
+    notify('Deck imported');
+  };
+});
 
   btnPrint.addEventListener('click', function(){
     var bar = document.getElementById('top-bar');
