@@ -140,8 +140,8 @@ const list = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   }
 
   // Monkey-patch addCard/removeCard
-  const origAdd = window.addCard;
-  const origRm  = window.removeCard;
+  const origAdd = (typeof window.addCard === 'function') ? window.addCard : function(vn){ console.warn('addCard not defined'); };
+  const origRm  = (typeof window.removeCard === 'function') ? window.removeCard : function(vn,el){ console.warn('removeCard not defined'); }  = window.removeCard;
   window.addCard = vn => { origAdd(vn); updateCount(); window.addedVariants.push(vn); cacheState(); };
   window.removeCard = (vn, el) => { origRm(vn, el); window.addedVariants = window.addedVariants.filter(x=>x!==vn); updateCount(); cacheState(); };
 
