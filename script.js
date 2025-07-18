@@ -89,20 +89,21 @@ function renderSearchResults(list) {
   function removeCard(vn, el) { if ((addedCounts[vn]||0)>0) { addedCounts[vn]--; el.remove(); } }
 
 // Icon replacer with whitespace collapse
-  function formatDescription(txt='', color) {
-    let out = txt
-      .replace(/\s*\[Tap\]:\s*/g,      `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
-      .replace(/\s*\[Might\]\s*/g,     `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
-      .replace(/\s*\[Rune\]\s*/g,      `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
-      .replace(/\s*\[S\]\s*/g,         `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
-      .replace(new RegExp(`\\s*\\[C\\]\\s*`, 'g'), `<img src="images/${color}2.png" class="inline-icon" alt="C">`);
-    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
-      out = out.replace(new RegExp(`\\s*\\[${col}\\]\\s*`, 'g'), `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
-    });
-    // collapse any remaining whitespace
-    return out.replace(/>\s+</g, '><').replace(/\s{2,}/g, ' ').trim();
-  }
-
+function formatDescription(text = '', colorCode) {
+  let out = text
+    .replace(/\s*\[Tap\]:\s*/g,   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`)
+    .replace(/\s*\[Might\]\s*/g,  `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`)
+    .replace(/\s*\[Rune\]\s*/g,   `<img src="images/RainbowRune.png" class="inline-icon" alt="Rune">`)
+    .replace(/\s*\[S\]\s*/g,      `<img src="images/SwordIconRB.png" class="inline-icon" alt="S">`)
+    .replace(new RegExp(`\\s*\\[C\\]\\s*`, 'g'),
+      `<img src="images/${colorCode}2.png" class="inline-icon" alt="C">`);
+  ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+    out = out.replace(new RegExp(`\\s*\\[${col}\\]\\s*`, 'g'),
+      `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+  });
+  // collapse residual whitespace
+  return out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
+}
   // Builders with dash separator
   // … your setup, jsonpFetch, allowedTypes, typeClassMap, etc. …
 
