@@ -88,6 +88,7 @@
   font-size: 8pt;
   overflow-y: auto;
   overflow-x: visible;
+  white-space: normal;
 }
 
 /* Color indicator inside middle */
@@ -100,6 +101,7 @@
   gap: 4px;
   padding: 0;
   z-index: 2;
+  word-wrap: break-word;
 }
 .card .middle .color-indicator img {
   width: 18px;
