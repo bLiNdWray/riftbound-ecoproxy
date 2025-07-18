@@ -286,17 +286,16 @@ function build(id, html) {
   wrapper.appendChild(hoverBar);
 
   // Event handlers
-  addBtn.addEventListener('click', e => {
+  addBtn.addEventListener('click', function(e) {
+   e.stopPropagation();
+   window.addCard(id);
+   badge.textContent = addedCounts[id] || 0;
+ });
+ removeBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    addCard(id);
+    window.removeCard(id, wrapper);
     badge.textContent = addedCounts[id] || 0;
-  });
-  removeBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    removeCard(id, wrapper);
-    badge.textContent = addedCounts[id] || 0;
-  });
-
+ });
   return wrapper;
 }
 // -------------------------------------------------
