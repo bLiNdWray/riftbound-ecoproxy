@@ -332,6 +332,7 @@
   width: 12px;
   height: 12px;
   vertical-align: text-bottom;
+  display: inline-block;
 }
 
 /* Hover bar styling */
