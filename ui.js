@@ -1,6 +1,5 @@
 (function() {
   // Top-bar buttons
-  var openBtn      = document.getElementById('open-search');
   var btnImport    = document.getElementById('btn-import');
   var btnPrint     = document.getElementById('btn-print');
   var btnOverview  = document.getElementById('btn-overview');
@@ -8,10 +7,10 @@
   var btnReset     = document.getElementById('btn-reset');
   var countLabel   = document.getElementById('card-count');
 
-  // State & flags
-  window.cardCounts    = window.cardCounts    || {};
-  var fullProxy        = false;
-  var isImporting      = false;
+  // State and flags
+  window.cardCounts = {};
+  var fullProxy    = false;
+  var isImporting  = false;
 
   // ===== Toasts =====
   function notify(msg) {
@@ -59,47 +58,39 @@
   // ===== Helpers =====
   function updateCount() {
     var total = Object.values(window.cardCounts).reduce(function(a,b){ return a+b; }, 0);
-    countLabel.textContent = total + ' card' + (total!==1?'s':'');
+    countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
   function refreshBadge(vn) {
     var b = document.querySelector('[data-variant="' + vn + '"] .qty-badge');
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
- // Wrap the original and return success state
-var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
-
-window.addCard = function(vn) {
-  // count existing cards for this variant
-  var beforeCount = document.querySelectorAll('[data-variant="' + vn + '"]').length;
-  
-  // call the original, which builds/appends if possible
-  origAdd(vn);
-  
-  // count again
-  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]'),
-      afterCount = afterEls.length;
-  
-  if (afterCount > beforeCount) {
-    // Success: update our state
-    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
-    updateCount();
-    saveState();
-    refreshBadge(vn);
-    
-    // Only toast if not during import
-    if (!isImporting) {
-      var name = afterEls[afterCount-1].dataset.name || vn;
-      notify(name + ' - ' + vn);
+  // ===== Wrap original addCard to return success =====
+  var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
+  window.addCard = function(vn) {
+    // measure before DOM count
+    var before = document.querySelectorAll('[data-variant="' + vn + '"]').length;
+    origAdd(vn);
+    var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]');
+    var after = afterEls.length;
+    if (after > before) {
+      // success
+      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+      updateCount();
+      saveState();
+      refreshBadge(vn);
+      if (!isImporting) {
+        var el = afterEls[after-1];
+        var name = el.dataset.name || vn;
+        notify(name + ' - ' + vn);
+      }
+      return true;
     }
-    return true;
-  } else {
-    // Nothing changed => failure
     return false;
-  }
-};
+  };
 
-
+  // ===== removeCard unchanged =====
+  var origRm = typeof window.removeCard === 'function' ? window.removeCard : function(){};
   window.removeCard = function(vn, el) {
     origRm(vn, el);
     if (window.cardCounts[vn] > 1) {
@@ -113,86 +104,80 @@ window.addCard = function(vn) {
     refreshBadge(vn);
   };
 
-// ===== IMPORT LIST (modal) =====
-btnImport.addEventListener('click', function(){
-  // 1) Teardown any existing modal
-  var prev = document.getElementById('import-modal');
-  if (prev) prev.remove();
+  // ===== Import List Modal =====
+  btnImport.addEventListener('click', function(){
+    // teardown
+    var prev = document.getElementById('import-modal');
+    if (prev) prev.remove();
 
-  // 2) Build & append modal
-  var overlay = document.createElement('div');
-  overlay.id = 'import-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-content large" style="max-width:600px; padding:16px;">
-      <button id="close-import" class="modal-close">×</button>
-      <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code. The trailing “-NN” is ignored.</p>
-      <textarea id="import-area"
-        style="width:100%; height:200px; font-family:monospace;"
-        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-      <div style="text-align:right; margin-top:12px;">
-        <button id="import-cancel" class="topbar-btn">Cancel</button>
-        <button id="import-ok"     class="topbar-btn">Import</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+    // build modal
+    var overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content large" style="max-width:600px;padding:16px;">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
+        <textarea id="import-area"
+          style="width:100%;height:200px;font-family:monospace;"
+          placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <div style="text-align:right;margin-top:12px;">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok"     class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
 
-  // 3) Grab elements
-  var areaEl    = overlay.querySelector('#import-area');
-  var closeBtn  = overlay.querySelector('#close-import');
-  var cancelBtn = overlay.querySelector('#import-cancel');
-  var okBtn     = overlay.querySelector('#import-ok');
+    // refs
+    var areaEl    = overlay.querySelector('#import-area');
+    var closeBtn  = overlay.querySelector('#close-import');
+    var cancelBtn = overlay.querySelector('#import-cancel');
+    var okBtn     = overlay.querySelector('#import-ok');
 
-  closeBtn.onclick  = () => overlay.remove();
-  cancelBtn.onclick = () => overlay.remove();
+    closeBtn.onclick  = () => overlay.remove();
+    cancelBtn.onclick = () => overlay.remove();
 
-  // 4) Handle Import
-  okBtn.onclick = function(){
-  overlay.remove();
-  longNotify('Deck Import in Progress');
+    okBtn.onclick = function(){
+      overlay.remove();
+      longNotify('Deck Import in Progress');
 
-  // Clear everything first
-  document.getElementById('card-container').innerHTML = '';
-  window.cardCounts = {};
+      // clear out
+      document.getElementById('card-container').innerHTML = '';
+      window.cardCounts = {};
 
-  var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean),
-      totalAdded = 0,
-      errors     = [],
-      seen       = new Set();
+      // parse tokens
+      var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      var totalAdded = 0, errors = [], seen = new Set();
 
-  isImporting = true;
-  tokens.forEach(function(tok){
-    var parts = tok.split('-');
-    if (parts.length < 2) {
-      if (!seen.has(tok)) { errors.push(tok); seen.add(tok); }
-      return;
-    }
-    var vn = parts[0] + '-' + parts[1];
-    // Try one add per token
-    if (window.addCard(vn)) {
-      totalAdded++;
-    } else if (!seen.has(vn)) {
-      errors.push(vn);
-      seen.add(vn);
-    }
+      isImporting = true;
+      tokens.forEach(function(tok){
+        var parts = tok.split('-');
+        if (parts.length < 2) {
+          if (!seen.has(tok)) { errors.push(tok); seen.add(tok); }
+          return;
+        }
+        var vn = parts[0] + '-' + parts[1];
+        if (window.addCard(vn)) {
+          totalAdded++;
+        } else if (!seen.has(vn)) {
+          errors.push(vn);
+          seen.add(vn);
+        }
+      });
+      isImporting = false;
+
+      // finalize
+      saveState();
+      updateCount();
+
+      // toasts
+      if (totalAdded) notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
+      if (errors.length) errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
+    };
   });
-  isImporting = false;
 
-  saveState();
-  updateCount();
-
-  // Final summary toasts
-  if (totalAdded)
-    notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
-  if (errors.length)
-    errorNotify(errors.join(', ') + 
-                (errors.length>1 ? " can't be found" : " can't be found"));
-};
-
-
-
-  // ===== Other Top-Bar Buttons =====
+  // ===== Other Top-Bar Buttons (unchanged) =====
   btnPrint.addEventListener('click', function(){
     document.getElementById('top-bar').style.display = 'none';
     document.getElementById('search-modal').classList.add('hidden');
@@ -201,26 +186,22 @@ btnImport.addEventListener('click', function(){
       document.getElementById('top-bar').style.display = '';
     }, 0);
   });
-
   btnOverview.addEventListener('click', function(){
     buildOverview();
     notify('Overview opened');
   });
-
   btnFullProxy.addEventListener('click', function(){
     fullProxy = !fullProxy;
     Object.keys(window.cardCounts).forEach(function(vn){
-      var img = document.querySelector('[data-variant="' + vn + '"] img.card-img');
-      if (img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+      var img=document.querySelector('[data-variant="'+vn+'"] img.card-img');
+      if(img) img.src = fullProxy? img.dataset.fullArt : img.dataset.proxyArt;
     });
-    notify(fullProxy ? 'Full art ON' : 'Proxy art ON');
+    notify(fullProxy?'Full art ON':'Proxy art ON');
   });
-
   btnReset.addEventListener('click', function(){
-    window.cardCounts = {};
-    document.getElementById('card-container').innerHTML = '';
-    updateCount();
-    saveState();
+    window.cardCounts={};
+    document.getElementById('card-container').innerHTML='';
+    updateCount(); saveState();
     notify('Reset complete');
   });
 
@@ -228,52 +209,49 @@ btnImport.addEventListener('click', function(){
   document.addEventListener('DOMContentLoaded', function(){
     loadState();
     Object.entries(window.cardCounts).forEach(function(pair){
-      var vn = pair[0], cnt = pair[1];
-      for (var i = 0; i < cnt; i++) window.addCard(vn);
+      var vn=pair[0],cnt=pair[1];
+      for(var i=0;i<cnt;i++) window.addCard(vn);
     });
     updateCount();
-    var sm = document.getElementById('search-modal'); if (sm) sm.style.top = '50px';
+    var sm=document.getElementById('search-modal');
+    if(sm) sm.style.top='50px';
   });
 
-  // ===== Overview Builder =====
+  // ===== Overview Builder (unchanged) =====
   function buildOverview(){
-    var ex = document.getElementById('overview-modal'); if (ex) ex.remove();
-    var m = document.createElement('div'); m.id='overview-modal'; m.className='modal-overlay';
-    m.innerHTML =
-      '<div class="modal-content small">'+
-        '<button id="close-overview" class="modal-close">×</button>'+
-        '<h2>Overview</h2><div id="overview-list"></div>'+
-      '</div>';
+    var ex=document.getElementById('overview-modal'); if(ex) ex.remove();
+    var m=document.createElement('div'); m.id='overview-modal'; m.className='modal-overlay';
+    m.innerHTML='<div class="modal-content small">'
+      +'<button id="close-overview" class="modal-close">×</button>'
+      +'<h2>Overview</h2><div id="overview-list"></div></div>';
     document.body.appendChild(m);
-    document.getElementById('close-overview').onclick = function(){ m.remove(); };
-
-    var order=['Legend','Runes','Units','Spells','Gear','Battlefield'], grp={};
+    document.getElementById('close-overview').onclick=function(){m.remove();};
+    var order=['Legend','Runes','Units','Spells','Gear','Battlefield'],grp={};
     Object.keys(window.cardCounts).forEach(function(vn){
-      var el = document.querySelector('[data-variant="'+vn+'"]');
-      var t  = (el&&el.dataset.type)?el.dataset.type:'Other';
+      var el=document.querySelector('[data-variant="'+vn+'"]');
+      var t=(el&&el.dataset.type)?el.dataset.type:'Other';
       (grp[t]=grp[t]||[]).push(vn);
     });
     var cntEl=document.getElementById('overview-list');
     order.forEach(function(type){
-      if (grp[type]){
-        var sec=document.createElement('div'), h=document.createElement('h3');
-        h.textContent=type; sec.appendChild(h);
+      if(grp[type]){
+        var sec=document.createElement('div');var h=document.createElement('h3');h.textContent=type;sec.appendChild(h);
         grp[type].forEach(function(vn){
           var el=document.querySelector('[data-variant="'+vn+'"]'),
               name=(el&&el.dataset.name)?el.dataset.name:vn,
               setNo=(el&&el.dataset.set)?el.dataset.set:'',
-              logo=(el&&el.dataset.colorLogo)?el.dataset.colorLogo:'';
-          var row=document.createElement('div'); row.className='overview-item';
-          row.innerHTML=
-            '<img src="'+logo+'" class="overview-logo"/>'+
-            '<span>'+name+' ('+setNo+')</span>'+
-            '<button class="overview-dec" data-vn="'+vn+'">–</button>'+
-            '<span class="overview-count">'+window.cardCounts[vn]+'</span>'+
-            '<button class="overview-inc" data-vn="'+vn+'">+</button>';
+              logo=(el&&el.dataset.colorLogo)?el.dataset.colorLogo:'',
+              row=document.createElement('div');
+          row.className='overview-item';
+          row.innerHTML='<img src="'+logo+'" class="overview-logo"/><span>'+name+' ('+setNo+')</span>'
+            +'<button class="overview-dec" data-vn="'+vn+'">–</button>'
+            +'<span class="overview-count">'+window.cardCounts[vn]+'</span>'
+            +'<button class="overview-inc" data-vn="'+vn+'">+</button>';
           sec.appendChild(row);
         });
         cntEl.appendChild(sec);
       }
     });
   }
+
 })();
