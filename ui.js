@@ -186,13 +186,16 @@
   });
 
   // ————— On Load: Restore State —————
-  document.addEventListener('DOMContentLoaded', function(){
-    loadState();
-    Object.entries(window.cardCounts).forEach(function([vn,c]){
-      for(let i=0;i<c;i++) window.addCard(vn);
-    });
-    updateCount();
+document.addEventListener('DOMContentLoaded', function(){
+  loadState();
+  Object.entries(window.cardCounts).forEach(function([vn,c]){
+    for (let i = 0; i < c; i++) window.addCard(vn);
   });
+  // ensure the counter reflects what we just loaded
+  updateCount();
+
+  // existing search-modal positioning…
+});
 
   // ————— Overview Builder —————
   function buildOverview(){
