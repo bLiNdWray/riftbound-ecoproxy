@@ -70,22 +70,14 @@
   var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
   var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function(){};
 
-  window.addCard = function(vn) {
-    origAdd(vn);
-    // Only proceed if the card element actually exists
-    var el = document.querySelector('[data-variant="' + vn + '"]');
-    if (!el) return;
-    // increment count
-    window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
-    updateCount();
-    saveState();
-    refreshBadge(vn);
-    // toast on manual add (skip during import)
-    if (!isImporting) {
-      var name = el.dataset.name || vn;
-      notify(name + ' - ' + vn);
-    }
-  };
+ window.addCard = function(vn) {
+  origAdd(vn);
+  // … increment logic …
+  // toast for manual adds (4s)
+  var el   = document.querySelector('[data-variant="' + vn + '"]');
+  var name = (el && el.dataset.name) ? el.dataset.name : vn;
+  notify(name + ' - ' + vn);
+};
 
   window.removeCard = function(vn, el) {
     origRm(vn, el);
@@ -104,11 +96,11 @@
 btnImport.addEventListener('click', function(){
   window.cardCounts = window.cardCounts || {};
 
-  // remove old modal
+  // 1) Tear down any existing modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // build modal
+  // 2) Build the modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -116,7 +108,7 @@ btnImport.addEventListener('click', function(){
     <div class="modal-content large" style="max-width:600px; padding:16px;">
       <button id="close-import" class="modal-close">×</button>
       <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code.</p>
+      <p>Paste your Table Top Simulator Deck Code in <code>XXX-YYY-NN</code> format:</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
         placeholder="e.g. OGN-045-1-03 OGN-046-1-02"></textarea>
@@ -131,25 +123,23 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
+  // 3) Wire up references
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
-  document.getElementById('close-import').onclick = closeModal;
-  document.getElementById('import-cancel').onclick = closeModal;
+  document.getElementById('close-import').onclick = () => overlay.remove();
+  document.getElementById('import-cancel').onclick = () => overlay.remove();
 
-  // prefill with existing variants & counts
+  // 4) Prefill with existing variant counts
   area.value = Object.entries(window.cardCounts)
-                     .map(([vn, cnt]) => vn + '-' + cnt)
+                     .map(([vn,c]) => `${vn}-${c}`)
                      .join(' ');
 
-  function closeModal(){ overlay.remove(); }
-
+  // 5) On Import…
   document.getElementById('import-ok').onclick = function(){
-    closeModal();
-
-    // 1) Show progress
+    overlay.remove();
     longNotify('Deck Import in Progress');
 
-    // 2) Optionally clear
+    // optionally clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -157,30 +147,27 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // 3) Parse tokens
-    var rawTokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
-    var imports   = rawTokens.map(tok => {
-      var parts = tok.split('-');
-      var qty   = parseInt(parts.pop(),10) || 1;
-      var vn    = parts.join('-');
-      return { vn, qty };
-    });
+    // parse into {vn,qty}
+    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
+        valids = {}, errors = [];
 
-    // 4) Validate against master list `allCards`
-    var validMap = {}, errors = [];
-    imports.forEach(({vn, qty})=>{
-      if (allCards.find(c=>c.variantNumber===vn)) {
-        validMap[vn] = (validMap[vn]||0) + qty;
+    tokens.forEach(tok => {
+      var parts = tok.split('-'),
+          qty   = parseInt(parts.pop(),10) || 1,
+          vn    = parts.join('-');
+      // verify via DOM
+      if (document.querySelector(`[data-variant="${vn}"]`)) {
+        valids[vn] = (valids[vn]||0) + qty;
       } else {
         errors.push(vn);
       }
     });
 
-    // 5) Bulk-add valid cards
+    // bulk-add valid cards
     var addedTotal = 0;
     isImporting = true;
-    Object.entries(validMap).forEach(([vn, qty])=>{
-      for(let i=0;i<qty;i++){
+    Object.entries(valids).forEach(([vn,qty]) => {
+      for (let i = 0; i < qty; i++) {
         window.addCard(vn);
         addedTotal++;
       }
@@ -188,13 +175,13 @@ btnImport.addEventListener('click', function(){
     isImporting = false;
     saveState();
 
-    // 6) Final toasts
-    if (addedTotal)
-      notify(addedTotal + ' card' + (addedTotal>1?'s':'') + ' added');
+    // summary toast
+    if (addedTotal) notify(`${addedTotal} card${addedTotal>1?'s':''} added`);
     if (errors.length)
-      errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
+      errorNotify(`${[...new Set(errors)].join(', ')} can't be found`);
   };
 });
+
 
 
   // ===== Other Top-Bar Buttons =====
