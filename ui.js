@@ -139,7 +139,7 @@
         saveState();
       }
 
-      var tokens = (area.value || '').trim().split(/\s+/).filter(Boolean);
+      var tokens = (area.value || '').trim().split(new RegExp("\\s+")).filter(Boolean);
       var errors = [];
       suppressToasts = true;
       tokens.forEach(function(tok){
