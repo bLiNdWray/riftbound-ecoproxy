@@ -137,3 +137,51 @@ html, body {
   border-radius: 0;   /* optional: flush edges */
   box-shadow: none;   /* optional: flatten */
 }
+/* Make the entire modal-content inside #search-modal full-width and nice */
+#search-modal .modal-content {
+  background: #fafafa;
+  border-radius: 0;    /* flush to edges if you like */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 0;
+  margin: 0;
+}
+
+/* Wrap the header in its own styled container */
+#search-modal .search-header {
+  background: #fff;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Style the input with rounded corners and subtle shadow */
+#search-modal .search-header input {
+  flex: 1;               /* fill available space */
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+#search-modal .search-header input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+/* Style the close button to match */
+#search-modal .search-header .modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+}
+
+/* Move results down slightly under header */
+#search-modal .results-grid {
+  padding: 16px;
+  margin-top: 8px;
+}
