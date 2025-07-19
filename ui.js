@@ -104,11 +104,11 @@
 btnImport.addEventListener('click', function(){
   window.cardCounts = window.cardCounts || {};
 
-  // remove old modal
+  // Remove old modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // build modal
+  // Build modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -119,7 +119,7 @@ btnImport.addEventListener('click', function(){
       <p>Paste your Table Top Simulator Deck Code.</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
-        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        placeholder="e.g. OGN-045-1-03 OGN-046-1-02"></textarea>
       <label style="display:block; margin:8px 0;">
         <input type="checkbox" id="import-clear" />
         Clear existing cards before import
@@ -136,17 +136,19 @@ btnImport.addEventListener('click', function(){
   document.getElementById('close-import').onclick = closeModal;
   document.getElementById('import-cancel').onclick = closeModal;
 
-  area.value = Object.keys(window.cardCounts).join(' ');
+  // Prefill with actual variant IDs (including trailing -1)
+  area.value = Object.entries(window.cardCounts)
+                     .map(([vn, cnt]) => vn + '-' + String(cnt).padStart(2,'0'))
+                     .join(' ');
 
   function closeModal(){ overlay.remove(); }
 
   document.getElementById('import-ok').onclick = function(){
+    // Close & progress
     closeModal();
-
-    // show import-in-progress toast
     longNotify('Deck Import in Progress');
 
-    // optionally clear
+    // Optionally clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -154,38 +156,39 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // 1) parse tokens and verify
-    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
-    var valids = [], errors = [];
+    // Parse tokens, validate existence
+    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
+        valids = [], errors = [];
     tokens.forEach(function(tok){
       var parts = tok.split('-');
       if (parts.length < 2) { errors.push(tok); return; }
-      var vn = parts[0] + '-' + parts[1];
-      // only accept if element exists
+      var qty = parseInt(parts.pop(), 10) || 1;          // last piece = quantity
+      var vn  = parts.join('-');                        // rejoin rest = true variantNumber
+      // check it exists in DOM
       if (document.querySelector('[data-variant="'+vn+'"]')) {
-        valids.push(vn);
+        valids.push({ vn: vn, qty: qty });
       } else {
         errors.push(vn);
       }
     });
 
-    // 2) add all valids
+    // Bulk-add the valid ones
     isImporting = true;
-    valids.forEach(function(vn){
-      window.addCard(vn);
+    valids.forEach(function(item){
+      for (var i = 0; i < item.qty; i++) {
+        window.addCard(item.vn);
+      }
     });
     isImporting = false;
     saveState();
 
-    // 3) report errors in one toast
+    // Single error toast
     if (errors.length) {
-      errorNotify(
-        errors.join(', ') + ' ' +
-        (errors.length>1? 'can\'t be found':'can\'t be found')
-      );
+      errorNotify(errors.join(', ') + (errors.length>1 ? " can't be found" : " can't be found"));
     }
   };
 });
+
 
 
   // ===== Other Top-Bar Buttons =====
