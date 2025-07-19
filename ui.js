@@ -65,44 +65,46 @@
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
- // Wrap the original addCard to detect real vs. fake adds
+// Wrap the original addCard to return success/failure and only toast on manual adds
 var origAdd = typeof window.addCard === 'function'
   ? window.addCard
   : function() {};
 
 window.addCard = function(vn) {
-  // 1) Count existing elements with this variant
-  var beforeEls = document.querySelectorAll('[data-variant="' + vn + '"]');
-  var beforeCount = beforeEls.length;
-
-  // 2) Call the original—this will build/append if it knows how
+  // Measure how many cards existed before
+  var before = document.querySelectorAll('[data-variant="' + vn + '"]').length;
+  
+  // Attempt to add via original logic
   origAdd(vn);
-
-  // 3) Count again
-  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]');
-  var afterCount = afterEls.length;
-
-  // 4) If a new element appeared, treat as success
-  if (afterCount > beforeCount) {
+  
+  // Measure again
+  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]'),
+      after = afterEls.length;
+  
+  // If we gained a card, it's a real add
+  if (after > before) {
+    // Update counts and badge
     window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
     updateCount();
     saveState();
     refreshBadge(vn);
-
-    // only toast on manual adds, not during import
+    
+    // Only toast on manual adds
     if (!isImporting) {
-      var el   = afterEls[afterCount - 1];
+      var el   = afterEls[after - 1];
       var name = el.dataset.name || vn;
       notify(name + ' - ' + vn);
     }
     return true;
-  }
+  } 
 
-  // 5) Otherwise it's a failure—show an error toast
-  errorNotify(vn + " can't be found");
+  // Otherwise nothing changed => failure
+  if (!isImporting) {
+    // Only toast error on manual adds
+    errorNotify(vn + " can't be found");
+  }
   return false;
 };
-
   // ===== removeCard unchanged =====
   var origRm = typeof window.removeCard === 'function' ? window.removeCard : function(){};
   window.removeCard = function(vn, el) {
