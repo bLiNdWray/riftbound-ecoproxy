@@ -238,4 +238,33 @@
     });
   }
 
+// === Search Modal Toggle ===
+document.addEventListener('DOMContentLoaded', function(){
+  const openBtn  = document.getElementById('open-search');
+  const closeBtn = document.getElementById('close-search');
+  const searchModal = document.getElementById('search-modal');
+
+  if (!searchModal) return;
+
+  // Ensure it's hidden on load
+  searchModal.classList.add('hidden');
+
+  // Open modal
+  openBtn.addEventListener('click', function(){
+    searchModal.classList.remove('hidden');
+  });
+
+  // Close via button
+  closeBtn.addEventListener('click', function(){
+    searchModal.classList.add('hidden');
+  });
+
+  // Optional: close when clicking outside content
+  searchModal.addEventListener('click', function(e){
+    if (e.target === searchModal) {
+      searchModal.classList.add('hidden');
+    }
+  });
+});
+  
 })();
