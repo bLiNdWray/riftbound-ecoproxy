@@ -106,14 +106,14 @@ window.addCard = function(vn) {
 
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // ensure state map
+  // 1) Reset state for a fresh import
   window.cardCounts = {};
 
-  // tear down old modal
+  // 2) Tear down any existing modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // build modal
+  // 3) Build the import modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -121,10 +121,11 @@ btnImport.addEventListener('click', function(){
     <div class="modal-content large" style="max-width:600px; padding:16px;">
       <button id="close-import" class="modal-close">×</button>
       <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code (XXX-YYY-NN):</p>
+      <p>Paste your Table Top Simulator Deck Code.<br>
+         Each token should be <code>XXX-XXX-NN</code>, but the <code>-NN</code> is now ignored.</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
-        placeholder="e.g. OGN-045-1-03 OGN-046-1-02"></textarea>
+        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
       <div style="text-align:right; margin-top:12px;">
         <button id="import-cancel" class="topbar-btn">Cancel</button>
         <button id="import-ok"     class="topbar-btn">Import</button>
@@ -132,35 +133,40 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
-  var area = document.getElementById('import-area');
-  document.getElementById('close-import').onclick = () => overlay.remove();
+  // 4) Wire up cancel/close
+  document.getElementById('close-import').onclick  = () => overlay.remove();
   document.getElementById('import-cancel').onclick = () => overlay.remove();
 
-  // on Import
+  // 5) On Import…
   document.getElementById('import-ok').onclick = function(){
     overlay.remove();
     longNotify('Deck Import in Progress');
 
-    // parse tokens
-    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
-        totalAdded = 0,
-        errors     = [],
-        seenErr    = new Set();
+    // Parse each token as one card
+    var tokens     = (document.getElementById('import-area').value || '')
+                      .trim()
+                      .split(/\s+/)
+                      .filter(Boolean);
+    var totalAdded = 0;
+    var errors     = [];
+    var seenErr    = new Set();
 
-    // import each
     isImporting = true;
-    tokens.forEach(function(tok){
-      var parts = tok.split('-'),
-          qty   = parseInt(parts.pop(),10) || 1,
-          vn    = parts.join('-'),
-          added = 0;
-
-      for (var i = 0; i < qty; i++) {
-        if (window.addCard(vn)) added++;
+    tokens.forEach(function(tok) {
+      // Split off the first two parts for the variant
+      var parts = tok.split('-');
+      if (parts.length < 2) {
+        if (!seenErr.has(tok)) {
+          errors.push(tok);
+          seenErr.add(tok);
+        }
+        return;
       }
-
-      totalAdded += added;
-      if (added === 0 && !seenErr.has(vn)) {
+      var vn = parts[0] + '-' + parts[1];
+      // Try to add exactly one copy
+      if (window.addCard(vn)) {
+        totalAdded++;
+      } else if (!seenErr.has(vn)) {
         errors.push(vn);
         seenErr.add(vn);
       }
@@ -168,15 +174,12 @@ btnImport.addEventListener('click', function(){
     isImporting = false;
     saveState();
 
-    // toasts
-    if (totalAdded)
-      notify(totalAdded + ' card' + (totalAdded > 1 ? 's' : '') + ' added');
-    if (errors.length)
-      errorNotify(errors.join(', ') + (errors.length > 1 ? " can't be found" : " can't be found"));
+    // Final toasts
+    if (totalAdded)  notify(totalAdded + ' card' + (totalAdded > 1 ? 's' : '') + ' added');
+    if (errors.length) errorNotify(errors.join(', ') +
+                                 (errors.length > 1 ? " can't be found" : " can't be found"));
   };
 });
-
-
 
   // ===== Other Top-Bar Buttons =====
   btnPrint.addEventListener('click', function(){
