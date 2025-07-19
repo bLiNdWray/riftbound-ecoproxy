@@ -72,66 +72,74 @@
     refreshBadge(vn);
   };
 
-  // ===== Import List Modal =====
-  btnImport.addEventListener('click', function(){
-    // teardown existing
-    var prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
+// ===== Import List Modal =====
+btnImport.addEventListener('click', function(){
+  // 1) Tear down any existing import modal
+  var prev = document.getElementById('import-modal');
+  if (prev) prev.remove();
 
-    // build modal
-    var overlay = document.createElement('div');
-    overlay.id = 'import-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-content large" style="max-width:600px;padding:16px;">
-        <button id="close-import" class="modal-close">×</button>
-        <h2>Import List</h2>
-        <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
-        <textarea id="import-area"
-          style="width:100%;height:200px;font-family:monospace;"
-          placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-        <div style="text-align:right;margin-top:12px;">
-          <button id="import-cancel" class="topbar-btn">Cancel</button>
-          <button id="import-ok"     class="topbar-btn">Import</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
+  // 2) Build & append modal
+  var overlay = document.createElement('div');
+  overlay.id = 'import-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content large" style="max-width:600px; padding:16px;">
+      <button id="close-import" class="modal-close">×</button>
+      <h2>Import List</h2>
+      <p>Paste your Table Top Simulator Deck Code.<br>
+         Each token should be <code>XXX-XXX-NN</code>, but the <code>-NN</code> is ignored.</p>
+      <textarea id="import-area"
+        style="width:100%; height:200px; font-family:monospace;"
+        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+      <label style="display:block; margin:8px 0;">
+        <input type="checkbox" id="import-clear" />
+        Clear existing cards before import
+      </label>
+      <div style="text-align:right; margin-top:12px;">
+        <button id="import-cancel" class="topbar-btn">Cancel</button>
+        <button id="import-ok"     class="topbar-btn">Import</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
 
-    // element refs
-    var areaEl    = overlay.querySelector('#import-area');
-    var closeBtn  = overlay.querySelector('#close-import');
-    var cancelBtn = overlay.querySelector('#import-cancel');
-    var okBtn     = overlay.querySelector('#import-ok');
+  // 3) Grab references
+  var areaEl    = overlay.querySelector('#import-area');
+  var clearChk  = overlay.querySelector('#import-clear');
+  var closeBtn  = overlay.querySelector('#close-import');
+  var cancelBtn = overlay.querySelector('#import-cancel');
+  var okBtn     = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick  = () => overlay.remove();
-    cancelBtn.onclick = () => overlay.remove();
+  closeBtn.onclick  = () => overlay.remove();
+  cancelBtn.onclick = () => overlay.remove();
 
-    okBtn.onclick = function(){
-      overlay.remove();
+  // 4) Prefill with existing codes (XXX-XXX each)
+  var tokens = Object.keys(window.cardCounts || {});
+  areaEl.value = tokens.join(' ');
 
-      // clear existing cards & state
+  // 5) Import on click
+  okBtn.onclick = function(){
+    overlay.remove();
+
+    // Clear existing if checkbox checked
+    if (clearChk.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
+    }
 
-      // parse tokens and add
-      var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
-      var totalAdded = 0;
+    // Parse tokens and add
+    var inputTokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+    inputTokens.forEach(function(tok){
+      var parts = tok.split('-');
+      if (parts.length < 2) return;
+      var vn = parts[0] + '-' + parts[1];
+      window.addCard(vn);
+    });
 
-      isImporting = true;
-      tokens.forEach(function(tok){
-        var parts = tok.split('-');
-        if (parts.length < 2) return;
-        var vn = parts[0] + '-' + parts[1];
-        if (window.addCard(vn)) {
-          totalAdded++;
-        }
-      });
-      isImporting = false;
-
-      saveState();
-      updateCount();
-    };
-  });
+    // Persist & update counter
+    saveState();
+    updateCount();
+  };
+});
 
   // ===== Other Top-Bar Buttons =====
   btnPrint.addEventListener('click', function(){
