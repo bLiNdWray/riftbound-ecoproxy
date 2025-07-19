@@ -70,14 +70,26 @@
   var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
   var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function(){};
 
- window.addCard = function(vn) {
+window.addCard = function(vn) {
   origAdd(vn);
-  // … increment logic …
-  // toast for manual adds (4s)
-  var el   = document.querySelector('[data-variant="' + vn + '"]');
-  var name = (el && el.dataset.name) ? el.dataset.name : vn;
-  notify(name + ' - ' + vn);
+  // check existence in DOM
+  var el = document.querySelector('[data-variant="' + vn + '"]');
+  if (!el) return false;        // indicate failure
+
+  // increment count
+  window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+  updateCount();
+  saveState();
+  refreshBadge(vn);
+
+  // manual-add toast when not importing
+  if (!isImporting) {
+    var name = el.dataset.name || vn;
+    notify(name + ' - ' + vn);
+  }
+  return true;                  // indicate success
 };
+
 
   window.removeCard = function(vn, el) {
     origRm(vn, el);
@@ -95,12 +107,10 @@
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
   window.cardCounts = window.cardCounts || {};
-
-  // Remove existing modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // Build modal
+  // build modal…
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -123,23 +133,22 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
-  // Element refs
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
   document.getElementById('close-import').onclick = () => overlay.remove();
   document.getElementById('import-cancel').onclick = () => overlay.remove();
 
-  // Prefill
+  // prefill
   area.value = Object.entries(window.cardCounts)
                      .map(([vn,c]) => `${vn}-${c}`)
                      .join(' ');
 
-  // On Import
+  // on click Import
   document.getElementById('import-ok').onclick = function(){
     overlay.remove();
     longNotify('Deck Import in Progress');
 
-    // Optionally clear first
+    // optional clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -147,40 +156,35 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // Parse tokens into {vn, qty}
+    // parse tokens
     var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
-    var imports = tokens.map(tok => {
-      var parts = tok.split('-');
-      var qty   = parseInt(parts.pop(), 10) || 1;
-      var vn    = parts.join('-');
-      return { vn, qty };
-    });
+    var totalAdded = 0, errors = [], seen = new Set();
 
-    // Bulk-add, tracking errors
-    var totalAdded = 0, errors = [];
     isImporting = true;
-    imports.forEach(function(item){
-      var before = window.cardCounts[item.vn] || 0;
-      for (var i = 0; i < item.qty; i++) {
-        window.addCard(item.vn);
+    tokens.forEach(function(tok){
+      var parts = tok.split('-'),
+          qty   = parseInt(parts.pop(),10) || 1,
+          vn    = parts.join('-'),
+          added = 0;
+      for (var i = 0; i < qty; i++) {
+        if (window.addCard(vn)) added++;
       }
-      var after = window.cardCounts[item.vn] || 0;
-      var added = after - before;
-      if (added <= 0) {
-        errors.push(item.vn);
-      } else {
+      if (added > 0) {
         totalAdded += added;
+      } else if (!seen.has(vn)) {
+        errors.push(vn);
+        seen.add(vn);
       }
     });
     isImporting = false;
     saveState();
 
-    // Final toasts
+    // final toasts
     if (totalAdded) notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
-    if (errors.length) errorNotify([...new Set(errors)].join(', ') + 
-                                   (errors.length>1?" can't be found":" can't be found"));
+    if (errors.length) errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
   };
 });
+
 
   // ===== Other Top-Bar Buttons =====
   btnPrint.addEventListener('click', function(){
