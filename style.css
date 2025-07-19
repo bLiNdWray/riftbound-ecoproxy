@@ -93,6 +93,7 @@ a:hover {
   padding: 8px;
 }
 
+
 /* Ensure the header container spans 100% and has no unintended padding/margins */
 #search-modal .search-header {
   width: 100% !important;
@@ -115,6 +116,7 @@ a:hover {
   flex-direction: column;
 }
 
+/* Stretch the actual input to fill its container */
 #search-modal .search-header input,
 #search-modal .search-header .search-input {
   width: 100% !important;
