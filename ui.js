@@ -8,9 +8,10 @@
   var btnReset     = document.getElementById('btn-reset');
   var countLabel   = document.getElementById('card-count');
 
-  // State: variant → count
-  window.cardCounts = window.cardCounts || {};
-  var fullProxy = false;
+  // State & flags
+  window.cardCounts    = window.cardCounts    || {};
+  var fullProxy        = false;
+  var isImporting      = false;
 
   // ===== Toasts =====
   function notify(msg) {
@@ -22,7 +23,6 @@
     setTimeout(function(){ n.classList.remove('visible'); }, 4000);
     setTimeout(function(){ n.remove(); }, 4500);
   }
-
   function errorNotify(msg) {
     var n = document.createElement('div');
     n.className = 'toast-notice error';
@@ -32,7 +32,6 @@
     setTimeout(function(){ n.classList.remove('visible'); }, 10000);
     setTimeout(function(){ n.remove(); }, 10500);
   }
-
   function longNotify(msg) {
     var n = document.createElement('div');
     n.className = 'toast-notice';
@@ -59,29 +58,33 @@
 
   // ===== Helpers =====
   function updateCount() {
-    var total = Object.values(window.cardCounts).reduce(function(a, b){ return a + b; }, 0);
-    countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
+    var total = Object.values(window.cardCounts).reduce(function(a,b){ return a+b; }, 0);
+    countLabel.textContent = total + ' card' + (total!==1?'s':'');
   }
-
   function refreshBadge(vn) {
     var b = document.querySelector('[data-variant="' + vn + '"] .qty-badge');
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
-  // ===== Wrap script.js addCard/removeCard =====
-  var origAdd = typeof window.addCard === 'function' ? window.addCard : function() {};
-  var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function() {};
+  // ===== Wrap core addCard/removeCard =====
+  var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
+  var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function(){};
 
   window.addCard = function(vn) {
     origAdd(vn);
-    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+    // Only proceed if the card element actually exists
+    var el = document.querySelector('[data-variant="' + vn + '"]');
+    if (!el) return;
+    // increment count
+    window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
     updateCount();
     saveState();
     refreshBadge(vn);
-    // toast for manual adds (4s)
-    var el   = document.querySelector('[data-variant="' + vn + '"]');
-    var name = (el && el.dataset.name) ? el.dataset.name : vn;
-    notify(name + ' added');
+    // toast on manual add (skip during import)
+    if (!isImporting) {
+      var name = el.dataset.name || vn;
+      notify(name + ' - ' + vn);
+    }
   };
 
   window.removeCard = function(vn, el) {
@@ -101,11 +104,11 @@
   btnImport.addEventListener('click', function(){
     window.cardCounts = window.cardCounts || {};
 
-    // Remove old modal
+    // remove old modal
     var prev = document.getElementById('import-modal');
     if (prev) prev.remove();
 
-    // Build modal
+    // build modal
     var overlay = document.createElement('div');
     overlay.id = 'import-modal';
     overlay.className = 'modal-overlay';
@@ -128,21 +131,24 @@
       </div>`;
     document.body.appendChild(overlay);
 
-    var area  = document.getElementById('import-area');
-    var clear = document.getElementById('import-clear');
+    var area  = document.getElementById('import-area'),
+        clear = document.getElementById('import-clear');
     document.getElementById('close-import').onclick = closeModal;
     document.getElementById('import-cancel').onclick = closeModal;
 
-    // Prefill with variant codes
+    // prefill
     area.value = Object.keys(window.cardCounts).join(' ');
 
     function closeModal() { overlay.remove(); }
 
     document.getElementById('import-ok').onclick = function(){
+      // begin import
+      isImporting = true;
       closeModal();
       saveState();
       longNotify('Deck Import in Progress');
 
+      // clear if checked
       if (clear.checked) {
         document.getElementById('card-container').innerHTML = '';
         window.cardCounts = {};
@@ -150,8 +156,9 @@
         saveState();
       }
 
-      var tokens = (area.value || '').trim().split(/\s+/).filter(Boolean);
-      var errors = [];
+      // parse tokens
+      var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
+          errors = [];
       tokens.forEach(function(tok){
         var parts = tok.split('-');
         if (parts.length < 2) { errors.push(tok); return; }
@@ -162,6 +169,11 @@
         if (after === before) errors.push(vn);
       });
 
+      // end import mode
+      isImporting = false;
+      saveState();
+
+      // show errors
       errors.forEach(function(vn){
         errorNotify(vn + " can't be found");
       });
@@ -208,49 +220,43 @@
       for (var i = 0; i < cnt; i++) window.addCard(vn);
     });
     updateCount();
-    var sm = document.getElementById('search-modal');
-    if (sm) sm.style.top = '50px';
+    var sm = document.getElementById('search-modal'); if (sm) sm.style.top = '50px';
   });
 
   // ===== Overview Builder =====
   function buildOverview(){
-    var ex = document.getElementById('overview-modal');
-    if (ex) ex.remove();
-    var m = document.createElement('div');
-    m.id = 'overview-modal';
-    m.className = 'modal-overlay';
+    var ex = document.getElementById('overview-modal'); if (ex) ex.remove();
+    var m = document.createElement('div'); m.id='overview-modal'; m.className='modal-overlay';
     m.innerHTML =
-      '<div class="modal-content small">' +
-        '<button id="close-overview" class="modal-close">×</button>' +
-        '<h2>Overview</h2><div id="overview-list"></div>' +
+      '<div class="modal-content small">'+
+        '<button id="close-overview" class="modal-close">×</button>'+
+        '<h2>Overview</h2><div id="overview-list"></div>'+
       '</div>';
     document.body.appendChild(m);
     document.getElementById('close-overview').onclick = function(){ m.remove(); };
 
-    var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
-    var grp = {};
+    var order=['Legend','Runes','Units','Spells','Gear','Battlefield'], grp={};
     Object.keys(window.cardCounts).forEach(function(vn){
-      var el = document.querySelector('[data-variant="' + vn + '"]');
-      var t  = (el && el.dataset.type) ? el.dataset.type : 'Other';
-      (grp[t] = grp[t] || []).push(vn);
+      var el = document.querySelector('[data-variant="'+vn+'"]');
+      var t  = (el&&el.dataset.type)?el.dataset.type:'Other';
+      (grp[t]=grp[t]||[]).push(vn);
     });
-
-    var cntEl = document.getElementById('overview-list');
+    var cntEl=document.getElementById('overview-list');
     order.forEach(function(type){
-      if (grp[type]) {
-        var sec = document.createElement('div');
-        var h   = document.createElement('h3'); h.textContent = type; sec.appendChild(h);
+      if (grp[type]){
+        var sec=document.createElement('div'), h=document.createElement('h3');
+        h.textContent=type; sec.appendChild(h);
         grp[type].forEach(function(vn){
-          var el    = document.querySelector('[data-variant="'+vn+'"]');
-          var name  = (el && el.dataset.name) ? el.dataset.name : vn;
-          var setNo = (el && el.dataset.set)  ? el.dataset.set  : '';
-          var logo  = (el && el.dataset.colorLogo) ? el.dataset.colorLogo : '';
-          var row   = document.createElement('div'); row.className = 'overview-item';
-          row.innerHTML =
-            '<img src="'+logo+'" class="overview-logo"/>' +
-            '<span>'+name+' ('+setNo+')</span>' +
-            '<button class="overview-dec" data-vn="'+vn+'">–</button>' +
-            '<span class="overview-count">'+window.cardCounts[vn]+'</span>' +
+          var el=document.querySelector('[data-variant="'+vn+'"]'),
+              name=(el&&el.dataset.name)?el.dataset.name:vn,
+              setNo=(el&&el.dataset.set)?el.dataset.set:'',
+              logo=(el&&el.dataset.colorLogo)?el.dataset.colorLogo:'';
+          var row=document.createElement('div'); row.className='overview-item';
+          row.innerHTML=
+            '<img src="'+logo+'" class="overview-logo"/>'+
+            '<span>'+name+' ('+setNo+')</span>'+
+            '<button class="overview-dec" data-vn="'+vn+'">–</button>'+
+            '<span class="overview-count">'+window.cardCounts[vn]+'</span>'+
             '<button class="overview-inc" data-vn="'+vn+'">+</button>';
           sec.appendChild(row);
         });
@@ -258,7 +264,4 @@
       }
     });
   }
-
-  // Expose loadState so DOMContentLoaded can call it
-  window.loadState = loadState;
 })();
