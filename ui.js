@@ -29,9 +29,10 @@
   
   // — Counter Helpers —
   function updateCount() {
-    const total = Object.values(window.cardCounts).reduce((a,b) => a + b, 0);
-    countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
-  }
+  const lbl = document.getElementById('card-count');
+  const total = Object.values(window.cardCounts).reduce((a,b)=>a+b,0);
+  if (lbl) lbl.textContent = total + ' card' + (total!==1?'s':'');
+}
   function refreshBadge(vn) {
     const b = document.querySelector(`[data-variant="${vn}"] .qty-badge`);
     if (b) b.textContent = window.cardCounts[vn] || 0;
