@@ -96,11 +96,11 @@
 btnImport.addEventListener('click', function(){
   window.cardCounts = window.cardCounts || {};
 
-  // 1) Tear down any existing modal
+  // Remove existing modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // 2) Build the modal
+  // Build modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -108,7 +108,7 @@ btnImport.addEventListener('click', function(){
     <div class="modal-content large" style="max-width:600px; padding:16px;">
       <button id="close-import" class="modal-close">×</button>
       <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code in <code>XXX-YYY-NN</code> format:</p>
+      <p>Paste your Table Top Simulator Deck Code.</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
         placeholder="e.g. OGN-045-1-03 OGN-046-1-02"></textarea>
@@ -123,23 +123,23 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
-  // 3) Wire up references
+  // Element refs
   var area  = document.getElementById('import-area'),
       clear = document.getElementById('import-clear');
   document.getElementById('close-import').onclick = () => overlay.remove();
   document.getElementById('import-cancel').onclick = () => overlay.remove();
 
-  // 4) Prefill with existing variant counts
+  // Prefill
   area.value = Object.entries(window.cardCounts)
                      .map(([vn,c]) => `${vn}-${c}`)
                      .join(' ');
 
-  // 5) On Import…
+  // On Import
   document.getElementById('import-ok').onclick = function(){
     overlay.remove();
     longNotify('Deck Import in Progress');
 
-    // optionally clear
+    // Optionally clear first
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -147,42 +147,40 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // parse into {vn,qty}
-    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
-        valids = {}, errors = [];
-
-    tokens.forEach(tok => {
-      var parts = tok.split('-'),
-          qty   = parseInt(parts.pop(),10) || 1,
-          vn    = parts.join('-');
-      // verify via DOM
-      if (document.querySelector(`[data-variant="${vn}"]`)) {
-        valids[vn] = (valids[vn]||0) + qty;
-      } else {
-        errors.push(vn);
-      }
+    // Parse tokens into {vn, qty}
+    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
+    var imports = tokens.map(tok => {
+      var parts = tok.split('-');
+      var qty   = parseInt(parts.pop(), 10) || 1;
+      var vn    = parts.join('-');
+      return { vn, qty };
     });
 
-    // bulk-add valid cards
-    var addedTotal = 0;
+    // Bulk-add, tracking errors
+    var totalAdded = 0, errors = [];
     isImporting = true;
-    Object.entries(valids).forEach(([vn,qty]) => {
-      for (let i = 0; i < qty; i++) {
-        window.addCard(vn);
-        addedTotal++;
+    imports.forEach(function(item){
+      var before = window.cardCounts[item.vn] || 0;
+      for (var i = 0; i < item.qty; i++) {
+        window.addCard(item.vn);
+      }
+      var after = window.cardCounts[item.vn] || 0;
+      var added = after - before;
+      if (added <= 0) {
+        errors.push(item.vn);
+      } else {
+        totalAdded += added;
       }
     });
     isImporting = false;
     saveState();
 
-    // summary toast
-    if (addedTotal) notify(`${addedTotal} card${addedTotal>1?'s':''} added`);
-    if (errors.length)
-      errorNotify(`${[...new Set(errors)].join(', ')} can't be found`);
+    // Final toasts
+    if (totalAdded) notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
+    if (errors.length) errorNotify([...new Set(errors)].join(', ') + 
+                                   (errors.length>1?" can't be found":" can't be found"));
   };
 });
-
-
 
   // ===== Other Top-Bar Buttons =====
   btnPrint.addEventListener('click', function(){
