@@ -1,5 +1,6 @@
 (function() {
   // Top-bar buttons
+  var openBtn      = document.getElementById('open-search');
   var btnImport    = document.getElementById('btn-import');
   var btnPrint     = document.getElementById('btn-print');
   var btnOverview  = document.getElementById('btn-overview');
@@ -7,39 +8,10 @@
   var btnReset     = document.getElementById('btn-reset');
   var countLabel   = document.getElementById('card-count');
 
-  // State and flags
+  // State and flag
   window.cardCounts = {};
   var fullProxy    = false;
   var isImporting  = false;
-
-  // ===== Toasts =====
-  function notify(msg) {
-    var n = document.createElement('div');
-    n.className = 'toast-notice';
-    n.textContent = msg;
-    document.getElementById('toast-container').appendChild(n);
-    setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 4000);
-    setTimeout(function(){ n.remove(); }, 4500);
-  }
-  function errorNotify(msg) {
-    var n = document.createElement('div');
-    n.className = 'toast-notice error';
-    n.textContent = msg;
-    document.getElementById('toast-container').appendChild(n);
-    setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 10000);
-    setTimeout(function(){ n.remove(); }, 10500);
-  }
-  function longNotify(msg) {
-    var n = document.createElement('div');
-    n.className = 'toast-notice';
-    n.textContent = msg;
-    document.getElementById('toast-container').appendChild(n);
-    setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 4000);
-    setTimeout(function(){ n.remove(); }, 4500);
-  }
 
   // ===== Persistence =====
   function saveState() {
@@ -65,42 +37,28 @@
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
-// Wrap the original addCard to return success/failure and only toast on manual actions
-var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
-
-window.addCard = function(vn) {
-  // measure before DOM count
-  var before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-  // attempt to add
-  origAdd(vn);
-  // measure after
-  var afterEls = document.querySelectorAll(`[data-variant="${vn}"]`);
-  var after = afterEls.length;
-
-  if (after > before) {
-    // real success: update state
-    window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
-    updateCount();
-    saveState();
-    refreshBadge(vn);
-    // manual toast
-    if (!isImporting) {
-      var name = afterEls[after-1].dataset.name || vn;
-      notify(name + ' - ' + vn);
-    }
-    return true;
-  } else {
-    // manual error toast
-    if (!isImporting) {
-      errorNotify(vn + " can't be found");
+  // ===== Wrap original addCard/removeCard =====
+  var origAdd = typeof window.addCard === 'function'
+    ? window.addCard
+    : function() {};
+  window.addCard = function(vn) {
+    var before = document.querySelectorAll('[data-variant="' + vn + '"]').length;
+    origAdd(vn);
+    var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]');
+    var after = afterEls.length;
+    if (after > before) {
+      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+      updateCount();
+      saveState();
+      refreshBadge(vn);
+      return true;
     }
     return false;
-  }
-};
+  };
 
-
-  // ===== removeCard unchanged =====
-  var origRm = typeof window.removeCard === 'function' ? window.removeCard : function(){};
+  var origRm = typeof window.removeCard === 'function'
+    ? window.removeCard
+    : function() {};
   window.removeCard = function(vn, el) {
     origRm(vn, el);
     if (window.cardCounts[vn] > 1) {
@@ -114,150 +72,148 @@ window.addCard = function(vn) {
     refreshBadge(vn);
   };
 
- // ===== IMPORT LIST (modal) =====
-btnImport.addEventListener('click', function(){
-  // remove old modal
-  var prev = document.getElementById('import-modal');
-  if (prev) prev.remove();
+  // ===== Import List Modal =====
+  btnImport.addEventListener('click', function(){
+    // teardown existing
+    var prev = document.getElementById('import-modal');
+    if (prev) prev.remove();
 
-  // build modal
-  var overlay = document.createElement('div');
-  overlay.id = 'import-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-content large" style="max-width:600px;padding:16px;">
-      <button id="close-import" class="modal-close">×</button>
-      <h2>Import List</h2>
-      <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
-      <textarea id="import-area"
-        style="width:100%;height:200px;font-family:monospace;"
-        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-      <div style="text-align:right;margin-top:12px;">
-        <button id="import-cancel" class="topbar-btn">Cancel</button>
-        <button id="import-ok"     class="topbar-btn">Import</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
+    // build modal
+    var overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content large" style="max-width:600px;padding:16px;">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
+        <textarea id="import-area"
+          style="width:100%;height:200px;font-family:monospace;"
+          placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <div style="text-align:right;margin-top:12px;">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok"     class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
 
-  // refs
-  var areaEl    = overlay.querySelector('#import-area');
-  var closeBtn  = overlay.querySelector('#close-import');
-  var cancelBtn = overlay.querySelector('#import-cancel');
-  var okBtn     = overlay.querySelector('#import-ok');
+    // element refs
+    var areaEl    = overlay.querySelector('#import-area');
+    var closeBtn  = overlay.querySelector('#close-import');
+    var cancelBtn = overlay.querySelector('#import-cancel');
+    var okBtn     = overlay.querySelector('#import-ok');
 
-  closeBtn.onclick  = () => overlay.remove();
-  cancelBtn.onclick = () => overlay.remove();
+    closeBtn.onclick  = () => overlay.remove();
+    cancelBtn.onclick = () => overlay.remove();
 
-  okBtn.onclick = function(){
-    overlay.remove();
-    longNotify('Deck Import in Progress');
+    okBtn.onclick = function(){
+      overlay.remove();
 
-    // clear existing
-    document.getElementById('card-container').innerHTML = '';
-    window.cardCounts = {};
+      // clear existing cards & state
+      document.getElementById('card-container').innerHTML = '';
+      window.cardCounts = {};
 
-    // parse & import
-    var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
-    var totalAdded = 0, errors = [], seen = new Set();
+      // parse tokens and add
+      var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      var totalAdded = 0;
 
-    isImporting = true;
-    tokens.forEach(function(tok){
-      var parts = tok.split('-');
-      if (parts.length < 2) {
-        if (!seen.has(tok)) { errors.push(tok); seen.add(tok); }
-        return;
-      }
-      var vn = parts[0] + '-' + parts[1];
-      if (window.addCard(vn)) {
-        totalAdded++;
-      } else if (!seen.has(vn)) {
-        errors.push(vn);
-        seen.add(vn);
-      }
-    });
-    isImporting = false;
+      isImporting = true;
+      tokens.forEach(function(tok){
+        var parts = tok.split('-');
+        if (parts.length < 2) return;
+        var vn = parts[0] + '-' + parts[1];
+        if (window.addCard(vn)) {
+          totalAdded++;
+        }
+      });
+      isImporting = false;
 
-    saveState();
-    updateCount();
+      saveState();
+      updateCount();
+    };
+  });
 
-    // summary & error toasts
-    if (totalAdded)
-      notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
-    if (errors.length)
-      errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
-  };
-});
-
-  // ===== Other Top-Bar Buttons (unchanged) =====
+  // ===== Other Top-Bar Buttons =====
   btnPrint.addEventListener('click', function(){
     document.getElementById('top-bar').style.display = 'none';
     document.getElementById('search-modal').classList.add('hidden');
     window.print();
-    setTimeout(function(){
-      document.getElementById('top-bar').style.display = '';
-    }, 0);
+    setTimeout(function(){ document.getElementById('top-bar').style.display = ''; }, 0);
   });
+
   btnOverview.addEventListener('click', function(){
     buildOverview();
-    notify('Overview opened');
   });
+
   btnFullProxy.addEventListener('click', function(){
     fullProxy = !fullProxy;
     Object.keys(window.cardCounts).forEach(function(vn){
-      var img=document.querySelector('[data-variant="'+vn+'"] img.card-img');
-      if(img) img.src = fullProxy? img.dataset.fullArt : img.dataset.proxyArt;
+      var img = document.querySelector('[data-variant="' + vn + '"] img.card-img');
+      if (img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
     });
-    notify(fullProxy?'Full art ON':'Proxy art ON');
   });
+
   btnReset.addEventListener('click', function(){
-    window.cardCounts={};
-    document.getElementById('card-container').innerHTML='';
-    updateCount(); saveState();
-    notify('Reset complete');
+    window.cardCounts = {};
+    document.getElementById('card-container').innerHTML = '';
+    updateCount();
+    saveState();
   });
 
   // ===== On Load: Restore State =====
   document.addEventListener('DOMContentLoaded', function(){
     loadState();
     Object.entries(window.cardCounts).forEach(function(pair){
-      var vn=pair[0],cnt=pair[1];
-      for(var i=0;i<cnt;i++) window.addCard(vn);
+      var vn = pair[0], cnt = pair[1];
+      for (var i = 0; i < cnt; i++) window.addCard(vn);
     });
     updateCount();
-    var sm=document.getElementById('search-modal');
-    if(sm) sm.style.top='50px';
+    var sm = document.getElementById('search-modal');
+    if (sm) sm.style.top = '50px';
   });
 
-  // ===== Overview Builder (unchanged) =====
+  // ===== Overview Builder =====
   function buildOverview(){
-    var ex=document.getElementById('overview-modal'); if(ex) ex.remove();
-    var m=document.createElement('div'); m.id='overview-modal'; m.className='modal-overlay';
-    m.innerHTML='<div class="modal-content small">'
-      +'<button id="close-overview" class="modal-close">×</button>'
-      +'<h2>Overview</h2><div id="overview-list"></div></div>';
+    var ex = document.getElementById('overview-modal');
+    if (ex) ex.remove();
+    var m = document.createElement('div');
+    m.id = 'overview-modal';
+    m.className = 'modal-overlay';
+    m.innerHTML =
+      '<div class="modal-content small">' +
+        '<button id="close-overview" class="modal-close">×</button>' +
+        '<h2>Overview</h2><div id="overview-list"></div>' +
+      '</div>';
     document.body.appendChild(m);
-    document.getElementById('close-overview').onclick=function(){m.remove();};
-    var order=['Legend','Runes','Units','Spells','Gear','Battlefield'],grp={};
+    document.getElementById('close-overview').onclick = function(){ m.remove(); };
+
+    var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
+    var grp   = {};
     Object.keys(window.cardCounts).forEach(function(vn){
-      var el=document.querySelector('[data-variant="'+vn+'"]');
-      var t=(el&&el.dataset.type)?el.dataset.type:'Other';
-      (grp[t]=grp[t]||[]).push(vn);
+      var el = document.querySelector('[data-variant="' + vn + '"]');
+      var t  = el && el.dataset.type ? el.dataset.type : 'Other';
+      (grp[t] = grp[t] || []).push(vn);
     });
-    var cntEl=document.getElementById('overview-list');
+
+    var cntEl = document.getElementById('overview-list');
     order.forEach(function(type){
-      if(grp[type]){
-        var sec=document.createElement('div');var h=document.createElement('h3');h.textContent=type;sec.appendChild(h);
+      if (grp[type]) {
+        var sec = document.createElement('div');
+        var h   = document.createElement('h3'); h.textContent = type;
+        sec.appendChild(h);
         grp[type].forEach(function(vn){
-          var el=document.querySelector('[data-variant="'+vn+'"]'),
-              name=(el&&el.dataset.name)?el.dataset.name:vn,
-              setNo=(el&&el.dataset.set)?el.dataset.set:'',
-              logo=(el&&el.dataset.colorLogo)?el.dataset.colorLogo:'',
-              row=document.createElement('div');
-          row.className='overview-item';
-          row.innerHTML='<img src="'+logo+'" class="overview-logo"/><span>'+name+' ('+setNo+')</span>'
-            +'<button class="overview-dec" data-vn="'+vn+'">–</button>'
-            +'<span class="overview-count">'+window.cardCounts[vn]+'</span>'
-            +'<button class="overview-inc" data-vn="'+vn+'">+</button>';
+          var el    = document.querySelector('[data-variant="'+vn+'"]'),
+              name  = el && el.dataset.name ? el.dataset.name : vn,
+              setNo = el && el.dataset.set  ? el.dataset.set  : '',
+              logo  = el && el.dataset.colorLogo ? el.dataset.colorLogo : '',
+              row   = document.createElement('div');
+          row.className = 'overview-item';
+          row.innerHTML =
+            '<img src="'+logo+'" class="overview-logo"/>' +
+            '<span>'+name+' ('+setNo+')</span>' +
+            '<button class="overview-dec" data-vn="'+vn+'">–</button>' +
+            '<span class="overview-count">'+window.cardCounts[vn]+'</span>' +
+            '<button class="overview-inc" data-vn="'+vn+'">+</button>';
           sec.appendChild(row);
         });
         cntEl.appendChild(sec);
