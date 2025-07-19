@@ -66,28 +66,37 @@
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
-  // ===== Wrap core addCard/removeCard =====
-  var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
-  var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function(){};
+ // Wrap the original and return success state
+var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
 
 window.addCard = function(vn) {
+  // count existing cards for this variant
+  var beforeCount = document.querySelectorAll('[data-variant="' + vn + '"]').length;
+  
+  // call the original, which builds/appends if possible
   origAdd(vn);
-  // check existence in DOM
-  var el = document.querySelector('[data-variant="' + vn + '"]');
-  if (!el) return false;        // indicate failure
-
-  // increment count
-  window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
-  updateCount();
-  saveState();
-  refreshBadge(vn);
-
-  // manual-add toast when not importing
-  if (!isImporting) {
-    var name = el.dataset.name || vn;
-    notify(name + ' - ' + vn);
+  
+  // count again
+  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]'),
+      afterCount = afterEls.length;
+  
+  if (afterCount > beforeCount) {
+    // Success: update our state
+    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+    updateCount();
+    saveState();
+    refreshBadge(vn);
+    
+    // Only toast if not during import
+    if (!isImporting) {
+      var name = afterEls[afterCount-1].dataset.name || vn;
+      notify(name + ' - ' + vn);
+    }
+    return true;
+  } else {
+    // Nothing changed => failure
+    return false;
   }
-  return true;                  // indicate success
 };
 
 
@@ -140,37 +149,46 @@ btnImport.addEventListener('click', function(){
 
   // 4) Handle Import
   okBtn.onclick = function(){
-    overlay.remove();
-    longNotify('Deck Import in Progress');
+  overlay.remove();
+  longNotify('Deck Import in Progress');
 
-    // Clear existing cards & state
-    document.getElementById('card-container').innerHTML = '';
-    window.cardCounts = {};
+  // Clear everything first
+  document.getElementById('card-container').innerHTML = '';
+  window.cardCounts = {};
 
-    // Parse tokens and add
-    var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
-    var totalAdded = 0;
+  var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean),
+      totalAdded = 0,
+      errors     = [],
+      seen       = new Set();
 
-    isImporting = true;
-    tokens.forEach(function(tok){
-      var parts = tok.split('-');
-      if (parts.length < 2) return;
-      var vn = parts[0] + '-' + parts[1];
-      // add exactly once per token
-      window.addCard(vn);
+  isImporting = true;
+  tokens.forEach(function(tok){
+    var parts = tok.split('-');
+    if (parts.length < 2) {
+      if (!seen.has(tok)) { errors.push(tok); seen.add(tok); }
+      return;
+    }
+    var vn = parts[0] + '-' + parts[1];
+    // Try one add per token
+    if (window.addCard(vn)) {
       totalAdded++;
-    });
-    isImporting = false;
+    } else if (!seen.has(vn)) {
+      errors.push(vn);
+      seen.add(vn);
+    }
+  });
+  isImporting = false;
 
-    // Persist and update counter
-    saveState();
-    updateCount();
+  saveState();
+  updateCount();
 
-    // Summary toast only
-    if (totalAdded)
-      notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
-  };
-});
+  // Final summary toasts
+  if (totalAdded)
+    notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
+  if (errors.length)
+    errorNotify(errors.join(', ') + 
+                (errors.length>1 ? " can't be found" : " can't be found"));
+};
 
 
 
