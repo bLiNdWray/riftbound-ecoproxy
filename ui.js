@@ -153,28 +153,26 @@ btnImport.addEventListener('click', function(){
     var errors = [];
     var seenErr = new Set();
 
-    isImporting = true;
-    tokens.forEach(function(tok){
-      // ignore trailing -NN
-      var parts = tok.split('-');
-      if (parts.length < 2) {
-        if (!seenErr.has(tok)) { errors.push(tok); seenErr.add(tok); }
-        return;
-      }
-      var vn = parts[0] + '-' + parts[1];
-      // Try to add
-      if (window.addCard(vn)) {
-        totalAdded++;
-      } else if (!seenErr.has(vn)) {
-        errors.push(vn);
-        seenErr.add(vn);
-      }
-    });
-    isImporting = false;
+isImporting = true;
+tokens.forEach(function(tok){
+  var parts = tok.split('-'),
+      vn    = parts[0] + '-' + parts[1];
+  if (window.addCard(vn)) {
+    totalAdded++;
+  } else if (!seenErr.has(vn)) {
+    errors.push(vn);
+    seenErr.add(vn);
+  }
+});
+isImporting = false;
 
-    // 5) Finalize state/count
-    saveState();
-    updateCount();
+// **NEW**: drop any “errors” for variants we actually added
+errors = errors.filter(function(vn){
+  return !(window.cardCounts[vn] > 0);
+});
+
+saveState();
+updateCount();
 
     // 6) Show toasts
     if (totalAdded) notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
