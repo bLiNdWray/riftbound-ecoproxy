@@ -110,3 +110,30 @@ html, body {
   box-sizing: border-box;
   padding: 12px;
 }
+
+/* Make the search panel itself full-width */
+#search-modal .search-panel {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 16px;    /* optional gutter */
+  box-sizing: border-box;
+}
+
+/* Make the results grid span the full modal width */
+#search-modal .results-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 16px;   /* match search-panel */
+  box-sizing: border-box;
+}
+
+/* Ensure the modal-content wrapper doesn’t constrain width */
+#search-modal .modal-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;   /* optional: flush edges */
+  box-shadow: none;   /* optional: flatten */
+}
