@@ -93,15 +93,12 @@ a:hover {
   padding: 8px;
 }
 
-/* Search Modal */
-#search-modal {
-  position: fixed !important;
-  top: 50px !important;       /* match top bar height */
-  left: 0;
-  width: 100%;
-  height: calc(100% - 50px);
-  overflow-y: auto;
-  z-index: 2000;
+/* Ensure the header container spans 100% and has no unintended padding/margins */
+#search-modal .search-header {
+  width: 100% !important;
+  box-sizing: border-box;
+  padding: 0 16px;   /* optional horizontal padding */
+  margin: 0;
 }
 
 /* Pin Search Header */
@@ -118,14 +115,13 @@ a:hover {
   flex-direction: column;
 }
 
-/* Search Input */
-#card-search-input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+#search-modal .search-header input,
+#search-modal .search-header .search-input {
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 12px;    /* maintain your existing padding */
+  font-size: 1rem;  /* adjust as needed */
 }
 
 /* Search Results Grid */
