@@ -104,11 +104,11 @@
 btnImport.addEventListener('click', function(){
   window.cardCounts = window.cardCounts || {};
 
-  // Remove old modal
+  // remove old modal
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // Build modal
+  // build modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -136,19 +136,20 @@ btnImport.addEventListener('click', function(){
   document.getElementById('close-import').onclick = closeModal;
   document.getElementById('import-cancel').onclick = closeModal;
 
-  // Prefill with actual variant IDs (including trailing -1)
+  // prefill with existing variants & counts
   area.value = Object.entries(window.cardCounts)
-                     .map(([vn, cnt]) => vn + '-' + String(cnt).padStart(2,'0'))
+                     .map(([vn, cnt]) => vn + '-' + cnt)
                      .join(' ');
 
   function closeModal(){ overlay.remove(); }
 
   document.getElementById('import-ok').onclick = function(){
-    // Close & progress
     closeModal();
+
+    // 1) Show progress
     longNotify('Deck Import in Progress');
 
-    // Optionally clear
+    // 2) Optionally clear
     if (clear.checked) {
       document.getElementById('card-container').innerHTML = '';
       window.cardCounts = {};
@@ -156,39 +157,44 @@ btnImport.addEventListener('click', function(){
       saveState();
     }
 
-    // Parse tokens, validate existence
-    var tokens = (area.value||'').trim().split(/\s+/).filter(Boolean),
-        valids = [], errors = [];
-    tokens.forEach(function(tok){
+    // 3) Parse tokens
+    var rawTokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
+    var imports   = rawTokens.map(tok => {
       var parts = tok.split('-');
-      if (parts.length < 2) { errors.push(tok); return; }
-      var qty = parseInt(parts.pop(), 10) || 1;          // last piece = quantity
-      var vn  = parts.join('-');                        // rejoin rest = true variantNumber
-      // check it exists in DOM
-      if (document.querySelector('[data-variant="'+vn+'"]')) {
-        valids.push({ vn: vn, qty: qty });
+      var qty   = parseInt(parts.pop(),10) || 1;
+      var vn    = parts.join('-');
+      return { vn, qty };
+    });
+
+    // 4) Validate against master list `allCards`
+    var validMap = {}, errors = [];
+    imports.forEach(({vn, qty})=>{
+      if (allCards.find(c=>c.variantNumber===vn)) {
+        validMap[vn] = (validMap[vn]||0) + qty;
       } else {
         errors.push(vn);
       }
     });
 
-    // Bulk-add the valid ones
+    // 5) Bulk-add valid cards
+    var addedTotal = 0;
     isImporting = true;
-    valids.forEach(function(item){
-      for (var i = 0; i < item.qty; i++) {
-        window.addCard(item.vn);
+    Object.entries(validMap).forEach(([vn, qty])=>{
+      for(let i=0;i<qty;i++){
+        window.addCard(vn);
+        addedTotal++;
       }
     });
     isImporting = false;
     saveState();
 
-    // Single error toast
-    if (errors.length) {
-      errorNotify(errors.join(', ') + (errors.length>1 ? " can't be found" : " can't be found"));
-    }
+    // 6) Final toasts
+    if (addedTotal)
+      notify(addedTotal + ' card' + (addedTotal>1?'s':'') + ' added');
+    if (errors.length)
+      errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
   };
 });
-
 
 
   // ===== Other Top-Bar Buttons =====
