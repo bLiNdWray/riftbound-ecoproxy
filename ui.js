@@ -65,29 +65,43 @@
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
-  // ===== Wrap original addCard to return success =====
-  var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
-  window.addCard = function(vn) {
-    // measure before DOM count
-    var before = document.querySelectorAll('[data-variant="' + vn + '"]').length;
-    origAdd(vn);
-    var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]');
-    var after = afterEls.length;
-    if (after > before) {
-      // success
-      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
-      updateCount();
-      saveState();
-      refreshBadge(vn);
-      if (!isImporting) {
-        var el = afterEls[after-1];
-        var name = el.dataset.name || vn;
-        notify(name + ' - ' + vn);
-      }
-      return true;
+ // Wrap the original addCard to detect real vs. fake adds
+var origAdd = typeof window.addCard === 'function'
+  ? window.addCard
+  : function() {};
+
+window.addCard = function(vn) {
+  // 1) Count existing elements with this variant
+  var beforeEls = document.querySelectorAll('[data-variant="' + vn + '"]');
+  var beforeCount = beforeEls.length;
+
+  // 2) Call the original—this will build/append if it knows how
+  origAdd(vn);
+
+  // 3) Count again
+  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]');
+  var afterCount = afterEls.length;
+
+  // 4) If a new element appeared, treat as success
+  if (afterCount > beforeCount) {
+    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+    updateCount();
+    saveState();
+    refreshBadge(vn);
+
+    // only toast on manual adds, not during import
+    if (!isImporting) {
+      var el   = afterEls[afterCount - 1];
+      var name = el.dataset.name || vn;
+      notify(name + ' - ' + vn);
     }
-    return false;
-  };
+    return true;
+  }
+
+  // 5) Otherwise it's a failure—show an error toast
+  errorNotify(vn + " can't be found");
+  return false;
+};
 
   // ===== removeCard unchanged =====
   var origRm = typeof window.removeCard === 'function' ? window.removeCard : function(){};
