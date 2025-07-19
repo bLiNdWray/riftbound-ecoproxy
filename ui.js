@@ -65,46 +65,39 @@
     if (b) b.textContent = window.cardCounts[vn] || 0;
   }
 
-// Wrap the original addCard to return success/failure and only toast on manual adds
-var origAdd = typeof window.addCard === 'function'
-  ? window.addCard
-  : function() {};
+// Wrap the original addCard to return success/failure and only toast on manual actions
+var origAdd = typeof window.addCard === 'function' ? window.addCard : function(){};
 
 window.addCard = function(vn) {
-  // Measure how many cards existed before
-  var before = document.querySelectorAll('[data-variant="' + vn + '"]').length;
-  
-  // Attempt to add via original logic
+  // measure before DOM count
+  var before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
+  // attempt to add
   origAdd(vn);
-  
-  // Measure again
-  var afterEls = document.querySelectorAll('[data-variant="' + vn + '"]'),
-      after = afterEls.length;
-  
-  // If we gained a card, it's a real add
+  // measure after
+  var afterEls = document.querySelectorAll(`[data-variant="${vn}"]`);
+  var after = afterEls.length;
+
   if (after > before) {
-    // Update counts and badge
-    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+    // real success: update state
+    window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
     updateCount();
     saveState();
     refreshBadge(vn);
-    
-    // Only toast on manual adds
+    // manual toast
     if (!isImporting) {
-      var el   = afterEls[after - 1];
-      var name = el.dataset.name || vn;
+      var name = afterEls[after-1].dataset.name || vn;
       notify(name + ' - ' + vn);
     }
     return true;
-  } 
-
-  // Otherwise nothing changed => failure
-  if (!isImporting) {
-    // Only toast error on manual adds
-    errorNotify(vn + " can't be found");
+  } else {
+    // manual error toast
+    if (!isImporting) {
+      errorNotify(vn + " can't be found");
+    }
+    return false;
   }
-  return false;
 };
+
   // ===== removeCard unchanged =====
   var origRm = typeof window.removeCard === 'function' ? window.removeCard : function(){};
   window.removeCard = function(vn, el) {
