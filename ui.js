@@ -106,14 +106,14 @@ window.addCard = function(vn) {
 
 // ===== IMPORT LIST (modal) =====
 btnImport.addEventListener('click', function(){
-  // 1) Reset state for a fresh import
+  // reset state for fresh import
   window.cardCounts = {};
 
-  // 2) Tear down any existing modal
+  // remove old modal if present
   var prev = document.getElementById('import-modal');
   if (prev) prev.remove();
 
-  // 3) Build the import modal
+  // build and append modal
   var overlay = document.createElement('div');
   overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
@@ -121,8 +121,7 @@ btnImport.addEventListener('click', function(){
     <div class="modal-content large" style="max-width:600px; padding:16px;">
       <button id="close-import" class="modal-close">×</button>
       <h2>Import List</h2>
-      <p>Paste your Table Top Simulator Deck Code.<br>
-         Each token should be <code>XXX-XXX-NN</code>, but the <code>-NN</code> is now ignored.</p>
+      <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
       <textarea id="import-area"
         style="width:100%; height:200px; font-family:monospace;"
         placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
@@ -133,40 +132,35 @@ btnImport.addEventListener('click', function(){
     </div>`;
   document.body.appendChild(overlay);
 
-  // 4) Wire up cancel/close
-  document.getElementById('close-import').onclick  = () => overlay.remove();
-  document.getElementById('import-cancel').onclick = () => overlay.remove();
+  // grab elements *after* they exist
+  var areaEl    = overlay.querySelector('#import-area');
+  var cancelBtn = overlay.querySelector('#import-cancel');
+  var closeBtn  = overlay.querySelector('#close-import');
+  var okBtn     = overlay.querySelector('#import-ok');
 
-  // 5) On Import…
-  document.getElementById('import-ok').onclick = function(){
+  function closeModal() {
     overlay.remove();
+  }
+
+  closeBtn.onclick  = closeModal;
+  cancelBtn.onclick = closeModal;
+
+  okBtn.onclick = function(){
+    // close UI and notify
+    closeModal();
     longNotify('Deck Import in Progress');
 
-    // Parse each token as one card
-    var tokens     = (document.getElementById('import-area').value || '')
-                      .trim()
-                      .split(/\s+/)
-                      .filter(Boolean);
-    var totalAdded = 0;
-    var errors     = [];
-    var seenErr    = new Set();
+    // parse tokens
+    var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+    var totalAdded = 0, errors = [], seenErr = new Set();
 
     isImporting = true;
-    tokens.forEach(function(tok) {
-      // Split off the first two parts for the variant
-      var parts = tok.split('-');
-      if (parts.length < 2) {
-        if (!seenErr.has(tok)) {
-          errors.push(tok);
-          seenErr.add(tok);
-        }
-        return;
-      }
-      var vn = parts[0] + '-' + parts[1];
-      // Try to add exactly one copy
-      if (window.addCard(vn)) {
-        totalAdded++;
-      } else if (!seenErr.has(vn)) {
+    tokens.forEach(function(tok){
+      var parts = tok.split('-'),
+          vn    = parts[0] + '-' + parts[1],
+          added = window.addCard(vn) ? 1 : 0;
+      totalAdded += added;
+      if (!added && !seenErr.has(vn)) {
         errors.push(vn);
         seenErr.add(vn);
       }
@@ -174,10 +168,10 @@ btnImport.addEventListener('click', function(){
     isImporting = false;
     saveState();
 
-    // Final toasts
-    if (totalAdded)  notify(totalAdded + ' card' + (totalAdded > 1 ? 's' : '') + ' added');
-    if (errors.length) errorNotify(errors.join(', ') +
-                                 (errors.length > 1 ? " can't be found" : " can't be found"));
+    // final toasts
+    if (totalAdded)  notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
+    if (errors.length) errorNotify(errors.join(', ') + 
+                                   (errors.length>1?" can't be found":" can't be found"));
   };
 });
 
