@@ -58,21 +58,25 @@ a:hover {
 }
 
 /* Scoped Search Modal */
-.search-modal {
-  position: fixed;
-  top: 0;
+/* Ensure the search modal floats under the top bar */
+#search-modal {
+  position: fixed !important;
+  top: 50px !important;       /* match your bar height */
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  width: 100%;
+  height: calc(100% - 50px);
+  overflow-y: auto;
+  z-index: 2000;
 }
-.search-modal.hidden {
-  display: none !important;
+
+/* Pin the search bar (assumed .search-header) at the top of that modal */
+#search-modal .search-header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-color, #fff);
+  z-index: 2001;
 }
+
 
 /* Modal content */
 .modal-content {
