@@ -104,78 +104,74 @@
     refreshBadge(vn);
   };
 
-  // ===== Import List Modal =====
-  btnImport.addEventListener('click', function(){
-    // teardown
-    var prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
+ // ===== IMPORT LIST (modal) =====
+btnImport.addEventListener('click', function(){
+  // Remove existing modal if present
+  var prev = document.getElementById('import-modal');
+  if (prev) prev.remove();
 
-    // build modal
-    var overlay = document.createElement('div');
-    overlay.id = 'import-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-content large" style="max-width:600px;padding:16px;">
-        <button id="close-import" class="modal-close">×</button>
-        <h2>Import List</h2>
-        <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
-        <textarea id="import-area"
-          style="width:100%;height:200px;font-family:monospace;"
-          placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-        <div style="text-align:right;margin-top:12px;">
-          <button id="import-cancel" class="topbar-btn">Cancel</button>
-          <button id="import-ok"     class="topbar-btn">Import</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
+  // Build and append the modal
+  var overlay = document.createElement('div');
+  overlay.id = 'import-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content large" style="max-width:600px; padding:16px;">
+      <button id="close-import" class="modal-close">×</button>
+      <h2>Import List</h2>
+      <p>Paste your deck codes (XXX-XXX-NN, NN ignored):</p>
+      <textarea id="import-area"
+        style="width:100%; height:200px; font-family:monospace;"
+        placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+      <div style="text-align:right; margin-top:12px;">
+        <button id="import-cancel" class="topbar-btn">Cancel</button>
+        <button id="import-ok"     class="topbar-btn">Import</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
 
-    // refs
-    var areaEl    = overlay.querySelector('#import-area');
-    var closeBtn  = overlay.querySelector('#close-import');
-    var cancelBtn = overlay.querySelector('#import-cancel');
-    var okBtn     = overlay.querySelector('#import-ok');
+  // Grab refs
+  var areaEl    = overlay.querySelector('#import-area');
+  var closeBtn  = overlay.querySelector('#close-import');
+  var cancelBtn = overlay.querySelector('#import-cancel');
+  var okBtn     = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick  = () => overlay.remove();
-    cancelBtn.onclick = () => overlay.remove();
+  // Close handlers
+  closeBtn.onclick  = () => overlay.remove();
+  cancelBtn.onclick = () => overlay.remove();
 
-    okBtn.onclick = function(){
-      overlay.remove();
-      longNotify('Deck Import in Progress');
+  // Import handler
+  okBtn.onclick = function(){
+    overlay.remove();
+    longNotify('Deck Import in Progress');
 
-      // clear out
-      document.getElementById('card-container').innerHTML = '';
-      window.cardCounts = {};
+    // 1) Clear everything
+    document.getElementById('card-container').innerHTML = '';
+    window.cardCounts = {};
 
-      // parse tokens
-      var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
-      var totalAdded = 0, errors = [], seen = new Set();
+    // 2) Parse tokens and add
+    var tokens     = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+    var totalAdded = 0;
 
-      isImporting = true;
-      tokens.forEach(function(tok){
-        var parts = tok.split('-');
-        if (parts.length < 2) {
-          if (!seen.has(tok)) { errors.push(tok); seen.add(tok); }
-          return;
-        }
-        var vn = parts[0] + '-' + parts[1];
-        if (window.addCard(vn)) {
-          totalAdded++;
-        } else if (!seen.has(vn)) {
-          errors.push(vn);
-          seen.add(vn);
-        }
-      });
-      isImporting = false;
+    isImporting = true;
+    tokens.forEach(function(tok){
+      var parts = tok.split('-');
+      if (parts.length < 2) return;
+      var vn = parts[0] + '-' + parts[1];
+      window.addCard(vn);
+      totalAdded++;
+    });
+    isImporting = false;
 
-      // finalize
-      saveState();
-      updateCount();
+    // 3) Persist and update counter
+    saveState();
+    updateCount();
 
-      // toasts
-      if (totalAdded) notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
-      if (errors.length) errorNotify(errors.join(', ') + (errors.length>1?" can't be found":" can't be found"));
-    };
-  });
+    // 4) Summary toast
+    if (totalAdded)
+      notify(totalAdded + ' card' + (totalAdded>1?'s':'') + ' added');
+  };
+});
+
 
   // ===== Other Top-Bar Buttons (unchanged) =====
   btnPrint.addEventListener('click', function(){
