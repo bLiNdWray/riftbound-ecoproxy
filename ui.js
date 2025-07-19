@@ -11,16 +11,18 @@
   // State: variant → count
   window.cardCounts = window.cardCounts || {};
   var fullProxy = false;
+  var suppressToasts = false;
 
   // ===== Toasts =====
   function notify(msg) {
+    if (suppressToasts) return;
     var n = document.createElement('div');
     n.className = 'toast-notice';
     n.textContent = msg;
     document.getElementById('toast-container').appendChild(n);
     setTimeout(function(){ n.classList.add('visible'); }, 10);
-    setTimeout(function(){ n.classList.remove('visible'); }, 2000);
-    setTimeout(function(){ n.remove(); }, 2500);
+    setTimeout(function(){ n.classList.remove('visible'); }, 4000);
+    setTimeout(function(){ n.remove(); }, 4500);
   }
 
   function longNotify(msg) {
@@ -35,10 +37,7 @@
 
   // ===== Persistence =====
   function saveState() {
-    localStorage.setItem(
-      'riftboundCardCounts',
-      JSON.stringify(window.cardCounts)
-    );
+    localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts));
   }
   function loadState() {
     try {
@@ -52,7 +51,7 @@
 
   // ===== Helpers =====
   function updateCount() {
-    var total = Object.values(window.cardCounts).reduce(function(a,b){ return a + b; }, 0);
+    var total = Object.values(window.cardCounts).reduce(function(a, b){ return a + b; }, 0);
     countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
 
@@ -62,12 +61,8 @@
   }
 
   // ===== Wrap script.js addCard/removeCard =====
-  var origAdd = typeof window.addCard === 'function'
-    ? window.addCard
-    : function(vn){};
-  var origRm  = typeof window.removeCard === 'function'
-    ? window.removeCard
-    : function(vn,el){};
+  var origAdd = typeof window.addCard === 'function' ? window.addCard : function() {};
+  var origRm  = typeof window.removeCard === 'function' ? window.removeCard : function() {};
 
   window.addCard = function(vn) {
     origAdd(vn);
@@ -75,10 +70,11 @@
     updateCount();
     saveState();
     refreshBadge(vn);
-    // toast for manual adds
-    var el   = document.querySelector('[data-variant="' + vn + '"]');
-    var name = el && el.dataset.name ? el.dataset.name : vn;
-    notify(name + ' added');
+    if (!suppressToasts) {
+      var el   = document.querySelector('[data-variant="' + vn + '"]');
+      var name = el && el.dataset.name ? el.dataset.name : vn;
+      notify(name + ' added');
+    }
   };
 
   window.removeCard = function(vn, el) {
@@ -98,11 +94,9 @@
   btnImport.addEventListener('click', function(){
     window.cardCounts = window.cardCounts || {};
 
-    // Remove existing
     var prev = document.getElementById('import-modal');
     if (prev) prev.remove();
 
-    // Build modal
     var overlay = document.createElement('div');
     overlay.id = 'import-modal';
     overlay.className = 'modal-overlay';
@@ -125,20 +119,17 @@
       </div>`;
     document.body.appendChild(overlay);
 
-    var area  = document.getElementById('import-area'),
-        clear = document.getElementById('import-clear');
+    var area  = document.getElementById('import-area');
+    var clear = document.getElementById('import-clear');
     document.getElementById('close-import').onclick = closeModal;
     document.getElementById('import-cancel').onclick = closeModal;
 
-    // Prefill with variant codes
     area.value = Object.keys(window.cardCounts).join(' ');
 
     function closeModal() { overlay.remove(); }
 
     document.getElementById('import-ok').onclick = function(){
       closeModal();
-      saveState();
-
       longNotify('Deck Import in Progress');
 
       if (clear.checked) {
@@ -148,9 +139,9 @@
         saveState();
       }
 
-      var tokens = (area.value || '').trim().split(/\s+/).filter(Boolean),
-          errors = [];
-
+      var tokens = (area.value || '').trim().split(/\s+/).filter(Boolean);
+      var errors = [];
+      suppressToasts = true;
       tokens.forEach(function(tok){
         var parts = tok.split('-');
         if (parts.length < 2) {
@@ -163,10 +154,12 @@
         var after = window.cardCounts[vn] || 0;
         if (after === before) errors.push(vn);
       });
+      suppressToasts = false;
 
       errors.forEach(function(vn){
         notify(vn + " can't be found");
       });
+      saveState();
     };
   });
 
@@ -230,7 +223,8 @@
     document.body.appendChild(m);
     document.getElementById('close-overview').onclick = function(){ m.remove(); };
 
-    var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'], grp = {};
+    var order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
+    var grp = {};
     Object.keys(window.cardCounts).forEach(function(vn){
       var el = document.querySelector('[data-variant="' + vn + '"]');
       var t  = (el && el.dataset.type) ? el.dataset.type : 'Other';
@@ -240,19 +234,17 @@
     var cntEl = document.getElementById('overview-list');
     order.forEach(function(type){
       if (grp[type]) {
-        var sec = document.createElement('div'),
-            h   = document.createElement('h3');
-        h.textContent = type; sec.appendChild(h);
+        var sec = document.createElement('div');
+        var h   = document.createElement('h3'); h.textContent = type; sec.appendChild(h);
         grp[type].forEach(function(vn){
-          var el    = document.querySelector('[data-variant="'+vn+'"]'),
-              name  = (el&&el.dataset.name) ? el.dataset.name : vn,
-              setNo = (el&&el.dataset.set)  ? el.dataset.set  : '',
-              logo  = (el&&el.dataset.colorLogo) ? el.dataset.colorLogo : '';
-          var row = document.createElement('div');
-          row.className = 'overview-item';
+          var el    = document.querySelector('[data-variant="'+vn+'"]');
+          var name  = (el && el.dataset.name) ? el.dataset.name : vn;
+          var setNo = (el && el.dataset.set)  ? el.dataset.set  : '';
+          var logo  = (el && el.dataset.colorLogo) ? el.dataset.colorLogo : '';
+          var row   = document.createElement('div'); row.className = 'overview-item';
           row.innerHTML =
             '<img src="'+logo+'" class="overview-logo"/>' +
-            '<span>'+name+' ('+setNo+')</span>' +
+            '<span>'+name+' ('+setNo+')'</span>' +
             '<button class="overview-dec" data-vn="'+vn+'">–</button>' +
             '<span class="overview-count">'+window.cardCounts[vn]+'</span>' +
             '<button class="overview-inc" data-vn="'+vn+'">+</button>';
