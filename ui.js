@@ -11,11 +11,9 @@
   // State: variant → count
   window.cardCounts = window.cardCounts || {};
   var fullProxy = false;
-  var suppressToasts = false;
 
   // ===== Toasts =====
   function notify(msg) {
-    if (suppressToasts) return;
     var n = document.createElement('div');
     n.className = 'toast-notice';
     n.textContent = msg;
@@ -23,6 +21,16 @@
     setTimeout(function(){ n.classList.add('visible'); }, 10);
     setTimeout(function(){ n.classList.remove('visible'); }, 4000);
     setTimeout(function(){ n.remove(); }, 4500);
+  }
+
+  function errorNotify(msg) {
+    var n = document.createElement('div');
+    n.className = 'toast-notice error';
+    n.textContent = msg;
+    document.getElementById('toast-container').appendChild(n);
+    setTimeout(function(){ n.classList.add('visible'); }, 10);
+    setTimeout(function(){ n.classList.remove('visible'); }, 10000);
+    setTimeout(function(){ n.remove(); }, 10500);
   }
 
   function longNotify(msg) {
@@ -70,11 +78,10 @@
     updateCount();
     saveState();
     refreshBadge(vn);
-    if (!suppressToasts) {
-      var el   = document.querySelector('[data-variant="' + vn + '"]');
-      var name = el && el.dataset.name ? el.dataset.name : vn;
-      notify(name + ' added');
-    }
+    // toast for manual adds (4s)
+    var el   = document.querySelector('[data-variant="' + vn + '"]');
+    var name = (el && el.dataset.name) ? el.dataset.name : vn;
+    notify(name + ' added');
   };
 
   window.removeCard = function(vn, el) {
@@ -94,9 +101,11 @@
   btnImport.addEventListener('click', function(){
     window.cardCounts = window.cardCounts || {};
 
+    // Remove old modal
     var prev = document.getElementById('import-modal');
     if (prev) prev.remove();
 
+    // Build modal
     var overlay = document.createElement('div');
     overlay.id = 'import-modal';
     overlay.className = 'modal-overlay';
@@ -124,12 +133,14 @@
     document.getElementById('close-import').onclick = closeModal;
     document.getElementById('import-cancel').onclick = closeModal;
 
+    // Prefill with variant codes
     area.value = Object.keys(window.cardCounts).join(' ');
 
     function closeModal() { overlay.remove(); }
 
     document.getElementById('import-ok').onclick = function(){
       closeModal();
+      saveState();
       longNotify('Deck Import in Progress');
 
       if (clear.checked) {
@@ -139,27 +150,21 @@
         saveState();
       }
 
-      var tokens = (area.value || '').trim().split(new RegExp("\\s+")).filter(Boolean);
+      var tokens = (area.value || '').trim().split(/\s+/).filter(Boolean);
       var errors = [];
-      suppressToasts = true;
       tokens.forEach(function(tok){
         var parts = tok.split('-');
-        if (parts.length < 2) {
-          errors.push(tok);
-          return;
-        }
+        if (parts.length < 2) { errors.push(tok); return; }
         var vn = parts[0] + '-' + parts[1];
         var before = window.cardCounts[vn] || 0;
         window.addCard(vn);
         var after = window.cardCounts[vn] || 0;
         if (after === before) errors.push(vn);
       });
-      suppressToasts = false;
 
       errors.forEach(function(vn){
-        notify(vn + " can't be found");
+        errorNotify(vn + " can't be found");
       });
-      saveState();
     };
   });
 
@@ -200,9 +205,7 @@
     loadState();
     Object.entries(window.cardCounts).forEach(function(pair){
       var vn = pair[0], cnt = pair[1];
-      for (var i = 0; i < cnt; i++) {
-        window.addCard(vn);
-      }
+      for (var i = 0; i < cnt; i++) window.addCard(vn);
     });
     updateCount();
     var sm = document.getElementById('search-modal');
@@ -214,7 +217,8 @@
     var ex = document.getElementById('overview-modal');
     if (ex) ex.remove();
     var m = document.createElement('div');
-    m.id = 'overview-modal'; m.className = 'modal-overlay';
+    m.id = 'overview-modal';
+    m.className = 'modal-overlay';
     m.innerHTML =
       '<div class="modal-content small">' +
         '<button id="close-overview" class="modal-close">×</button>' +
@@ -244,7 +248,7 @@
           var row   = document.createElement('div'); row.className = 'overview-item';
           row.innerHTML =
             '<img src="'+logo+'" class="overview-logo"/>' +
-            '<span>'+name+' ('+setNo+')'</span>' +
+            '<span>'+name+' ('+setNo+')</span>' +
             '<button class="overview-dec" data-vn="'+vn+'">–</button>' +
             '<span class="overview-count">'+window.cardCounts[vn]+'</span>' +
             '<button class="overview-inc" data-vn="'+vn+'">+</button>';
@@ -254,4 +258,7 @@
       }
     });
   }
+
+  // Expose loadState so DOMContentLoaded can call it
+  window.loadState = loadState;
 })();
