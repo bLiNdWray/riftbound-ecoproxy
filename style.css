@@ -1,16 +1,22 @@
+/* styles.css – Riftbound Eco Proxy Cleaned */
+
 /* Reset & Base */
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 html, body {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f4f4; color: #333;
+  background: #f4f4f4;
+  color: #333;
 }
 
-/* Top-bar Button Styles */
+/* Top-Bar Button */
 .topbar-btn {
   background: #007bff;
   color: #fff;
@@ -24,20 +30,25 @@ html, body {
   background: #0056b3;
 }
 
-/* Counter Span */
+/* Card Counter */
 #card-count {
   margin-left: 16px;
   font-weight: bold;
 }
 
+/* Hidden Utility */
+.hidden {
+  display: none !important;
+}
+
 /* Modal Overlay */
 .modal-overlay {
   position: fixed;
-  top: 50px;   /* under top bar */
+  top: 50px;                /* below 50px top bar */
   left: 0;
   width: 100%;
   height: calc(100% - 50px);
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: start;
@@ -46,21 +57,22 @@ html, body {
   z-index: 2000;
 }
 
-/* Modal Content */
+/* Modal Content Box */
 .modal-content {
   position: relative;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 90%;
   max-width: 600px;
   padding: 16px;
 }
 
-/* Close Button */
+/* Modal Close Button */
 .modal-close {
   position: absolute;
-  top: 8px; right: 8px;
+  top: 8px;
+  right: 8px;
   background: transparent;
   border: none;
   font-size: 1.25rem;
@@ -78,92 +90,36 @@ html, body {
   margin-top: 8px;
 }
 
-/* Hidden Utility */
-.hidden {
-  display: none !important;
-}
-
-/* Search Modal */
+/* Search Modal Base */
 #search-modal {
   position: fixed !important;
   top: 50px !important;
   left: 0;
   width: 100%;
   height: calc(100% - 50px);
+  background: #fafafa;
   overflow-y: auto;
   z-index: 2000;
 }
 
+/* Search Header */
 #search-modal .search-header {
-  width: 100% !important;
-  box-sizing: border-box;
-  padding: 0 16px;
-  margin: 0;
-  background: #fff;
-}
-/* Make the search input fill that header and increase its height */
-#search-modal .search-header input,
-#search-modal .search-header .search-input {
-  width: 100% !important;
-  height: 48px !important;
-  box-sizing: border-box;
-  padding: 0 12px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* Make the search panel itself full-width */
-#search-modal .search-panel {
-  width: 100% !important;
-  max-width: none !important;
-  padding: 0 16px;    /* optional gutter */
-  box-sizing: border-box;
-}
-
-/* Make the results grid span the full modal width */
-#search-modal .results-grid {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  width: 100%;
-  max-width: none;
-  margin: 0 auto;
-  padding: 0 16px;   /* match search-panel */
-  box-sizing: border-box;
-}
-
-/* Ensure the modal-content wrapper doesn’t constrain width */
-#search-modal .modal-content {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  border-radius: 0;   /* optional: flush edges */
-  box-shadow: none;   /* optional: flatten */
-}
-/* Make the entire modal-content inside #search-modal full-width and nice */
-#search-modal .modal-content {
-  background: #fafafa;
-  border-radius: 0;    /* flush to edges if you like */
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 0;
-  margin: 0;
-}
-
-/* Wrap the header in its own styled container */
-#search-modal .search-header {
-  background: #fff;
-  padding: 16px;
-  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-   position: sticky;
-  top: 0;
+  width: 100%;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
   z-index: 2001;
 }
 
-/* Style the input with rounded corners and subtle shadow */
+/* Search Input */
 #search-modal .search-header input {
-  flex: 1;               /* fill available space */
+  flex: 1;
+  height: 48px;
   padding: 12px 16px;
   border: 1px solid #ccc;
   border-radius: 24px;
@@ -173,20 +129,27 @@ html, body {
 }
 #search-modal .search-header input:focus {
   border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
-/* Style the close button to match */
+/* Search Close Button */
 #search-modal .search-header .modal-close {
-  background: transparent;
-  border: none;
   font-size: 1.5rem;
   color: #666;
-  cursor: pointer;
 }
 
-/* Move results down slightly under header */
+/* Search Panel & Results */
+#search-modal .search-panel {
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
 #search-modal .results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   padding: 16px;
   margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
