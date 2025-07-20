@@ -114,7 +114,7 @@ html, body {
   background: #fff;
   border-bottom: 1px solid #ddd;
   z-index: 2001;
-  justify-content: center;  /* center its children */
+  justify-content: center;  /* center children horizontally */
 }
 #search-modal .modal-content {
   width: 100% !important;
@@ -139,6 +139,7 @@ html, body {
   max-width: 800px;         /* optional cap */
   margin: 0 auto;
   display: block;
+  box-sizing: border-box;
 }
 }
 #search-modal .search-header input:focus {
