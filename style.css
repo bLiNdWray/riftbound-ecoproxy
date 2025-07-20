@@ -167,3 +167,13 @@ html, body {
   width: 100%;
   box-sizing: border-box;
 }
+.donate-buttons {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.donate-buttons img {
+  display: block;
+  cursor: pointer;
+}
