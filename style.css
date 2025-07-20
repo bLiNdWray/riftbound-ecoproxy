@@ -178,3 +178,19 @@ html, body {
   display: block;
   cursor: pointer;
 }
+@media print {
+  /* Treat each card as unbreakable */
+  .card {
+    /* Modern browsers */
+    break-inside: avoid;
+    /* Fallback for older browsers */
+    page-break-inside: avoid;
+    /* Ensure the card is treated as a block for printing */
+    display: block;
+  }
+
+  /* Allow the container to overflow to new pages */
+  #card-container {
+    overflow: visible !important;
+  }
+}
