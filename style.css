@@ -194,3 +194,22 @@ html, body {
     overflow: visible !important;
   }
 }
+/* Overview color icon */
+.overview-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  /* Optional: add a subtle border for contrast */
+  border: 1px solid rgba(0,0,0,0.1);
+  /* Align vertically with text */
+  vertical-align: middle;
+}
+
+/* Pull the icon and text closer */
+.overview-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
