@@ -176,11 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Overview Builder —
 
 function buildOverview() {
-  // remove any existing overview modal
+  // remove existing
   const prev = document.getElementById('overview-modal');
   if (prev) prev.remove();
 
-  // build overlay
+  // overlay
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -193,48 +193,48 @@ function buildOverview() {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  // desired type order
+  // desired order
   const typesOrder = ['Legend','Rune','Battlefield','Unit','Spells'];
   const groups = {};
 
-  // collect and count cards by type & variant
+  // collect counts per variant
   document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
     const vn   = card.getAttribute('data-variant');
     const type = card.dataset.type || 'Other';
+    const logo = card.dataset.colorLogo || '';  // use color badge
     const name = card.dataset.name || vn;
-    const logo = card.dataset.colorLogo || '';
     groups[type] = groups[type] || {};
-    if (!groups[type][vn]) {
-      groups[type][vn] = { count: 0, name, logo };
-    }
+    groups[type][vn] = groups[type][vn] || { count: 0, name, logo };
     groups[type][vn].count++;
   });
 
   const listEl = document.getElementById('overview-list');
 
-  // build sections in order
   typesOrder.forEach(type => {
-    const variants = groups[type];
-    if (!variants) return;
+    if (!groups[type]) return;
+    const entries = Object.values(groups[type]);
 
-    // make array for sorting
-    let entries = Object.entries(variants).map(([vn, info]) => ({ vn, ...info }));
-
-    // sort Units & Spells by logo then name, others alphabetically
+    // sort Unit & Spells by logo then name
     if (type === 'Unit' || type === 'Spells') {
-      entries.sort((a, b) => a.logo.localeCompare(b.logo) || a.name.localeCompare(b.name));
+      entries.sort((a, b) => {
+        if (a.logo < b.logo) return -1;
+        if (a.logo > b.logo) return 1;
+        return a.name.localeCompare(b.name);
+      });
     } else {
-      entries.sort((a, b) => a.name.localeCompare(b.name));
+      // else alphabetical by name
+      entries.sort((a,b) => a.name.localeCompare(b.name));
     }
 
-    // section wrapper
-    const totalOfType = entries.reduce((sum, e) => sum + e.count, 0);
+    // section header
+    const totalOfType = entries.reduce((sum,e) => sum + e.count, 0);
     const section = document.createElement('div');
     section.className = 'overview-section';
     section.innerHTML = `<h3>${type} (${totalOfType})</h3>`;
 
-    // each row
-    entries.forEach(({ vn, name, logo, count }) => {
+    // rows
+    entries.forEach(({logo,name,count}) => {
+      const vn = Object.keys(groups[type]).find(k=>groups[type][k].name===name && groups[type][k].logo===logo);
       const row = document.createElement('div');
       row.className = 'overview-item';
       row.setAttribute('data-variant', vn);
@@ -251,14 +251,14 @@ function buildOverview() {
     listEl.appendChild(section);
   });
 
-  // wire up the buttons
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.onclick = () => {
+  // wire up buttons (inc/dec logic unchanged)
+  listEl.querySelectorAll('.overview-inc').forEach(btn=>{
+    btn.onclick = ()=>{
       window.addCard(btn.dataset.vn);
     };
   });
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.onclick = () => {
+  listEl.querySelectorAll('.overview-dec').forEach(btn=>{
+    btn.onclick = ()=>{
       window.removeCard(btn.dataset.vn, btn.parentNode);
     };
   });
