@@ -174,12 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // — Overview Builder —
- function buildOverview(){
-  // teardown
+
+function buildOverview(){
+  // remove old modal if present
   const prev = document.getElementById('overview-modal');
   if(prev) prev.remove();
 
-  // overlay
+  // create overlay
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -190,12 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div id="overview-list"></div>
     </div>`;
   document.body.appendChild(overlay);
-  overlay.querySelector('#close-overview').onclick = ()=>overlay.remove();
+  overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
+  // define desired type order
   const typesOrder = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
-  const groups = {};
 
-  // collect cards
+  // collect counts per type → variant
+  const groups = {};
   document.querySelectorAll('#card-container .card[data-variant]').forEach(card=>{
     const vn   = card.getAttribute('data-variant');
     const type = card.dataset.type || 'Other';
@@ -204,63 +206,40 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const listEl = document.getElementById('overview-list');
+
+  // iterate in order, plus any extras
   typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
-    .forEach(type=> {
+    .forEach(type => {
       if(!groups[type]) return;
-      // section header with type total
-      const totalOfType = Object.values(groups[type]).reduce((a,b)=>a+b,0);
+
+      // section wrapper
       const section = document.createElement('div');
-      section.className = 'overview-section';
-      section.innerHTML = `<h3>${type} (<span class="type-total">${totalOfType}</span>)</h3>`;
-      
-      // each variant row
-      Object.entries(groups[type]).forEach(([vn,count]) => {
+      const header  = document.createElement('h3');
+      header.textContent = type;
+      section.appendChild(header);
+
+      // each variant in that type
+      Object.keys(groups[type]).forEach(vn => {
+        const count = groups[type][vn];
         const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
         const name   = cardEl?.dataset.name || vn;
-        const setNo  = cardEl?.dataset.set  || '';
-        const logo   = cardEl?.dataset.colorLogo || '';
-        
+        const icon   = cardEl?.dataset.colorLogo || '';
+
+        // build row
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.innerHTML = `
-          <img src="${logo}" class="overview-logo"/>
-          <span class="overview-name">${name} (${setNo})</span>
-          <button class="overview-dec" data-vn="${vn}">–</button>
-          <span class="overview-count">${count}</span>
-          <button class="overview-inc" data-vn="${vn}">+</button>
-        `;
+          <img src="${icon}" class="overview-logo" alt="${type} icon"/>
+          <span class="overview-text">
+            ${name} – ${vn} (${count})
+          </span>`;
         section.appendChild(row);
       });
 
       listEl.appendChild(section);
     });
-
-  // wire up inc/dec buttons
-  listEl.querySelectorAll('.overview-inc').forEach(btn=>{
-    btn.onclick = e=>{
-      const vn = btn.dataset.vn;
-      window.addCard(vn);      // will update DOM & counters
-      // update this row’s count and the section total
-      const rowCount = btn.previousElementSibling;
-      rowCount.textContent = (parseInt(rowCount.textContent,10) + 1);
-      const typeHdr  = btn.closest('.overview-section').querySelector('.type-total');
-      typeHdr.textContent = (parseInt(typeHdr.textContent,10) + 1);
-    };
-  });
-  listEl.querySelectorAll('.overview-dec').forEach(btn=>{
-    btn.onclick = e=>{
-      const vn = btn.dataset.vn;
-      const row    = btn.parentNode;
-      const countEl= row.querySelector('.overview-count');
-      const before = parseInt(countEl.textContent,10);
-      if(before > 0 && window.removeCard(vn, row)){
-        countEl.textContent = before - 1;
-        const typeHdr = row.closest('.overview-section').querySelector('.type-total');
-        typeHdr.textContent = (parseInt(typeHdr.textContent,10) - 1);
-      }
-    };
-  });
 }
+  
 // — Live Recount via MutationObserver —
 (() => {
   const container = document.getElementById('card-container');
