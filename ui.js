@@ -312,3 +312,4 @@ function buildOverview() {
 
   observer.observe(container, { childList: true });
 })();
+})();
