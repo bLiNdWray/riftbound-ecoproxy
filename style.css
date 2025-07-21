@@ -199,7 +199,6 @@ html, body {
 /* Overview Section Container */
 /* Reduce gap between sections */
 .overview-section {
-  margin-bottom: 12px;   /* was 24px */
   padding: 8px 12px;     /* slightly tighter */
 }
 
