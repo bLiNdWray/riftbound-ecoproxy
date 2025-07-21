@@ -180,7 +180,7 @@ function buildOverview() {
   const prev = document.getElementById('overview-modal');
   if (prev) prev.remove();
 
-  // Create overlay and modal structure
+  // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -191,13 +191,15 @@ function buildOverview() {
       <div id="overview-list"></div>
     </div>`;
   document.body.appendChild(overlay);
+
+  // Close handler
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  // Define the order of sections
+  // Define type order
   const typesOrder = ['Legend','Battlefield','Runes','Units','Spells','Gear'];
   const groups = {};
 
-  // Group all cards in #card-container by their data-type and count occurrences
+  // Group cards by type and count occurrences
   document.querySelectorAll('#card-container .card').forEach(card => {
     const vn   = card.getAttribute('data-variant');
     const type = card.dataset.type || 'Other';
@@ -207,25 +209,25 @@ function buildOverview() {
 
   const listEl = document.getElementById('overview-list');
 
-  // Build each type section in the specified order
+  // Iterate types in specified order, then any extras
   typesOrder
     .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
     .forEach(type => {
       if (!groups[type]) return;
 
       // Section header with total count
-      const totalOfType = Object.values(groups[type]).reduce((a,b) => a + b, 0);
+      const totalOfType = Object.values(groups[type]).reduce((a, b) => a + b, 0);
       const section = document.createElement('div');
       section.className = 'overview-section';
       section.innerHTML = `<h3>${type} (${totalOfType})</h3>`;
 
-      // Rows for each variant in this group
+      // Build each variant row
       Object.entries(groups[type]).forEach(([vn, count]) => {
         const cardEl = document.querySelector(
           `#card-container .card[data-variant="${vn}"]`
         );
 
-        // Determine the display name
+        // Extract display name
         let name = vn;
         if (cardEl.querySelector('.name')) {
           name = cardEl.querySelector('.name').textContent.trim();
@@ -237,18 +239,18 @@ function buildOverview() {
           name = cardEl.querySelector('.bf-name').textContent.trim();
         }
 
-        // Pull the color icon URL from a data attribute (if present)
+        // Get color icon URL, if any
         const logoUrl = cardEl.dataset.colorLogo || '';
 
-        // Build the row
+        // Create row
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.setAttribute('data-variant', vn);
         row.innerHTML = `
-          ${ logoUrl
-             ? `<img src="${logoUrl}" class="overview-logo" alt="" />`
-             : '' }
-          <span class="overview-text">${name} &ndash; ${vn}</span>
+          ${logoUrl
+            ? `<img src="${logoUrl}" class="overview-logo" alt="" />`
+            : ''}
+          <span class="overview-text">${name} – ${vn}</span>
           <button class="overview-dec" data-vn="${vn}">−</button>
           <span class="overview-count">${count}</span>
           <button class="overview-inc" data-vn="${vn}">+</button>
@@ -259,7 +261,7 @@ function buildOverview() {
       listEl.appendChild(section);
     });
 
-  // Wire up the decrement buttons
+  // Wire up decrement buttons
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
     btn.onclick = () => {
       const vn = btn.dataset.vn;
@@ -268,37 +270,34 @@ function buildOverview() {
       const before = parseInt(countEl.textContent, 10);
       if (before > 0 && window.removeCard(vn, rowEl)) {
         countEl.textContent = before - 1;
-        // Update section total
-        const section = btn.closest('.overview-section');
-        const header = section.querySelector('h3');
-        const m = header.textContent.match(/(.+)\s*\((\d+)\)/);
+        const header = rowEl.closest('.overview-section').querySelector('h3');
+        const m = header.textContent.match(/\((\d+)\)/);
         if (m) {
-          const newTotal = parseInt(m[2], 10) - 1;
-          header.textContent = `${m[1]} (${newTotal})`;
+          const newTotal = parseInt(m[1], 10) - 1;
+          header.textContent = `${header.textContent.split(' (')[0]} (${newTotal})`;
         }
       }
     };
   });
 
-  // Wire up the increment buttons
+  // Wire up increment buttons
   listEl.querySelectorAll('.overview-inc').forEach(btn => {
     btn.onclick = () => {
       const vn = btn.dataset.vn;
       window.addCard(vn);
-      // Update this row’s count
-      const countEl = btn.previousElementSibling;
+      const rowEl = btn.parentNode;
+      const countEl = rowEl.querySelector('.overview-count');
       countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-      // Update section total
-      const section = btn.closest('.overview-section');
-      const header = section.querySelector('h3');
-      const m = header.textContent.match(/(.+)\s*\((\d+)\)/);
+      const header = rowEl.closest('.overview-section').querySelector('h3');
+      const m = header.textContent.match(/\((\d+)\)/);
       if (m) {
-        const newTotal = parseInt(m[2], 10) + 1;
-        header.textContent = `${m[1]} (${newTotal})`;
+        const newTotal = parseInt(m[1], 10) + 1;
+        header.textContent = `${header.textContent.split(' (')[0]} (${newTotal})`;
       }
     };
   });
 }
+
 
 
 
