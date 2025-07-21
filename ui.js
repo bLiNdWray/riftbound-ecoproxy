@@ -173,6 +173,30 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCount();
   });
 
+// Attach click handlers to Overview +/– buttons by re-rendering on change
+function wireOverviewButtons(listEl) {
+  // “–” buttons
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      if (window.removeCard(vn)) {
+        buildOverview();
+      }
+    };
+  });
+
+  // “+” buttons
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      if (window.addCard(vn)) {
+        buildOverview();
+      }
+    };
+  });
+}
+
+  
  function buildOverview() {
   // remove existing
   const prev = document.getElementById('overview-modal');
@@ -257,7 +281,8 @@ row.innerHTML = `
   });
 }
 wireOverviewButtons(listEl);
-  
+ }
+   
 // — Live Recount via MutationObserver —
 (() => {
   const container = document.getElementById('card-container');
