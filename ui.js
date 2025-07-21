@@ -220,5 +220,25 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.appendChild(sec);
     });
   }
+// — Live Recount via MutationObserver —
+(() => {
+  const container = document.getElementById('card-container');
+  if (!container) return;
 
+  const observer = new MutationObserver(() => {
+    // Recount top-bar total
+    updateCount();
+
+    // Recount each variant’s badge
+    // Gather all variants currently in the DOM
+    const variants = new Set();
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      variants.add(card.getAttribute('data-variant'));
+    });
+    // Update each badge
+    variants.forEach(vn => refreshBadge(vn));
+  });
+
+  observer.observe(container, { childList: true });
+})();
 })();
