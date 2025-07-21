@@ -225,13 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = document.createElement('div');
       row.className = 'overview-item';
       row.setAttribute('data-variant', vn);
-      row.innerHTML = `
-        <img src="${logo}" class="overview-logo" />
-        <span class="overview-text">${name} – ${vn}</span>
-        <button class="overview-dec" data-vn="${vn}">–</button>
-        <span class="overview-count">${count}</span>
-        <button class="overview-inc" data-vn="${vn}">+</button>
-      `;
+row.innerHTML = `
+  <img src="${logo}" class="overview-logo" alt="color icon" />
+  <span class="overview-text">${name} – ${vn}</span>
+  <button class="overview-dec" data-vn="${vn}">−</button>
+  <span class="overview-count">${count}</span>
+  <button class="overview-inc" data-vn="${vn}">+</button>
+`;
       section.appendChild(row);
     });
 
