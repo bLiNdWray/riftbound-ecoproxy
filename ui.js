@@ -175,12 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // — Overview Builder —
 
-function buildOverview(){
-  // remove old modal if present
+function buildOverview() {
+  // remove existing
   const prev = document.getElementById('overview-modal');
-  if(prev) prev.remove();
+  if (prev) prev.remove();
 
-  // create overlay
+  // overlay
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -193,12 +193,11 @@ function buildOverview(){
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  // define desired type order
   const typesOrder = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
-
-  // collect counts per type → variant
   const groups = {};
-  document.querySelectorAll('#card-container .card[data-variant]').forEach(card=>{
+
+  // collect counts per variant
+  document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
     const vn   = card.getAttribute('data-variant');
     const type = card.dataset.type || 'Other';
     groups[type] = groups[type] || {};
@@ -207,38 +206,43 @@ function buildOverview(){
 
   const listEl = document.getElementById('overview-list');
 
-  // iterate in order, plus any extras
-  typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
-    .forEach(type => {
-      if(!groups[type]) return;
+  // iterate types in order, fallback types appended at end
+  typesOrder.concat(
+    Object.keys(groups).filter(t => !typesOrder.includes(t))
+  ).forEach(type => {
+    if (!groups[type]) return;
 
-      // section wrapper
-      const section = document.createElement('div');
-      const header  = document.createElement('h3');
-      header.textContent = type;
-      section.appendChild(header);
+    // section header
+    const totalOfType = Object.values(groups[type]).reduce((a, b) => a + b, 0);
+    const section = document.createElement('div');
+    section.className = 'overview-section';
+    section.innerHTML = `<h3>${type} ( ${totalOfType} )</h3>`;
 
-      // each variant in that type
-      Object.keys(groups[type]).forEach(vn => {
-        const count = groups[type][vn];
-        const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
-        const name   = cardEl?.dataset.name || vn;
-        const icon   = cardEl?.dataset.colorLogo || '';
+    // variant rows
+    Object.entries(groups[type]).forEach(([vn, count]) => {
+      const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
+      const name   = cardEl?.dataset.name || vn;
+      const logo   = cardEl?.dataset.colorLogo || '';
 
-        // build row
-        const row = document.createElement('div');
-        row.className = 'overview-item';
-        row.innerHTML = `
-          <img src="${icon}" class="overview-logo" alt="${type} icon"/>
-          <span class="overview-text">
-            ${name} – ${vn} (${count})
-          </span>`;
-        section.appendChild(row);
-      });
-
-      listEl.appendChild(section);
+      const row = document.createElement('div');
+      row.className = 'overview-item';
+      row.setAttribute('data-variant', vn);
+      row.innerHTML = `
+        <img src="${logo}" class="overview-logo" />
+        <span class="overview-text">${name} – ${vn}</span>
+        <button class="overview-dec" data-vn="${vn}">–</button>
+        <span class="overview-count">${count}</span>
+        <button class="overview-inc" data-vn="${vn}">+</button>
+      `;
+      section.appendChild(row);
     });
+
+    listEl.appendChild(section);
+  });
+
+  // buttons wired previously; no changes needed
 }
+
   
 // — Live Recount via MutationObserver —
 (() => {
