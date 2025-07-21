@@ -234,44 +234,41 @@
         listEl.appendChild(section);
       });
 
- // Wire up − buttons
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.onclick = () => {
-      const vn = btn.dataset.vn;
-      const rowEl = btn.parentNode;
-      const countEl = rowEl.querySelector('.overview-count');
-      const before = parseInt(countEl.textContent, 10);
-      if (before > 0 && window.removeCard(vn, rowEl)) {
-        countEl.textContent = before - 1;
-        // Update section total
-        const section = btn.closest('.overview-section');
-        const totalEl = section.querySelector('h3');
-        const m = totalEl.textContent.match(/\((\d+)\)/);
-        if (m) {
-          const newTotal = parseInt(m[1], 10) - 1;
-          totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
-        }
-      }
-    };
-  });
-   // Wire up + buttons
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.onclick = () => {
-      const vn = btn.dataset.vn;
-      window.addCard(vn);
-      // Update this row’s count
-      const countEl = btn.previousElementSibling;
-      countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-      // Update section total
-      const section = btn.closest('.overview-section');
-      const totalEl = section.querySelector('h3');
-      const m = totalEl.textContent.match(/\((\d+)\)/);
+ // … inside buildOverview, after rendering rows …
+
+// Wire up “−” buttons
+listEl.querySelectorAll('.overview-dec').forEach(btn => {
+  btn.onclick = () => {
+    const vn = btn.dataset.vn;
+    const countEl = btn.parentNode.querySelector('.overview-count');
+    const before  = parseInt(countEl.textContent, 10);
+    if (before > 0 && window.removeCard(vn)) {
+      // only update the overview counts locally
+      countEl.textContent = before - 1;
+      const hdr = btn.closest('.overview-section').querySelector('h3');
+      const m   = hdr.textContent.match(/\((\d+)\)/);
       if (m) {
-        const newTotal = parseInt(m[1], 10) + 1;
-        totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
+        hdr.textContent = hdr.textContent.replace(/\(\d+\)/, `(${m[1] - 1})`);
       }
-    };
-  });
+    }
+  };
+});
+
+// Wire up “+” buttons
+listEl.querySelectorAll('.overview-inc').forEach(btn => {
+  btn.onclick = () => {
+    const vn = btn.dataset.vn;
+    window.addCard(vn);
+    const countEl = btn.parentNode.querySelector('.overview-count');
+    countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+    const hdr = btn.closest('.overview-section').querySelector('h3');
+    const m   = hdr.textContent.match(/\((\d+)\)/);
+    if (m) {
+      hdr.textContent = hdr.textContent.replace(/\(\d+\)/, `(${m[1] * 1 + 1})`);
+    }
+  };
+});
+
   }
 
   // — Live Recount via MutationObserver —
