@@ -101,4 +101,28 @@
   window.removeCard = (vn,el) => { if (el&&el.parentNode) el.parentNode.removeChild(el); };
 
   // … the rest of your makeUnit/makeSpell/etc. and build() stay unchanged …
+
+function makeUnit(c) {
+  const el = document.createElement('div');
+  el.className = 'card unit';
+  el.innerHTML = `
+    <img src="${c.imageUrl}" alt="${c.name}" />
+    <div class="hover-bar">
+      <button onclick="addCard('${c.variantNumber}')">＋</button>
+      <button onclick="removeCard('${c.variantNumber}', this)">−</button>
+    </div>
+    <div class="qty-badge" data-variant="${c.variantNumber}">0</div>
+    <div class="name">${c.name}</div>`;
+  return el;
+}
+
+function makeSpell(c) {
+  // similar to makeUnit, but adjust classes/details
+  // …
+}
+
+function makeBattlefield(c) { /* … */ }
+function makeLegend(c)      { /* … */ }
+function makeRune(c)        { /* … */ }
+  
 })();
