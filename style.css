@@ -195,21 +195,69 @@ html, body {
   }
 }
 /* Overview color icon */
+/* Overview Section Container */
+.overview-section {
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Section header */
+.overview-section h3 {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Each row: icon, text, controls */
+.overview-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #f0f0f0;
+}
+.overview-item:first-child {
+  border-top: none;
+}
+
+/* Color dot */
 .overview-logo {
   width: 16px;
   height: 16px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 8px;
-  /* Optional: add a subtle border for contrast */
-  border: 1px solid rgba(0,0,0,0.1);
-  /* Align vertically with text */
-  vertical-align: middle;
 }
 
-/* Pull the icon and text closer */
-.overview-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+/* Text */
+.overview-text {
+  flex: 1;
+  color: #222;
+  font-size: 0.95rem;
+}
+
+/* Count badge */
+.overview-count {
+  min-width: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Buttons */
+.overview-dec,
+.overview-inc {
+  background: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+.overview-dec:hover,
+.overview-inc:hover {
+  background: #d0d0d0;
 }
