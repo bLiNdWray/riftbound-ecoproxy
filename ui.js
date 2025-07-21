@@ -27,46 +27,63 @@
     }
   }
 
-  // — Helpers —
-  function updateCount() {
-    const total = Object.values(window.cardCounts).reduce((a,b)=>a+b,0);
-    const lbl = document.getElementById('card-count');
-    if (lbl) lbl.textContent = total + ' card' + (total!==1?'s':'');
-  }
-  function refreshBadge(vn) {
-    const b = document.querySelector(`[data-variant="${vn}"] .qty-badge`);
-    if (b) b.textContent = window.cardCounts[vn]||0;
-  }
+ // ===== Helpers =====
+function refreshBadge(vn) {
+  // count DOM elements for this variant
+  const count = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  const badge = document.querySelector(
+    `#card-container .card[data-variant="${vn}"] .qty-badge`
+  );
+  if (badge) badge.textContent = count;
+}
 
-  // — Wrap addCard/removeCard from script.js —
-  const origAdd = typeof window.addCard==='function' ? window.addCard : ()=>{};
-  window.addCard = function(vn) {
-    const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-    origAdd(vn);
-    const after = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-    if (after>before) {
-      window.cardCounts[vn] = (window.cardCounts[vn]||0)+1;
-      saveState();
-      refreshBadge(vn);
-      updateCount();
-      return true;
-    }
-    return false;
-  };
+function updateCount() {
+  // total = all cards in container
+  const total = document.querySelectorAll('#card-container .card').length;
+  const lbl   = document.getElementById('card-count');
+  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+}
 
-  const origRm = typeof window.removeCard==='function' ? window.removeCard : ()=>{};
-  window.removeCard = function(vn,el) {
-    origRm(vn,el);
-    if (window.cardCounts[vn]>1) {
-      window.cardCounts[vn]--;
-    } else {
-      delete window.cardCounts[vn];
-      if(el&&el.parentNode) el.parentNode.removeChild(el);
-    }
-    saveState();
+// ===== Wrap addCard/removeCard =====
+const origAdd = window.addCard;
+window.addCard = function(vn) {
+  const beforeDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  origAdd(vn);
+  const afterDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  if (afterDOM > beforeDOM) {
+    // only refresh the badge for this vn
     refreshBadge(vn);
+    // and update the global counter
     updateCount();
-  };
+    return true;
+  }
+  return false;
+};
+
+const origRm = window.removeCard;
+window.removeCard = function(vn, el) {
+  origRm(vn, el);
+  // after DOM removal, update this badge & total
+  refreshBadge(vn);
+  updateCount();
+};
+
+// ===== On Load: Recount everything =====
+document.addEventListener('DOMContentLoaded', () => {
+  // once cards are initially drawn:
+  document.querySelectorAll('#card-container .card').forEach(card => {
+    const vn = card.getAttribute('data-variant');
+    refreshBadge(vn);
+  });
+  updateCount();
+});
+
 
   // — Import List Modal —
   btnImport.addEventListener('click',()=>{
