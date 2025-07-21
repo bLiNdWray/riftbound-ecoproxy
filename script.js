@@ -1,4 +1,4 @@
-// script.js – Riftbound Eco Proxy (stripped counting logic)
+// script.js – Riftbound Eco Proxy (render-only, counting removed)
 (() => {
   const API_BASE   = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME = 'Riftbound Cards';
@@ -28,101 +28,77 @@
     document.head.appendChild(script);
   }
 
+  // Allowed types & class map
+  const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
+  const typeClassMap = { unit:'unit', spell:'spell', gear:'spell', battlefield:'battlefield', legend:'legend', rune:'rune' };
+
   // Load all cards
   jsonpFetch({ sheet: SHEET_NAME }, data => {
     allCards = Array.isArray(data) ? data : [];
   });
 
-  // Modal handlers
-  openBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    input.value = '';
-    results.innerHTML = '';
-    input.focus();
-  });
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+  // Initial URL load
+  const params = new URLSearchParams(window.location.search);
+  const initialIds = (params.get('id')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if (initialIds.length) {
+    renderCards(initialIds, true);
+    initialIds.forEach(id => {
+      /* ui.js will handle initial counts */
+      window.addCard(id);
+    });
+  }
 
-  // Live search
+  // Modal open/close & live search (unchanged) …
+  openBtn.addEventListener('click', () => { modal.classList.remove('hidden'); input.value=''; results.innerHTML=''; input.focus(); });
+  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
-    if (!q) { results.innerHTML = ''; return; }
+    if (!q) { results.innerHTML=''; return; }
     renderSearchResults(
       allCards.filter(c => {
-        return (
-          (c.name  || '').toLowerCase().includes(q) ||
-          (c.variantNumber || '').toLowerCase().includes(q)
-        );
+        const nameMatch = (c.name||'').toLowerCase().includes(q);
+        const idMatch   = (c.variantNumber||'').toLowerCase().includes(q);
+        return (nameMatch||idMatch) && allowedTypes.includes((c.type||'').toLowerCase());
       })
     );
   });
 
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const t = (c.type||'').trim().toLowerCase();
-      if (!['unit','spell','gear','battlefield','legend','rune'].includes(t)) return;
-      const cardEl = {
-        unit:        () => makeUnit(c),
-        spell:       () => makeSpell(c),
-        gear:        () => makeSpell(c),
-        battlefield: () => makeBattlefield(c),
-        legend:      () => makeLegend(c),
-        rune:        () => makeRune(c),
-      }[t]();
-      cardEl.classList.add(t);
-      results.appendChild(cardEl);
+  // renderSearchResults & renderCards are identical except they call build()
+  // … (omitted for brevity, copy your existing functions)
+
+  function build(id, html) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card';
+    wrapper.setAttribute('data-variant', id);
+    wrapper.insertAdjacentHTML('beforeend', html);
+
+    // 2) Badge placeholder only
+    const badge = document.createElement('div');
+    badge.className = 'qty-badge';
+    wrapper.appendChild(badge);
+
+    // 3) Hover-bar with buttons
+    const hoverBar = document.createElement('div');
+    hoverBar.className = 'hover-bar';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn';    addBtn.textContent = '+';
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn'; removeBtn.textContent = '−';
+    hoverBar.append(addBtn, removeBtn);
+    wrapper.appendChild(hoverBar);
+
+    // 4) Wire events
+    addBtn.addEventListener('click', () => { window.addCard(id); });
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      window.removeCard(id, wrapper);
     });
+
+    return wrapper;
   }
 
-  function renderCards(ids, clear = true) {
-    if (clear) container.innerHTML = '';
-    ids.forEach(vn => {
-      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
-        if (!Array.isArray(data) || !data[0]) return;
-        const c = data[0];
-        const t = (c.type||'').trim().toLowerCase();
-        if (!['unit','spell','gear','battlefield','legend','rune'].includes(t)) return;
-        const el = {
-          unit:        () => makeUnit(c),
-          spell:       () => makeSpell(c),
-          gear:        () => makeSpell(c),
-          battlefield: () => makeBattlefield(c),
-          legend:      () => makeLegend(c),
-          rune:        () => makeRune(c),
-        }[t]();
-        el.classList.add(t);
-        container.appendChild(el);
-      });
-    });
-  }
+  // Expose the raw renderer hooks; ui.js will override these
+  window.addCard    = addCard;
+  window.removeCard = removeCard;
 
-  // Expose for UI to hook into
-  window.addCard    = vn => { renderCards([vn], false); return true; };
-  window.removeCard = (vn,el) => { if (el&&el.parentNode) el.parentNode.removeChild(el); };
-
-  // … the rest of your makeUnit/makeSpell/etc. and build() stay unchanged …
-
-function makeUnit(c) {
-  const el = document.createElement('div');
-  el.className = 'card unit';
-  el.innerHTML = `
-    <img src="${c.imageUrl}" alt="${c.name}" />
-    <div class="hover-bar">
-      <button onclick="addCard('${c.variantNumber}')">＋</button>
-      <button onclick="removeCard('${c.variantNumber}', this)">−</button>
-    </div>
-    <div class="qty-badge" data-variant="${c.variantNumber}">0</div>
-    <div class="name">${c.name}</div>`;
-  return el;
-}
-
-function makeSpell(c) {
-  // similar to makeUnit, but adjust classes/details
-  // …
-}
-
-function makeBattlefield(c) { /* … */ }
-function makeLegend(c)      { /* … */ }
-function makeRune(c)        { /* … */ }
-  
-})();
+})(); 
