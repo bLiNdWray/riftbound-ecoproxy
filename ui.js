@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Overview Builder —
 
 function buildOverview() {
-  // remove existing
+  // teardown
   const prev = document.getElementById('overview-modal');
   if (prev) prev.remove();
 
@@ -193,79 +193,63 @@ function buildOverview() {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  const typesOrder = ['Legend','Battlefield','Runes','Units','Spells','Gear'];
+  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
   const groups = {};
 
-  // Group cards by type and count
-  document.querySelectorAll('#card-container .card').forEach(card => {
+  // collect counts per variant
+  document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
     const vn   = card.getAttribute('data-variant');
-    // card.classList contains one of: 'legend','rune','unit','spell','gear','battlefield'
-    const type = card.classList.contains('legend')      ? 'Legend'
-               : card.classList.contains('battlefield') ? 'Battlefield'
-               : card.classList.contains('rune')        ? 'Runes'
-               : card.classList.contains('unit')        ? 'Units'
-               : card.classList.contains('spell')       ? 'Spells'
-               : card.classList.contains('gear')        ? 'Gear'
-               : 'Other';
+    const type = card.dataset.type || 'Other';
     groups[type] = groups[type] || {};
     groups[type][vn] = (groups[type][vn] || 0) + 1;
   });
 
   const listEl = document.getElementById('overview-list');
 
-  // Build each section in order
-  typesOrder.concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
+  typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
     .forEach(type => {
       if (!groups[type]) return;
 
-      // Section header with total count
+      // section header
       const totalOfType = Object.values(groups[type]).reduce((a,b)=>a+b,0);
       const section = document.createElement('div');
       section.className = 'overview-section';
       section.innerHTML = `<h3>${type} (${totalOfType})</h3>`;
 
-      // Each variant row
+      // for each variant in this type
       Object.entries(groups[type]).forEach(([vn,count]) => {
-       const cardEl = document.querySelector(
-  `#card-container .card[data-variant="${vn}"]`
-);
-        // 1) Name extraction:
-        let name = vn;
-        if (cardEl.querySelector('.name')) {
-          name = cardEl.querySelector('.name').textContent.trim();
-        } else if (cardEl.querySelector('.legend-name .main-title')) {
-          name = cardEl.querySelector('.legend-name .main-title').textContent.trim();
-        } else if (cardEl.querySelector('.rune-title')) {
-          name = cardEl.querySelector('.rune-title').textContent.trim();
-        } else if (cardEl.querySelector('.bf-name')) {
-          name = cardEl.querySelector('.bf-name').textContent.trim();
-        }
+        // find card data in allCards
+        const cardData = allCards.find(c=>c.variantNumber===vn) || {};
+        const name     = cardData.name || vn;
+        const colors   = cardData.colors || [];  // e.g. ['red','blue']
 
-        // 2) Color icon: grab first <img> inside the card
- const iconEls = cardEl.querySelectorAll('.color-indicator img');
-const iconHTML = Array.from(iconEls).map(img =>
-  `<img src="${img.src}" class="overview-logo" alt="">`
-).join('');
+        // build icon HTML from colors
+        const iconHTML = colors.map(color =>
+          `<img src="images/colors/${color}.png" 
+                class="overview-logo" 
+                alt="${color}" />`
+        ).join('');
 
-        // Build the row
+        // build row
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.setAttribute('data-variant', vn);
-       row.innerHTML = `
-  ${iconHTML}
-  <span class="overview-text">${name} – ${vn}</span>
-  <button class="overview-dec" data-vn="${vn}">−</button>
-  <span class="overview-count">${count}</span>
-  <button class="overview-inc" data-vn="${vn}">+</button>
-`;
+        row.innerHTML = `
+          ${iconHTML}
+          <span class="overview-text">${name} – ${vn}</span>
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
         section.appendChild(row);
       });
 
       listEl.appendChild(section);
     });
 
-  // Inc/dec buttons already wired elsewhere will still work
+  // your existing inc/dec wiring…
 }
+
 
 
   
