@@ -234,33 +234,44 @@
         listEl.appendChild(section);
       });
 
-    // Wire buttons
-    listEl.querySelectorAll('.overview-dec').forEach(btn => {
-      btn.onclick = () => {
-        const vn = btn.dataset.vn;
-        const row = btn.parentNode;
-        const countEl = row.querySelector('.overview-count');
-        const before = parseInt(countEl.textContent, 10);
-        if (before > 0 && window.removeCard(vn, row)) {
-          countEl.textContent = before - 1;
-          const hdr = row.closest('.overview-section').querySelector('h3');
-          const m = hdr.textContent.match(/\((\d+)\)/);
-          if (m) hdr.textContent = hdr.textContent.replace(/\(\d+\)/, `(${m[1]-1})`);
+    // Wire up − buttons
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      const rowEl = btn.parentNode;
+      const countEl = rowEl.querySelector('.overview-count');
+      const before = parseInt(countEl.textContent, 10);
+      if (before > 0 && window.removeCard(vn, rowEl)) {
+        countEl.textContent = before - 1;
+        // Update section total
+        const section = btn.closest('.overview-section');
+        const totalEl = section.querySelector('h3');
+        const m = totalEl.textContent.match(/\((\d+)\)/);
+        if (m) {
+          const newTotal = parseInt(m[1], 10) - 1;
+          totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
         }
-      };
-    });
-    listEl.querySelectorAll('.overview-inc').forEach(btn => {
-      btn.onclick = () => {
-        const vn = btn.dataset.vn;
-        window.addCard(vn);
-        const row = btn.parentNode;
-        const countEl = row.querySelector('.overview-count');
-        countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-        const hdr = row.closest('.overview-section').querySelector('h3');
-        const m = hdr.textContent.match(/\((\d+)\)/);
-        if (m) hdr.textContent = hdr.textContent.replace(/\(\d+\)/, `(${m[1]*1+1})`);
-      };
-    });
+      }
+    };
+  });
+   // Wire up + buttons
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      window.addCard(vn);
+      // Update this row’s count
+      const countEl = btn.previousElementSibling;
+      countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+      // Update section total
+      const section = btn.closest('.overview-section');
+      const totalEl = section.querySelector('h3');
+      const m = totalEl.textContent.match(/\((\d+)\)/);
+      if (m) {
+        const newTotal = parseInt(m[1], 10) + 1;
+        totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
+      }
+    };
+  });
   }
 
   // — Live Recount via MutationObserver —
