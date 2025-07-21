@@ -236,19 +236,34 @@
 
  // … inside buildOverview, after rendering rows …
 
-// Wire up “−” buttons
+// Wire up “−” buttons correctly
 listEl.querySelectorAll('.overview-dec').forEach(btn => {
   btn.onclick = () => {
     const vn = btn.dataset.vn;
-    const countEl = btn.parentNode.querySelector('.overview-count');
-    const before  = parseInt(countEl.textContent, 10);
-    if (before > 0 && window.removeCard(vn)) {
-      // only update the overview counts locally
+    const row = btn.closest('.overview-item');
+    const countEl = row.querySelector('.overview-count');
+    const before = parseInt(countEl.textContent, 10);
+
+    if (before > 0) {
+      // 1) Find one real card in the main container
+      const cardEl = document.querySelector(
+        `#card-container .card[data-variant="${vn}"]`
+      );
+      if (!cardEl) return;
+
+      // 2) Remove it
+      const success = window.removeCard(vn, cardEl);
+      if (!success) return;
+
+      // 3) Update overview row count
       countEl.textContent = before - 1;
-      const hdr = btn.closest('.overview-section').querySelector('h3');
+
+      // 4) Update section total
+      const hdr = row.closest('.overview-section').querySelector('h3');
       const m   = hdr.textContent.match(/\((\d+)\)/);
       if (m) {
-        hdr.textContent = hdr.textContent.replace(/\(\d+\)/, `(${m[1] - 1})`);
+        const newTotal = parseInt(m[1], 10) - 1;
+        hdr.textContent = `${hdr.textContent.split(' (')[0]} (${newTotal})`;
       }
     }
   };
