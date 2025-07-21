@@ -289,7 +289,6 @@ function buildOverview() {
   });
 }
 
-  
 // — Live Recount via MutationObserver —
 (() => {
   const container = document.getElementById('card-container');
@@ -310,5 +309,4 @@ function buildOverview() {
   });
 
   observer.observe(container, { childList: true });
-})();
 })();
