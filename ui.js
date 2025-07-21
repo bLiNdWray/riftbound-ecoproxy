@@ -238,33 +238,25 @@ row.innerHTML = `
     listEl.appendChild(section);
   });
 
-  // wire up inc/dec buttons
-  listEl.querySelectorAll('.overview-inc').forEach(btn=>{
-    btn.onclick = e=>{
+  function wireOverviewButtons(listEl) {
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.onclick = () => {
       const vn = btn.dataset.vn;
-      window.addCard(vn);      // will update DOM & counters
-      // update this row’s count and the section total
-      const rowCount = btn.previousElementSibling;
-      rowCount.textContent = (parseInt(rowCount.textContent,10) + 1);
-      const typeHdr  = btn.closest('.overview-section').querySelector('.type-total');
-      typeHdr.textContent = (parseInt(typeHdr.textContent,10) + 1);
+      if (window.removeCard(vn)) {
+        buildOverview();
+      }
     };
   });
-  listEl.querySelectorAll('.overview-dec').forEach(btn=>{
-    btn.onclick = e=>{
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.onclick = () => {
       const vn = btn.dataset.vn;
-      const row    = btn.parentNode;
-      const countEl= row.querySelector('.overview-count');
-      const before = parseInt(countEl.textContent,10);
-      if(before > 0 && window.removeCard(vn, row)){
-        countEl.textContent = before - 1;
-        const typeHdr = row.closest('.overview-section').querySelector('.type-total');
-        typeHdr.textContent = (parseInt(typeHdr.textContent,10) - 1);
+      if (window.addCard(vn)) {
+        buildOverview();
       }
     };
   });
 }
-
+wireOverviewButtons(listEl);
   
 // — Live Recount via MutationObserver —
 (() => {
