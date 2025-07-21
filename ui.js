@@ -226,9 +226,9 @@ function buildOverview() {
 
       // Each variant row
       Object.entries(groups[type]).forEach(([vn,count]) => {
-        const cardEl = document.querySelector(
-          `#card-container .card[data-variant="${vn}"]`
-        );
+       const cardEl = document.querySelector(
+  `#card-container .card[data-variant="${vn}"]`
+);
         // 1) Name extraction:
         let name = vn;
         if (cardEl.querySelector('.name')) {
@@ -242,15 +242,17 @@ function buildOverview() {
         }
 
         // 2) Color icon: grab first <img> inside the card
-        const imgEl = cardEl.querySelector('img');
-        const logo  = imgEl ? imgEl.src : '';
+ const iconEls = cardEl.querySelectorAll('.color-indicator img');
+const iconHTML = Array.from(iconEls).map(img =>
+  `<img src="${img.src}" class="overview-logo" alt="">`
+).join('');
 
         // Build the row
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.setAttribute('data-variant', vn);
        row.innerHTML = `
-  <img src="${logo}" class="overview-logo" alt="color icon" />
+  ${iconHTML}
   <span class="overview-text">${name} – ${vn}</span>
   <button class="overview-dec" data-vn="${vn}">−</button>
   <span class="overview-count">${count}</span>
