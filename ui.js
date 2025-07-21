@@ -8,7 +8,7 @@
   const countLabel   = document.getElementById('card-count');
 
   // In-memory counts
-  const counts = {};
+  let counts = {}; 
 
   function updateCount() {
     const total = Object.values(counts).reduce((a,b)=>a+b, 0);
