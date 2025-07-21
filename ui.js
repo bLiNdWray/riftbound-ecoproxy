@@ -176,11 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Overview Builder —
 
 function buildOverview() {
-  // teardown
+  // Remove existing overview modal
   const prev = document.getElementById('overview-modal');
   if (prev) prev.remove();
 
-  // overlay
+  // Create overlay and content container
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -193,10 +193,11 @@ function buildOverview() {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
+  // Define the type order
   const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
   const groups = {};
 
-  // collect counts per variant
+  // Group cards in the container by type and count them
   document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
     const vn   = card.getAttribute('data-variant');
     const type = card.dataset.type || 'Other';
@@ -206,31 +207,31 @@ function buildOverview() {
 
   const listEl = document.getElementById('overview-list');
 
-  typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
+  // Render each type section in the prescribed order
+  typesOrder
+    .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
     .forEach(type => {
       if (!groups[type]) return;
 
-      // section header
-      const totalOfType = Object.values(groups[type]).reduce((a,b)=>a+b,0);
+      // Section header with total count
+      const totalOfType = Object.values(groups[type]).reduce((a,b) => a + b, 0);
       const section = document.createElement('div');
       section.className = 'overview-section';
       section.innerHTML = `<h3>${type} (${totalOfType})</h3>`;
 
-      // for each variant in this type
-      Object.entries(groups[type]).forEach(([vn,count]) => {
-        // find card data in allCards
-        const cardData = allCards.find(c=>c.variantNumber===vn) || {};
+      // Render each variant in this type
+      Object.entries(groups[type]).forEach(([vn, count]) => {
+        // Lookup name and colors in allCards
+        const cardData = allCards.find(c => c.variantNumber === vn) || {};
         const name     = cardData.name || vn;
-        const colors   = cardData.colors || [];  // e.g. ['red','blue']
+        const colors   = cardData.colors || [];
 
-        // build icon HTML from colors
+        // Build color icons
         const iconHTML = colors.map(color =>
-          `<img src="images/colors/${color}.png" 
-                class="overview-logo" 
-                alt="${color}" />`
+          `<img src="images/colors/${color}.png" class="overview-logo" alt="${color}"/>`
         ).join('');
 
-        // build row
+        // Build row
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.setAttribute('data-variant', vn);
@@ -247,8 +248,47 @@ function buildOverview() {
       listEl.appendChild(section);
     });
 
-  // your existing inc/dec wiring…
+  // Wire up + buttons
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      window.addCard(vn);
+      // Update this row’s count
+      const countEl = btn.previousElementSibling;
+      countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+      // Update section total
+      const section = btn.closest('.overview-section');
+      const totalEl = section.querySelector('h3');
+      const m = totalEl.textContent.match(/\((\d+)\)/);
+      if (m) {
+        const newTotal = parseInt(m[1], 10) + 1;
+        totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
+      }
+    };
+  });
+
+  // Wire up − buttons
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.onclick = () => {
+      const vn = btn.dataset.vn;
+      const rowEl = btn.parentNode;
+      const countEl = rowEl.querySelector('.overview-count');
+      const before = parseInt(countEl.textContent, 10);
+      if (before > 0 && window.removeCard(vn, rowEl)) {
+        countEl.textContent = before - 1;
+        // Update section total
+        const section = btn.closest('.overview-section');
+        const totalEl = section.querySelector('h3');
+        const m = totalEl.textContent.match(/\((\d+)\)/);
+        if (m) {
+          const newTotal = parseInt(m[1], 10) - 1;
+          totalEl.textContent = `${section.querySelector('h3').textContent.split(' (')[0]} (${newTotal})`;
+        }
+      }
+    };
+  });
 }
+
 
 
 
