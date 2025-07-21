@@ -7,6 +7,7 @@
   const btnOverview  = document.getElementById('btn-overview');
   const btnFullProxy = document.getElementById('btn-full-proxy');
   const btnReset     = document.getElementById('btn-reset');
+  const countLabel   = document.getElementById('card-count');
 
   // — State —
   window.cardCounts = {};
@@ -26,62 +27,71 @@
     }
   }
 
-  // — Helpers —
-  function refreshBadge(vn) {
-    const count = document.querySelectorAll(
-      `#card-container .card[data-variant="${vn}"]`
-    ).length;
-    const badge = document.querySelector(
-      `#card-container .card[data-variant="${vn}"] .qty-badge`
-    );
-    if (badge) badge.textContent = count;
-  }
+ // ===== Helpers =====
+function refreshBadge(vn) {
+  // count DOM elements for this variant
+  const count = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  const badge = document.querySelector(
+    `#card-container .card[data-variant="${vn}"] .qty-badge`
+  );
+  if (badge) badge.textContent = count;
+}
 
-  function updateCount() {
-    const total = document.querySelectorAll('#card-container .card').length;
-    const lbl   = document.getElementById('card-count');
-    if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
-  }
+function updateCount() {
+  // total = all cards in container
+  const total = document.querySelectorAll('#card-container .card').length;
+  const lbl   = document.getElementById('card-count');
+  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+}
 
-  // — Wrap script.js addCard / removeCard —
-  const origAdd = typeof window.addCard === 'function' ? window.addCard : () => {};
-  window.addCard = function(vn) {
-    const before = document.querySelectorAll(
-      `#card-container .card[data-variant="${vn}"]`
-    ).length;
-    origAdd(vn);
-    const after = document.querySelectorAll(
-      `#card-container .card[data-variant="${vn}"]`
-    ).length;
-    if (after > before) {
-      window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
-      saveState();
-      refreshBadge(vn);
-      updateCount();
-      return true;
-    }
-    return false;
-  };
-
-  const origRm = typeof window.removeCard === 'function' ? window.removeCard : () => {};
-  window.removeCard = function(vn, el) {
-    origRm(vn, el);
-    if (window.cardCounts[vn] > 1) {
-      window.cardCounts[vn]--;
-    } else {
-      delete window.cardCounts[vn];
-      if (el && el.parentNode) el.parentNode.removeChild(el);
-    }
-    saveState();
+// ===== Wrap addCard/removeCard =====
+const origAdd = window.addCard;
+window.addCard = function(vn) {
+  const beforeDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  origAdd(vn);
+  const afterDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  if (afterDOM > beforeDOM) {
+    // only refresh the badge for this vn
     refreshBadge(vn);
+    // and update the global counter
     updateCount();
-  };
+    return true;
+  }
+  return false;
+};
+
+const origRm = window.removeCard;
+window.removeCard = function(vn, el) {
+  origRm(vn, el);
+  // after DOM removal, update this badge & total
+  refreshBadge(vn);
+  updateCount();
+};
+
+// ===== On Load: Recount everything =====
+document.addEventListener('DOMContentLoaded', () => {
+  // once cards are initially drawn:
+  document.querySelectorAll('#card-container .card').forEach(card => {
+    const vn = card.getAttribute('data-variant');
+    refreshBadge(vn);
+  });
+  updateCount();
+});
+
 
   // — Import List Modal —
-  btnImport.addEventListener('click', () => {
+  btnImport.addEventListener('click',()=>{
+    // remove old
     const prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
+    if(prev) prev.remove();
 
+    // build modal (inline styles removed)
     const overlay = document.createElement('div');
     overlay.id = 'import-modal';
     overlay.className = 'modal-overlay';
@@ -98,30 +108,32 @@
       </div>`;
     document.body.appendChild(overlay);
 
+    // refs
     const areaEl   = overlay.querySelector('#import-area');
     const clearChk = overlay.querySelector('#import-clear');
     const closeBtn = overlay.querySelector('#close-import');
     const cancelBtn= overlay.querySelector('#import-cancel');
     const okBtn    = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick  = () => overlay.remove();
-    cancelBtn.onclick = () => overlay.remove();
+    closeBtn.onclick  = ()=>overlay.remove();
+    cancelBtn.onclick = ()=>overlay.remove();
 
+    // prefill
     areaEl.value = Object.keys(window.cardCounts).join(' ');
 
-    okBtn.onclick = () => {
+    okBtn.onclick = ()=>{
       overlay.remove();
-      if (clearChk.checked) {
+      if(clearChk.checked) {
         document.getElementById('card-container').innerHTML = '';
         window.cardCounts = {};
         updateCount();
       }
       const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
       isImporting = true;
-      tokens.forEach(tok => {
+      tokens.forEach(tok=>{
         const parts = tok.split('-');
-        if (parts.length < 2) return;
-        const vn = parts[0] + '-' + parts[1];
+        if(parts.length<2) return;
+        const vn = parts[0]+'-'+parts[1];
         window.addCard(vn);
       });
       isImporting = false;
@@ -131,32 +143,32 @@
   });
 
   // — Other Top-Bar Buttons —
-  btnPrint.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
+  btnPrint.addEventListener('click',()=>{
+    document.getElementById('top-bar').style.display='none';
     document.getElementById('search-modal').classList.add('hidden');
     window.print();
-    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
+    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
   });
-  btnOverview.addEventListener('click', buildOverview);
-  btnFullProxy.addEventListener('click', () => {
+  btnOverview.addEventListener('click',buildOverview);
+  btnFullProxy.addEventListener('click',()=>{
     fullProxy = !fullProxy;
-    Object.keys(window.cardCounts).forEach(vn => {
+    Object.keys(window.cardCounts).forEach(vn=>{
       const img = document.querySelector(`[data-variant="${vn}"] img.card-img`);
-      if (img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+      if(img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
     });
   });
-  btnReset.addEventListener('click', () => {
+  btnReset.addEventListener('click',()=>{
     window.cardCounts = {};
     document.getElementById('card-container').innerHTML = '';
     saveState();
     updateCount();
   });
 
-  // — On Load: Restore & Recount —
-  document.addEventListener('DOMContentLoaded', () => {
+  // — On Load: Restore State —
+  document.addEventListener('DOMContentLoaded',()=>{
     loadState();
-    Object.entries(window.cardCounts).forEach(([vn, c]) => {
-      for (let i = 0; i < c; i++) window.addCard(vn);
+    Object.entries(window.cardCounts).forEach(([vn,c])=>{
+      for(let i=0;i<c;i++) window.addCard(vn);
     });
     updateCount();
   });
@@ -274,6 +286,5 @@ function buildOverview() {
   });
 
   observer.observe(container, { childList: true });
-  })();
-
+})();
 })();
