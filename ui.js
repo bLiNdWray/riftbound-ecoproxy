@@ -176,11 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // — Overview Builder —
 
 function buildOverview() {
-  // teardown
-  const prev = document.getElementById('overview-modal');
-  if (prev) prev.remove();
+  // Remove any existing modal
+  const old = document.getElementById('overview-modal');
+  if (old) old.remove();
 
-  // overlay
+  // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'overview-modal';
   overlay.className = 'modal-overlay';
@@ -193,15 +193,20 @@ function buildOverview() {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
+  // The exact order you requested:
   const typesOrder = ['Legend','Rune','Battlefield','Unit','Spells'];
   const groups = {};
 
-  // Build groups[type][vn] = { name, logo, count }
+  // Step 1: Gather and group
   document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
-    const vn    = card.getAttribute('data-variant');
-    const type  = card.dataset.type || 'Other';
-    const logo  = card.dataset.colorLogo || '';
-    const name  = card.dataset.name      || vn;
+    const type = card.dataset.type || 'Other';
+    const vn   = card.dataset.variant;
+    const name = card.querySelector('.name') 
+                 ? card.querySelector('.name').textContent.trim() 
+                 : vn;
+    const logo = card.querySelector('.inline-icon') 
+                 ? card.querySelector('.inline-icon').src 
+                 : (card.querySelector('img')?.src || '');
     groups[type] = groups[type] || {};
     if (!groups[type][vn]) {
       groups[type][vn] = { name, logo, count: 0 };
@@ -211,30 +216,21 @@ function buildOverview() {
 
   const listEl = document.getElementById('overview-list');
 
+  // Step 2: For each type in order, build its section
   typesOrder.forEach(type => {
     const byVn = groups[type];
-    if (!byVn) return;
+    if (!byVn) return;  // skip empty
 
-    // Create [vn, data] array
-    const entries = Object.entries(byVn);
+    // Convert to [vn, data] array and sort by name
+    const entries = Object.entries(byVn).sort((a,b) => {
+      return a[1].name.localeCompare(b[1].name);
+    });
 
-    // Sort
-    if (type === 'Unit' || type === 'Spells') {
-      entries.sort((a, b) => {
-        const dataA = a[1], dataB = b[1];
-        if (dataA.logo < dataB.logo) return -1;
-        if (dataA.logo > dataB.logo) return 1;
-        return dataA.name.localeCompare(dataB.name);
-      });
-    } else {
-      entries.sort((a, b) => a[1].name.localeCompare(b[1].name));
-    }
-
-    // Section
-    const totalOfType = entries.reduce((sum, [,d]) => sum + d.count, 0);
+    // Section wrapper
+    const total = entries.reduce((sum,[,d]) => sum + d.count, 0);
     const section = document.createElement('div');
     section.className = 'overview-section';
-    section.innerHTML = `<h3>${type} (${totalOfType})</h3>`;
+    section.innerHTML = `<h3>${type} (${total})</h3>`;
 
     // Rows
     entries.forEach(([vn, data]) => {
@@ -254,13 +250,12 @@ function buildOverview() {
     listEl.appendChild(section);
   });
 
-  // Wire up buttons
+  // Step 3: Wire the buttons
   listEl.querySelectorAll('.overview-inc').forEach(btn => {
     btn.onclick = () => window.addCard(btn.dataset.vn);
   });
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
     btn.onclick = () => {
-      // find the row element to pass into removeCard
       const row = btn.closest('.overview-item');
       window.removeCard(btn.dataset.vn, row);
     };
