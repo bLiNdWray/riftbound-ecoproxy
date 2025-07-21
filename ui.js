@@ -193,7 +193,7 @@ function buildOverview() {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  const typesOrder = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
+  const typesOrder = ['Legend','Battlefield','Runes','Units','Spells','Gear'];
   const groups = {};
 
   // Group cards by type and count
@@ -201,11 +201,11 @@ function buildOverview() {
     const vn   = card.getAttribute('data-variant');
     // card.classList contains one of: 'legend','rune','unit','spell','gear','battlefield'
     const type = card.classList.contains('legend')      ? 'Legend'
+               : card.classList.contains('battlefield') ? 'Battlefield'
                : card.classList.contains('rune')        ? 'Runes'
                : card.classList.contains('unit')        ? 'Units'
                : card.classList.contains('spell')       ? 'Spells'
                : card.classList.contains('gear')        ? 'Gear'
-               : card.classList.contains('battlefield') ? 'Battlefield'
                : 'Other';
     groups[type] = groups[type] || {};
     groups[type][vn] = (groups[type][vn] || 0) + 1;
