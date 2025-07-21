@@ -234,7 +234,7 @@
         listEl.appendChild(section);
       });
 
-    // Wire up − buttons
+ // Wire up − buttons
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
     btn.onclick = () => {
       const vn = btn.dataset.vn;
