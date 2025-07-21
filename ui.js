@@ -28,6 +28,7 @@
   }
 
  // ===== Helpers =====
+// ===== Helpers =====
 function refreshBadge(vn) {
   // count DOM elements for this variant
   const count = document.querySelectorAll(
@@ -83,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateCount();
 });
+
 
 
   // — Import List Modal —
