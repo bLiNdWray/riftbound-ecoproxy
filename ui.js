@@ -178,14 +178,14 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
+    const typesOrder = ['Legend','Battlefield','Runes','Units','Spells'];
     const groups = {};
 
     document.querySelectorAll('#card-container .card').forEach(card => {
       const vn   = card.getAttribute('data-variant');
       const type = card.classList.contains('legend')      ? 'Legend'
-                 : card.classList.contains('rune')        ? 'Runes'
                  : card.classList.contains('battlefield') ? 'Battlefield'
+                 : card.classList.contains('rune')        ? 'Runes'
                  : card.classList.contains('unit')        ? 'Units'
                  : card.classList.contains('spell')       ? 'Spells'
                  : card.classList.contains('gear')        ? 'Gear'
@@ -236,38 +236,41 @@
 
  // … inside buildOverview, after rendering rows …
 
-// Wire up “−” buttons correctly
+// Wire up “−” buttons
 listEl.querySelectorAll('.overview-dec').forEach(btn => {
-  btn.onclick = () => {
+  btn.addEventListener('click', () => {
     const vn = btn.dataset.vn;
-    const row = btn.closest('.overview-item');
+    // 1) Find one real card in the main container
+    const cardEl = document.querySelector(
+      `#card-container .card[data-variant="${vn}"]`
+    );
+    if (!cardEl) return;
+
+    // 2) Remove it via removeCard; it returns true on success
+    const removed = window.removeCard(vn, cardEl);
+    if (!removed) return;
+
+    // 3) Update this overview row’s count
+    const row     = btn.closest('.overview-item');
     const countEl = row.querySelector('.overview-count');
-    const before = parseInt(countEl.textContent, 10);
+    const newCount = parseInt(countEl.textContent, 10) - 1;
+    countEl.textContent = newCount;
 
-    if (before > 0) {
-      // 1) Find one real card in the main container
-      const cardEl = document.querySelector(
-        `#card-container .card[data-variant="${vn}"]`
-      );
-      if (!cardEl) return;
-
-      // 2) Remove it
-      const success = window.removeCard(vn, cardEl);
-      if (!success) return;
-
-      // 3) Update overview row count
-      countEl.textContent = before - 1;
-
-      // 4) Update section total
-      const hdr = row.closest('.overview-section').querySelector('h3');
-      const m   = hdr.textContent.match(/\((\d+)\)/);
-      if (m) {
-        const newTotal = parseInt(m[1], 10) - 1;
-        hdr.textContent = `${hdr.textContent.split(' (')[0]} (${newTotal})`;
-      }
+    // 4) Update the section header total
+    const section = btn.closest('.overview-section');
+    const hdr     = section.querySelector('h3');
+    const m       = hdr.textContent.match(/^(.+?)\s*\((\d+)\)/);
+    if (m) {
+      const label = m[1];
+      const total = parseInt(m[2], 10) - 1;
+      hdr.textContent = `${label} (${total})`;
     }
-  };
+
+    // 5) Re‐sync the top‐bar counter (in case MutationObserver hasn't yet)
+    updateCount();
+  });
 });
+
 
 // Wire up “+” buttons
 listEl.querySelectorAll('.overview-inc').forEach(btn => {
