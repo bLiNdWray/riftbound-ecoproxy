@@ -217,6 +217,13 @@ html, body {
   gap: 0.25rem;
 }
 
+/* Icon sizing */
+.overview-icons img {
+  width: 1.2em;
+  height: auto;
+  display: block;
+}
+
 /* Variant centered in column 2 */
 .overview-variant {
   grid-column: 2;
