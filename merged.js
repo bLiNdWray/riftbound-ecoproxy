@@ -200,16 +200,25 @@
       section.innerHTML = `<h3>${type}</h3>`;
       Object.entries(grp[type]).forEach(([vn, count]) => {
         const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-        // extract icons: color-indicator or legend-icons
+                // extract icons: color-indicator, legend-icons, or rune-image
         let icons = '';
         const colWrap = cardEl.querySelector('.color-indicator');
-        if (colWrap) icons = [...colWrap.querySelectorAll('img.inline-icon')].map(i=>i.outerHTML).join(' ');
-        else {
+        if (colWrap) {
+          icons = [...colWrap.querySelectorAll('img.inline-icon')]
+            .map(i => i.outerHTML)
+            .join(' ');
+        } else {
           const lgWrap = cardEl.querySelector('.legend-icons');
-          if (lgWrap) icons = [...lgWrap.querySelectorAll('img')].map(i=>i.outerHTML).join(' ');
+          if (lgWrap) {
+            icons = [...lgWrap.querySelectorAll('img')]
+              .map(i => i.outerHTML)
+              .join(' ');
+          } else {
+            const runeImg = cardEl.querySelector('.rune-image img');
+            if (runeImg) icons = runeImg.outerHTML;
+          }
         }
-        // extract name with fallbacks
-        const nameEl = cardEl.querySelector('.name')
+        // extract name with fallbacksEl = cardEl.querySelector('.name')
                       || cardEl.querySelector('.main-title')
                       || cardEl.querySelector('.bf-name')
                       || cardEl.querySelector('.rune-title');
