@@ -17,7 +17,7 @@
 
   window.cardCounts = {};
 
-  // ── Sorted Insertion ────────────────────────────────────────────────
+  // ── Type Order & Sorted Insertion ─────────────────────────────────
   const typeOrder = ['legend','battlefield','rune','unit','spell','gear'];
   function getType(el) {
     for (let t of typeOrder) if (el.classList.contains(t)) return t;
@@ -141,42 +141,37 @@
       <div class="bottom-bar"><span>${c.type}${tags?' - '+tags:''}</span></div>`);
   }
 
- function makeBattlefield(c) {
-  const desc = c.description || '';
-  return build(c.variantNumber, `
-    <div class="bf-columns">
-      <div class="bf-col side left">
-        <div class="bf-text">${desc}</div>
+  function makeBattlefield(c) {
+    const desc=c.description||'';
+    return build(c.variantNumber,`
+      <div class="bf-columns">
+        <div class="bf-col side left"><div class="bf-text">${desc}</div></div>
+        <div class="bf-col center"><div class="bf-type-text">${c.type.toUpperCase()}</div><div class="bf-name">${c.name}</div></div>
+        <div class="bf-col side right"><div class="bf-text">${desc}</div></div>
       </div>
-      <div class="bf-col center">
-        <div class="bf-type-text">${c.type.toUpperCase()}</div>
-        <div class="bf-name">${c.name}</div>
-      </div>
-      <div class="bf-col side right">
-        <div class="bf-text">${desc}</div>
-      </div>
-    </div>
-  `);
-}
+    `);
+  }
 
   function makeLegend(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const iconsHTML = cols.map(col=>`<img src="images/${col}.png" alt="${col}">`).join(' ');
-    const parts = (c.name||'').split(',').map(s=>s.trim());
-    const charName = parts[0], moniker = parts[1]||'';
-    const body = formatDescription(c.description);
-    return build(c.variantNumber, `
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const iconsHTML=cols.map(col=>`<img src="images/${col}.png" alt="${col}">`).join(' ');
+    const parts=(c.name||'').split(',').map(s=>s.trim());
+    const charName=parts[0], moniker=parts[1]||'';
+    const body=formatDescription(c.description);
+    return build(c.variantNumber,`
       <div class="legend-header"><div class="legend-icons">${iconsHTML}</div><div class="legend-title">LEGEND</div></div>
       <div class="legend-name"><div class="main-title">${charName}</div>${moniker?`<div class="subtitle">${moniker}</div>`:''}</div>
-      <div class="legend-body"><div class="legend-body-text">${body}</div></div>`);
+      <div class="legend-body"><div class="legend-body-text">${body}</div></div>
+    `);
   }
 
   function makeRune(c) {
     const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
     const img=cols[0]||'Body';
-    return build(c.variantNumber, `
+    return build(c.variantNumber,`
       <div class="rune-title">${c.name}</div>
-      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>`);
+      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>
+    `);
   }
 
   // ── Rendering ───────────────────────────────────────────────────────
@@ -194,7 +189,7 @@
     if(clear)container.innerHTML='';
     ids.forEach(vn=>{
       jsonpFetch({sheet:SHEET_NAME,id:vn},data=>{
-        if(!Array.isArray(data)||!data[0])return;
+        if(!data[0])return;
         const c=data[0],t=(c.type||'').trim().toLowerCase();
         if(!allowedTypes.includes(t))return;
         const el={unit:makeUnit,spell:makeSpell,gear:makeSpell,battlefield:makeBattlefield,legend:makeLegend,rune:makeRune}[t](c);
@@ -213,14 +208,35 @@
   function refreshBadge(vn){const b=container.querySelector(`.card[data-variant="${vn}"] .qty-badge`);if(b)b.textContent=container.querySelectorAll(`.card[data-variant="${vn}"]`).length;}
   function updateCount(){const t=container.querySelectorAll('.card').length;document.getElementById('card-count').textContent=t+' card'+(t!==1?'s':'');}
 
-  // ── UI Actions ───────────────────────────────────────────────────────
-  openBtn.addEventListener('click',()=>{modal.classList.remove('hidden');input.value='';results.innerHTML='';input.focus();});
-  closeBtn.addEventListener('click',()=>modal.classList.add('hidden'));
+  // ── Search Modal ──────────────────────────────────────────────────────
+  openBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    input.value = '';
+    results.innerHTML = '';
+    input.focus();
+  });
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { results.innerHTML = ''; return; }
+    const matches = allCards.filter(c => {
+      const name = (c.name||'').toLowerCase();
+      const vn   = (c.variantNumber||'').toLowerCase();
+      return name.includes(q) || vn.includes(q);
+    });
+    renderSearchResults(matches);
+  });
 
-  importBtn.addEventListener('click',()=>{
-    const prev=document.getElementById('import-modal');if(prev)return prev.remove();
-    const overlay=document.createElement('div');overlay.id='import-modal';overlay.className='modal-overlay';
-    overlay.innerHTML=`
+  // ── Import List ───────────────────────────────────────────────────────
+  importBtn.addEventListener('click', () => {
+    const prev = document.getElementById('import-modal');
+    if (prev) return prev.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
       <div class="modal-content">
         <button id="close-import" class="modal-close">×</button>
         <h2>Import List</h2>
@@ -232,150 +248,131 @@
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    const area=overlay.querySelector('#import-area');
-    overlay.querySelector('#close-import').onclick=overlay.remove.bind(overlay);
-    overlay.querySelector('#import-cancel').onclick=overlay.remove.bind(overlay);
-    area.value=Object.keys(window.cardCounts).join(' ');
-    overlay.querySelector('#import-ok').onclick=()=>{
-      if(overlay.querySelector('#import-clear').checked){container.innerHTML='';window.cardCounts={};updateCount();}
-      area.value.trim().split(/\s+/).forEach(tok=>{const p=tok.split('-');if(p.length>=2)window.addCard(p[0]+'-'+p[1]);});
+    const area = overlay.querySelector('#import-area');
+    overlay.querySelector('#close-import').onclick = overlay.remove.bind(overlay);
+    overlay.querySelector('#import-cancel').onclick = overlay.remove.bind(overlay);
+    area.value = Object.keys(window.cardCounts).join(' ');
+    overlay.querySelector('#import-ok').onclick = () => {
+      if (overlay.querySelector('#import-clear').checked) {
+        container.innerHTML = '';
+        window.cardCounts = {};
+        updateCount();
+      }
+      area.value.trim().split(/\s+/).forEach(tok => {
+        const p = tok.split('-');
+        if (p.length >= 2) window.addCard(p[0] + '-' + p[1]);
+      });
       overlay.remove();
     };
   });
 
-  printBtn.addEventListener('click',()=>{
-    document.getElementById('top-bar').style.display='none';
+  // ── Print ─────────────────────────────────────────────────────────────
+  printBtn.addEventListener('click', () => {
+    document.getElementById('top-bar').style.display = 'none';
     modal.classList.add('hidden');
     window.print();
-    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
+    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
   });
 
-  fullProxyBtn.addEventListener('click',()=>{
-    window.fullProxy=!window.fullProxy;
-    container.querySelectorAll('.card[data-variant]').forEach(card=>{
-      const img=card.querySelector('img.card-img');
-      if(img)img.src=window.fullProxy?img.dataset.fullArt:img.dataset.proxyArt;
+  // ── Toggle Full Proxy ────────────────────────────────────────────────
+  fullProxyBtn.addEventListener('click', () => {
+    window.fullProxy = !window.fullProxy;
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      const img = card.querySelector('img.card-img');
+      if (img) img.src = window.fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
     });
   });
 
-  resetBtn.addEventListener('click',()=>{
-    window.cardCounts={};container.innerHTML='';saveState();updateCount();
+  // ── Reset ─────────────────────────────────────────────────────────────
+  resetBtn.addEventListener('click', () => {
+    window.cardCounts = {};
+    container.innerHTML = '';
+    saveState();
+    updateCount();
   });
 
   // ── Overview ─────────────────────────────────────────────────────────
-function buildOverview() {
-  // remove any existing modal
-  const prev = document.getElementById('overview-modal');
-  if (prev) { 
-    prev.remove(); 
-    return; 
-  }
+  function buildOverview() {
+    const prev = document.getElementById('overview-modal');
+    if (prev) { prev.remove(); return; }
+    const overlay = document.createElement('div');
+    overlay.id = 'overview-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      '<div class="modal-content">' +
+        '<button id="close-overview" class="modal-close">×</button>' +
+        '<h2>Overview</h2>' +
+        '<div id="overview-list"></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  // create overlay + content
-  const overlay = document.createElement('div');
-  overlay.id = 'overview-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML =
-    '<div class="modal-content">' +
-      '<button id="close-overview" class="modal-close">×</button>' +
-      '<h2>Overview</h2>' +
-      '<div id="overview-list"></div>' +
-    '</div>';
-  document.body.appendChild(overlay);
-
-  // wire close
-  overlay.querySelector('#close-overview').onclick = function() {
-    overlay.remove();
-  };
-
-  // group cards by type
-  const order = ['Legend','Battlefield','Runes','Units','Spells'];
-  const grp = {};
-  Object.entries(window.cardCounts).forEach(function([vn, count]) {
-    if (!count) return;
-    const selector = '.card[data-variant="' + vn + '"]';
-    const cardEl = container.querySelector(selector);
-    if (!cardEl) return;
-    let type = 'Other';
-    if (cardEl.classList.contains('legend'))        type = 'Legend';
-    else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
-    else if (cardEl.classList.contains('rune'))       type = 'Runes';
-    else if (cardEl.classList.contains('unit'))       type = 'Units';
-    else if (cardEl.classList.contains('spell'))      type = 'Spells';
-    grp[type] = grp[type] || {};
-    grp[type][vn] = count;
-  });
-
-  // build the list
-  const listEl = overlay.querySelector('#overview-list');
-  order.forEach(function(type) {
-    if (!grp[type]) return;
-    const section = document.createElement('div');
-    section.innerHTML = '<h3>' + type + '</h3>';
-    Object.entries(grp[type]).forEach(function([vn, count]) {
-      const selector = '.card[data-variant="' + vn + '"]';
-      const cardEl = container.querySelector(selector);
-      if (!cardEl) return;
-
-      // pick up icons
-      let icons = '';
-      const colWrap = cardEl.querySelector('.color-indicator');
-      if (colWrap) {
-        icons = Array.prototype.slice.call(colWrap.querySelectorAll('img.inline-icon'))
-          .map(i => i.outerHTML).join(' ');
-      } else {
-        const lgWrap = cardEl.querySelector('.legend-icons');
-        if (lgWrap) {
-          icons = Array.prototype.slice.call(lgWrap.querySelectorAll('img'))
-            .map(i => i.outerHTML).join(' ');
-        } else {
-          const runeImg = cardEl.querySelector('.rune-image img');
-          if (runeImg) icons = runeImg.outerHTML;
-        }
-      }
-
-      // get name
-      const nameEl = cardEl.querySelector('.name')
-                     || cardEl.querySelector('.main-title')
-                     || cardEl.querySelector('.bf-name')
-                     || cardEl.querySelector('.rune-title');
-      const name = nameEl ? nameEl.textContent.trim() : vn;
-
-      // row HTML
-      const row = document.createElement('div');
-      row.className = 'overview-item';
-      row.innerHTML =
-        '<span class="overview-label">' +
-          icons +
-          '<span class="overview-text">' + name + '</span>' +
-        '</span>' +
-        '<span class="overview-variant">' + vn + '</span>' +
-        '<span class="overview-controls">' +
-          '<button class="overview-dec" data-vn="' + vn + '">−</button>' +
-          '<span class="overview-count">' + count + '</span>' +
-          '<button class="overview-inc" data-vn="' + vn + '">+</button>' +
-        '</span>';
-      section.appendChild(row);
+    const order = ['Legend','Battlefield','Runes','Units','Spells'];
+    const grp = {};
+    Object.entries(window.cardCounts).forEach(([vn,c]) => {
+      if (!c) return;
+      const el = container.querySelector('.card[data-variant="' + vn + '"]');
+      if (!el) return;
+      let t = 'Other';
+      if (el.classList.contains('legend')) t='Legend';
+      else if (el.classList.contains('battlefield')) t='Battlefield';
+      else if (el.classList.contains('rune')) t='Runes';
+      else if (el.classList.contains('unit')) t='Units';
+      else if (el.classList.contains('spell')) t='Spells';
+      grp[t] = grp[t]||{};
+      grp[t][vn] = c;
     });
-    listEl.appendChild(section);
-  });
 
-  // wire inc/dec inside overview
-  listEl.querySelectorAll('.overview-inc').forEach(btn =>
-    btn.onclick = () => window.addCard(btn.dataset.vn)
-  );
-  listEl.querySelectorAll('.overview-dec').forEach(btn =>
-    btn.onclick = () => window.removeCard(btn.dataset.vn)
-  );
-}
-btnOverview.addEventListener('click', buildOverview);
+    const listEl = overlay.querySelector('#overview-list');
+    order.forEach(type => {
+      if (!grp[type]) return;
+      const section = document.createElement('div');
+      section.innerHTML = '<h3>' + type + '</h3>';
+      Object.entries(grp[type]).forEach(([vn,c]) => {
+        const el = container.querySelector('.card[data-variant="' + vn + '"]');
+        if (!el) return;
+        let icons = '';
+        const ci = el.querySelector('.color-indicator');
+        if (ci) icons = Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join(' ');
+        else {
+          const lg = el.querySelector('.legend-icons');
+          if (lg) icons = Array.from(lg.querySelectorAll('img')).map(i=>i.outerHTML).join(' ');
+          else {
+            const ri = el.querySelector('.rune-image img');
+            if (ri) icons = ri.outerHTML;
+          }
+        }
+        const ne = el.querySelector('.name')||el.querySelector('.main-title')||el.querySelector('.bf-name')||el.querySelector('.rune-title');
+        const name = ne?ne.textContent.trim():vn;
+        const row = document.createElement('div');
+        row.className = 'overview-item';
+        row.innerHTML =
+          '<span class="overview-label">'+icons+'<span class="overview-text">'+name+'</span></span>'+
+          '<span class="overview-variant">'+vn+'</span>'+
+          '<span class="overview-controls">'+
+            '<button class="overview-dec" data-vn="'+vn+'">−</button>'+
+            '<span class="overview-count">'+c+'</span>'+
+            '<button class="overview-inc" data-vn="'+vn+'">+</button>'+
+          '</span>';
+        listEl.appendChild(row);
+      });
+    });
+    listEl.querySelectorAll('.overview-inc').forEach(b=>b.onclick=()=>window.addCard(b.dataset.vn));
+    listEl.querySelectorAll('.overview-dec').forEach(b=>b.onclick=()=>window.removeCard(b.dataset.vn));
+  }
+  btnOverview.addEventListener('click', buildOverview);
 
   // ── Observer & Init ────────────────────────────────────────────────
-  new MutationObserver(()=>{updateCount();Object.keys(window.cardCounts).forEach(refreshBadge);})
-    .observe(container,{childList:true});
-  document.addEventListener('DOMContentLoaded',()=>{
+  new MutationObserver(() => {
+    updateCount();
+    Object.keys(window.cardCounts).forEach(refreshBadge);
+  }).observe(container, { childList: true });
+
+  document.addEventListener('DOMContentLoaded', () => {
     loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c])=>{for(let i=0;i<c;i++)renderCards([vn],false);});
+    Object.entries(window.cardCounts).forEach(([vn,c]) => {
+      for (let i=0; i<c; i++) renderCards([vn], false);
+    });
     updateCount();
   });
 })();
