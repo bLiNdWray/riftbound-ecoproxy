@@ -223,6 +223,12 @@ html, body {
   align-items: center;
   gap: 0.25rem;
 }
+/* Ensure every image inside the icon+name cell is sized correctly */
+.overview-label img {
+  width: 1.2em;
+  height: auto;
+  display: block;
+}
 /* Icon sizing */
 .overview-label .overview-icons img {
   width: 1.2em;
