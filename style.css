@@ -202,10 +202,10 @@ html, body {
 /* Overview: single‐line, 3-column layout */
 .overview-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto auto;
   align-items: center;
-  white-space: nowrap;      /* never wrap */
-  gap: 0.5rem;
+  white-space: nowrap;    /* never wrap anything */
+  gap: 1rem;
 }
 
 /* Icons + Name together in column 1 */
@@ -216,7 +216,13 @@ html, body {
   align-items: center;
   gap: 0.25rem;
 }
-
+/* Cell 1: icon + name */
+.overview-label {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
 /* Icon sizing */
 .overview-icons img {
   width: 1.2em;
@@ -239,13 +245,29 @@ html, body {
   font-weight: bold;
 }
 
-/* Buttons & count styling */
+/* Cell 2: variant centered */
+.overview-variant {
+  grid-column: 2;
+  justify-self: center;
+  font-weight: bold;
+}
+
+/* Cell 3: controls cluster */
+.overview-controls {
+  grid-column: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-self: end;
+}
+
+/* Control styles */
 .overview-count {
   background: #f0f0f0;
   padding: 0 0.4em;
   border-radius: 3px;
 }
-.overview-item button {
+.overview-controls button {
   background: #007bff;
   color: #fff;
   border: 1px solid #0056b3;
@@ -255,6 +277,6 @@ html, body {
   cursor: pointer;
   transition: background 0.2s;
 }
-.overview-item button:hover {
+.overview-controls button:hover {
   background: #0056b3;
 }
