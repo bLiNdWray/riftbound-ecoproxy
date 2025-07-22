@@ -25,19 +25,22 @@
   }
 
   // — Badge & total counter updates —
-  function refreshBadge(vn) {
-    const n = document.querySelectorAll(
-      `#card-container .card[data-variant="${vn}"]`
-    ).length;
-    const b = document.querySelector(
-      `#card-container .card[data-variant="${vn}"] .qty-badge`
-    );
-    if (b) b.textContent = n;
+function refreshBadge(vn) {
+  const badge = document.querySelector(
+    `.card[data-variant="${vn}"] .qty-badge`
+  );
+  if (badge) {
+    badge.textContent = window.addedCounts[vn] || 0;
   }
-  function updateCount() {
-    const total = document.querySelectorAll('#card-container .card').length;
-    if (countLabel) countLabel.textContent = total + ' card' + (total!==1?'s':'');
+}
+
+function updateCount() {
+  const total = Object.values(window.addedCounts)
+    .reduce((sum, n) => sum + n, 0);
+  if (countLabel) {
+    countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
+}
 
  // — Wrap addCard so it also refreshes UI immediately —
 const origAdd = window.addCard;
