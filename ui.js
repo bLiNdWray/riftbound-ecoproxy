@@ -42,14 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const listEl = overlay.querySelector('#overview-list');
     Object.keys(counts).sort().forEach(vn => {
       const count = counts[vn];
-      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-      const name = cardEl?.dataset.name || vn;
+      const cardEl = container.querySelector(\`.card[data-variant="${vn}"]\`);
+      const name = cardEl && cardEl.dataset.name ? cardEl.dataset.name : vn;
       const item = document.createElement('div');
       item.className = 'overview-item';
-      item.innerHTML = \`
-        <span class="overview-text">\${name} – \${vn}</span>
-        <span class="overview-count">(\${count})</span>
-      \`;
+      item.innerHTML = `
+        <span class="overview-text">${name} – ${vn}</span>
+        <span class="overview-count">(${count})</span>
+      `;
       listEl.appendChild(item);
     });
   }
