@@ -363,16 +363,26 @@ function buildOverview() {
   // ── wire inc/dec inside overview ───────────────────────────────────
   listEl.querySelectorAll('.overview-inc').forEach(btn => {
     btn.addEventListener('click', () => {
-      window.addCard(btn.dataset.vn);
-      buildOverview();
+      const vn = btn.dataset.vn;
+      // increment in main container
+      window.addCard(vn);
+      // update this row's count badge
+      const countSpan = btn.parentElement.querySelector('.overview-count');
+      countSpan.textContent = window.cardCounts[vn] || 0;
     });
   });
+
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
     btn.addEventListener('click', () => {
-      window.removeCard(btn.dataset.vn);
-      buildOverview();
+      const vn = btn.dataset.vn;
+      // decrement in main container
+      window.removeCard(vn);
+      // update this row's count badge
+      const countSpan = btn.parentElement.querySelector('.overview-count');
+      countSpan.textContent = window.cardCounts[vn] || 0;
     });
   });
+
 }
 btnOverview.addEventListener('click', buildOverview);
 
