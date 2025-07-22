@@ -275,65 +275,113 @@
     window.cardCounts={}; container.innerHTML=''; saveState(); updateCount();
   });
 
-  // ── Overview ─────────────────────────────────────────────────────────
-  function buildOverview() {
-    const prev = document.getElementById('overview-modal'); if(prev){ prev.remove(); return; }
-    const overlay = document.createElement('div'); overlay.id='overview-modal'; overlay.className='modal-overlay';
-    overlay.innerHTML =
-      '<div class="modal-content">' +
-        '<button id="close-overview" class="modal-close">×</button>' +
-        '<h2>Overview</h2>' +
-        '<div id="overview-list"></div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-    overlay.querySelector('#close-overview').onclick = () => overlay.remove();
-
-    const order=['Legend','Battlefield','Runes','Units','Spells'], grp={};
-    Object.entries(window.cardCounts).forEach(([vn,c])=>{
-      if(!c) return;
-      const el = container.querySelector('.card[data-variant="'+vn+'"]'); if(!el) return;
-      let t = 'Other';
-      if(el.classList.contains('legend')) t='Legend';
-      else if(el.classList.contains('battlefield')) t='Battlefield';
-      else if(el.classList.contains('rune')) t='Runes';
-      else if(el.classList.contains('unit')) t='Units';
-      else if(el.classList.contains('spell')) t='Spells';
-      grp[t]=grp[t]||{}; grp[t][vn]=c;
-    });
-
-    const listEl=overlay.querySelector('#overview-list');
-    order.forEach(type=>{
-      if(!grp[type]) return;
-      const section=document.createElement('div'); section.innerHTML='<h3>'+type+'</h3>';
-      Object.entries(grp[type]).forEach(([vn,c])=>{
-        const el = container.querySelector('.card[data-variant="'+vn+'"]'); if(!el) return;
-        let icons='';
-        const ci=el.querySelector('.color-indicator');
-        if(ci) icons=Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join(' ');
-        else {
-          const lg=el.querySelector('.legend-icons');
-          if(lg) icons=Array.from(lg.querySelectorAll('img')).map(i=>i.outerHTML).join(' ');
-          else { const ri=el.querySelector('.rune-image img'); if(ri) icons=ri.outerHTML; }
-        }
-        const ne=el.querySelector('.name')||el.querySelector('.main-title')||el.querySelector('.bf-name')||el.querySelector('.rune-title');
-        const name=ne?ne.textContent.trim():vn;
-        const row=document.createElement('div'); row.className='overview-item';
-        row.innerHTML=
-          '<span class="overview-label">'+icons+'<span class="overview-text">'+name+'</span></span>'+
-          '<span class="overview-variant">'+vn+'</span>'+
-          '<span class="overview-controls">'+
-            '<button class="overview-dec" data-vn="'+vn+'">−</button>'+
-            '<span class="overview-count">'+c+'</span>'+
-            '<button class="overview-inc" data-vn="'+vn+'">+</button>'+
-          '</span>';
-        listEl.appendChild(row);
-      });
-    });
-
-    listEl.querySelectorAll('.overview-inc').forEach(b=>b.onclick=()=>window.addCard(b.dataset.vn));
-    listEl.querySelectorAll('.overview-dec').forEach(b=>b.onclick=()=>window.removeCard(b.dataset.vn));
+   // ── Overview ─────────────────────────────────────────────────────────
+function buildOverview() {
+  // remove any existing modal
+  const prev = document.getElementById('overview-modal');
+  if (prev) { 
+    prev.remove(); 
+    return; 
   }
-  btnOverview.addEventListener('click', buildOverview);
+
+  // create overlay + content
+  const overlay = document.createElement('div');
+  overlay.id = 'overview-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML =
+    '<div class="modal-content">' +
+      '<button id="close-overview" class="modal-close">×</button>' +
+      '<h2>Overview</h2>' +
+      '<div id="overview-list"></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  // wire close
+  overlay.querySelector('#close-overview').onclick = function() {
+    overlay.remove();
+  };
+
+  // group cards by type
+  const order = ['Legend','Battlefield','Runes','Units','Spells'];
+  const grp = {};
+  Object.entries(window.cardCounts).forEach(function([vn, count]) {
+    if (!count) return;
+    const selector = '.card[data-variant="' + vn + '"]';
+    const cardEl = container.querySelector(selector);
+    if (!cardEl) return;
+    let type = 'Other';
+    if (cardEl.classList.contains('legend'))        type = 'Legend';
+    else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
+    else if (cardEl.classList.contains('rune'))       type = 'Runes';
+    else if (cardEl.classList.contains('unit'))       type = 'Units';
+    else if (cardEl.classList.contains('spell'))      type = 'Spells';
+    grp[type] = grp[type] || {};
+    grp[type][vn] = count;
+  });
+
+  // build the list
+  const listEl = overlay.querySelector('#overview-list');
+  order.forEach(function(type) {
+    if (!grp[type]) return;
+    const section = document.createElement('div');
+    section.innerHTML = '<h3>' + type + '</h3>';
+    Object.entries(grp[type]).forEach(function([vn, count]) {
+      const selector = '.card[data-variant="' + vn + '"]';
+      const cardEl = container.querySelector(selector);
+      if (!cardEl) return;
+
+      // pick up icons
+      let icons = '';
+      const colWrap = cardEl.querySelector('.color-indicator');
+      if (colWrap) {
+        icons = Array.prototype.slice.call(colWrap.querySelectorAll('img.inline-icon'))
+          .map(i => i.outerHTML).join(' ');
+      } else {
+        const lgWrap = cardEl.querySelector('.legend-icons');
+        if (lgWrap) {
+          icons = Array.prototype.slice.call(lgWrap.querySelectorAll('img'))
+            .map(i => i.outerHTML).join(' ');
+        } else {
+          const runeImg = cardEl.querySelector('.rune-image img');
+          if (runeImg) icons = runeImg.outerHTML;
+        }
+      }
+
+      // get name
+      const nameEl = cardEl.querySelector('.name')
+                     || cardEl.querySelector('.main-title')
+                     || cardEl.querySelector('.bf-name')
+                     || cardEl.querySelector('.rune-title');
+      const name = nameEl ? nameEl.textContent.trim() : vn;
+
+      // row HTML
+      const row = document.createElement('div');
+      row.className = 'overview-item';
+      row.innerHTML =
+        '<span class="overview-label">' +
+          icons +
+          '<span class="overview-text">' + name + '</span>' +
+        '</span>' +
+        '<span class="overview-variant">' + vn + '</span>' +
+        '<span class="overview-controls">' +
+          '<button class="overview-dec" data-vn="' + vn + '">−</button>' +
+          '<span class="overview-count">' + count + '</span>' +
+          '<button class="overview-inc" data-vn="' + vn + '">+</button>' +
+        '</span>';
+      section.appendChild(row);
+    });
+    listEl.appendChild(section);
+  });
+
+  // wire inc/dec inside overview
+  listEl.querySelectorAll('.overview-inc').forEach(btn =>
+    btn.onclick = () => window.addCard(btn.dataset.vn)
+  );
+  listEl.querySelectorAll('.overview-dec').forEach(btn =>
+    btn.onclick = () => window.removeCard(btn.dataset.vn)
+  );
+}
+btnOverview.addEventListener('click', buildOverview);
 
   // ── Observer & Init ────────────────────────────────────────────────
   new MutationObserver(()=>{ updateCount(); Object.keys(window.cardCounts).forEach(refreshBadge); })
