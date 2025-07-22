@@ -54,14 +54,28 @@
   observer.observe(container, { childList: true });
 
   // ===== Wrap addCard/removeCard =====
-  const origAdd = window.addCard;
-  window.addCard = function(vn) {
-    const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-    const added  = origAdd(vn);
-    return added;
-  };
+const origAdd = window.addCard;
+window.addCard = function(vn) {
+  const addedEl = origAdd(vn);
+  if (addedEl) {
+    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+    saveState();
+    console.log(`cardCounts after add:`, window.cardCounts);
+  }
+  return addedEl;
+};
 
-  const origRm = window.removeCard;
+const origRm = window.removeCard;
+window.removeCard = function(vn, el) {
+  const removed = origRm(vn, el);
+  if (removed && window.cardCounts[vn] > 0) {
+    window.cardCounts[vn]--;
+    if (window.cardCounts[vn] === 0) delete window.cardCounts[vn];
+    saveState();
+    console.log(`cardCounts after remove:`, window.cardCounts);
+  }
+  return removed;
+};
   window.removeCard = function(vn, el) {
     const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
     if (!cardEl) return false;
