@@ -6,7 +6,7 @@
   const container  = document.getElementById('card-container');
 
   // ── Type Order & Sorted Insertion ─────────────────────────────────
-  const typeOrder = ['legend','battlefield','rune','unit','spell','gear'];
+  
   function getType(el) {
     return typeOrder.find(t => el.classList.contains(t)) || 'unit';
   }
