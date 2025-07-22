@@ -218,12 +218,13 @@
             if (runeImg) icons = runeImg.outerHTML;
           }
         }
-        // extract name with fallbacksEl = cardEl.querySelector('.name')
-                      || cardEl.querySelector('.main-title')
-                      || cardEl.querySelector('.bf-name')
-                      || cardEl.querySelector('.rune-title');
+                // extract name with fallbacks
+        const nameEl = cardEl.querySelector('.name')
+          || cardEl.querySelector('.main-title')
+          || cardEl.querySelector('.bf-name')
+          || cardEl.querySelector('.rune-title');
         const name = nameEl ? nameEl.textContent.trim() : vn;
-        const row = document.createElement('div'); row.className = 'overview-item';
+        const row = document.createElement('div'); row.className = 'overview-item'; = document.createElement('div'); row.className = 'overview-item';
         row.innerHTML = `
           <span class="overview-icons">${icons}</span> ${name} - ${vn}
           <button class="overview-dec" data-vn="${vn}">−</button>
@@ -239,7 +240,7 @@
     listEl.querySelectorAll('.overview-inc').forEach(btn => btn.addEventListener('click', () => window.addCard(btn.dataset.vn)));
     listEl.querySelectorAll('.overview-dec').forEach(btn => btn.addEventListener('click', () => window.removeCard(btn.dataset.vn)));
   }
-  btnOverview.addEventListener('click', buildOverview);('click', buildOverview);
+  btnOverview.addEventListener('click', buildOverview);
 
   // ── Observer & Init ────────────────────────────────────────────────
   new MutationObserver(() => {
