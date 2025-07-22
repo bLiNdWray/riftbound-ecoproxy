@@ -6,7 +6,7 @@
   const btnPrint     = document.getElementById('btn-print');
   const btnOverview  = document.getElementById('btn-overview');
   const btnFullProxy = document.getElementById('btn-full-proxy');
-  // const btnReset     = document.getElementById('btn-reset');
+  const btnReset     = document.getElementById('btn-reset');
   const countLabel   = document.getElementById('card-count');
 
   // — State —
