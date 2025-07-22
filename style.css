@@ -224,7 +224,7 @@ html, body {
   gap: 0.25rem;
 }
 /* Icon sizing */
-.overview-icons img {
+.overview-label .overview-icons img {
   width: 1.2em;
   height: auto;
   display: block;
