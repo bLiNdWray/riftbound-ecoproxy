@@ -312,7 +312,27 @@ function build(id, html) {
 // -------------------------------------------------
 // Expose to ui.js (must be before the IIFE closes)
 // -------------------------------------------------
-window.addCard    = addCard;
-window.removeCard = removeCard;
+const origAdd = typeof window.addCard === 'function' ? window.addCard : () => {};
+window.addCard = function(vn) {
+  // attempt real add
+  const success = origAdd(vn);
+  if (success) {
+    // bump the count in our map
+    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+  }
+  return success;
+};
 
+// — Wrap removeCard so it also updates cardCounts —
+const origRm = typeof window.removeCard === 'function' ? window.removeCard : () => {};
+window.removeCard = function(vn, el) {
+  // find an element if not provided
+  const cardEl = el || document.querySelector(`.card[data-variant="${vn}"]`);
+  if (!cardEl) return false;
+  const success = origRm(vn, cardEl);
+  if (success && typeof window.cardCounts[vn] === 'number') {
+    window.cardCounts[vn] = Math.max(0, window.cardCounts[vn] - 1);
+  }
+  return success;
+};
 })(); // <-- this closes your top-level IIFE
