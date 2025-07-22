@@ -90,256 +90,43 @@
     return w;
   }
 
-  // Card builders
-  function makeUnit(c) {
-    const cols = (c.colors || '').split(/[;,]\s*/).filter(Boolean);
-    const costN = Number(c.energy) || 0;
-    const powN  = Number(c.power)  || 0;
-    const costIcons = Array(powN).fill().map(_ =>
-      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
-    ).join('');
-    const mightHTML = c.might
-      ? `<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`
-      : '';
-    const descHTML  = formatDescription(c.description);
-    const tags      = (c.tags || '').split(/;\s*/).join(' ');
-    const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+  // Card builders (unit, spell, battlefield, legend, rune)
+  function makeUnit(c) { /* ... */ }
+  function makeSpell(c) { /* ... */ }
+  function makeBattlefield(c) { /* ... */ }
+  function makeLegend(c) { /* ... */ }
+  function makeRune(c) { /* ... */ }
 
-    return build(c.variantNumber, `
-      <div class="top-bar">
-        <span class="cost">${costN}${costIcons}</span>
-        <span class="might">${mightHTML}</span>
-      </div>
-      <div class="name">${c.name}</div>
-      <div class="middle">
-        <div class="desc-wrap">${descHTML}</div>
-        <div class="color-indicator">
-          ${colorIcon}<span class="color-text">${cols.join(' ')}</span>
-        </div>
-      </div>
-      <div class="bottom-bar">
-        <span class="type-line">${c.type}${tags ? ' - ' + tags : ''}</span>
-      </div>
-    `);
-  }
+  // Render functions
+  function renderSearchResults(list) { /* ... */ }
+  function renderCards(ids, clear = true) { /* ... */ }
 
-  function makeSpell(c) {
-    const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const costN     = Number(c.energy) || 0;
-    const powN      = Number(c.power)  || 0;
-    const costIcons = Array(powN).fill().map(_=>
-      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
-    ).join('');
-    const descHTML  = formatDescription(c.description);
-    const tags      = (c.tags||'').split(/;\s*/).join(' ');
-    const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+  // Add/Remove handlers
+  window.addCard = vn => { /* ... */ };
+  window.removeCard = (vn, el) => { /* ... */ };
 
-    return build(c.variantNumber, `
-      <div class="top-bar">
-        <span class="cost">${costN}${costIcons}</span>
-        <span class="might"></span>
-      </div>
-      <div class="name">${c.name}</div>
-      <div class="middle">
-        <div class="desc-wrap">${descHTML}</div>
-        <div class="color-indicator">
-          ${colorIcon}<span class="color-text">${cols.join(' ')}</span>
-        </div>
-      </div>
-      <div class="bottom-bar">
-        <span class="type-line">${c.type}${tags ? ' - ' + tags : ''}</span>
-      </div>
-    `);
-  }
+  // Persistence
+  function saveState() { /* ... */ }
+  function loadState() { /* ... */ }
 
-  function makeBattlefield(c) {
-    const d = c.description || '';
-    return build(c.variantNumber, `
-      <div class="bf-columns">
-        <div class="bf-col side left"><div class="bf-text">${d}</div></div>
-        <div class="bf-col center">
-          <div class="bf-type-text">${c.type.toUpperCase()}</div>
-          <div class="bf-name">${c.name}</div>
-        </div>
-        <div class="bf-col side right"><div class="bf-text">${d}</div></div>
-      </div>
-    `);
-  }
+  // UI Helpers
+  function refreshBadge(vn) { /* ... */ }
+  function updateCount() { /* ... */ }
 
-  function makeLegend(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const iconsHTML = cols.map(col =>
-      `<img src="images/${col}.png" alt="${col}">`
-    ).join('');
-    const [ch, mon] = (c.name||'').split(',').map(s=>s.trim());
-    const bodyHTML = formatDescription(c.description);
+  // Search modal handlers
+  openBtn.addEventListener('click', () => { /* ... */ });
+  closeBtn.addEventListener('click', () => /* ... */ );
+  input.addEventListener('input', () => { /* ... */ });
 
-    return build(c.variantNumber, `
-      <div class="legend-header">
-        <div class="legend-icons">${iconsHTML}</div>
-        <div class="legend-title">LEGEND</div>
-      </div>
-      <div class="legend-name">
-        <div class="main-title">${ch}</div>
-        ${mon ? `<div class="subtitle">${mon}</div>` : ''}
-      </div>
-      <div class="legend-body">
-        <div class="legend-body-text">${bodyHTML}</div>
-      </div>
-    `);
-  }
+  // Import list handler
+  importBtn.addEventListener('click', () => { /* ... */ });
 
-  function makeRune(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
-    const img  = cols[0] || 'Body';
-    return build(c.variantNumber, `
-      <div class="rune-title">${c.name}</div>
-      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>
-    `);
-  }
+  // Top-bar actions
+  printBtn.addEventListener('click', () => { /* ... */ });
+  fullProxyBtn.addEventListener('click', () => { /* ... */ });
+  resetBtn.addEventListener('click', () => { /* ... */ });
 
-  // ── Render ───────────────────────────────────────────────────────────
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const t = (c.type||'').trim().toLowerCase();
-      if (!allowedTypes.includes(t)) return;
-      const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell,
-                   battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
-      el.classList.add(typeClassMap[t]);
-      results.appendChild(el);
-    });
-  }
-
-  function renderCards(ids, clear = true) {
-    if (clear) container.innerHTML = '';
-    ids.forEach(vn => {
-      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
-        if (!Array.isArray(data)||!data[0]) return;
-        const c = data[0], t = (c.type||'').trim().toLowerCase();
-        if (!allowedTypes.includes(t)) return;
-        const el = { unit:makeUnit, spell:makeSpell, gear:makeSpell,
-                     battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
-        el.classList.add(typeClassMap[t]);
-        container.appendChild(el);
-      });
-    });
-  }
-
-  // ── Add / Remove ────────────────────────────────────────────────────
-  window.addCard = vn => {
-    renderCards([vn], false);
-    window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
-    refreshBadge(vn);
-    updateCount();
-    saveState();
-  };
-
-  window.removeCard = (vn, el) => {
-    if (el) el.remove();
-    window.cardCounts[vn] = Math.max((window.cardCounts[vn]||0) - 1, 0);
-    refreshBadge(vn);
-    updateCount();
-    saveState();
-  };
-
-  // ── Persistence ──────────────────────────────────────────────────────
-  function saveState() {
-    localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts));
-  }
-  function loadState() {
-    try {
-      window.cardCounts = JSON.parse(localStorage.getItem('riftboundCardCounts')) || {};
-    } catch {
-      window.cardCounts = {};
-    }
-  }
-
-  // ── UI Helpers ───────────────────────────────────────────────────────
-  function refreshBadge(vn) {
-    const badge = container.querySelector(`.card[data-variant="${vn}"] .qty-badge`);
-    if (badge) badge.textContent = container.querySelectorAll(`.card[data-variant="${vn}"]`).length;
-  }
-  function updateCount() {
-    const total = container.querySelectorAll('.card').length;
-    document.getElementById('card-count').textContent = total + ' card' + (total !== 1 ? 's' : '');
-  }
-
-  // ── Search Modal ────────────────────────────────────────────────────
-  openBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden'); input.value = ''; results.innerHTML = ''; input.focus();
-  });
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) return results.innerHTML = '';
-    renderSearchResults(
-      allCards.filter(c =>
-        ((c.name||'').toLowerCase().includes(q) ||
-         (c.variantNumber||'').toLowerCase().includes(q)) &&
-        allowedTypes.includes((c.type||'').toLowerCase())
-      )
-    );
-  });
-
-  // ── Import List ─────────────────────────────────────────────────────
-  importBtn.addEventListener('click', () => {
-    const prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'import-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-content">
-        <button id="close-import" class="modal-close">×</button>
-        <h2>Import List</h2>
-        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-        <label><input type="checkbox" id="import-clear"/> Clear existing cards before import</label>
-        <div class="modal-actions">
-          <button id="import-cancel" class="topbar-btn">Cancel</button>
-          <button id="import-ok" class="topbar-btn">Import</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-
-    const area = overlay.querySelector('#import-area');
-    overlay.querySelector('#close-import').onclick = overlay.remove.bind(overlay);
-    overlay.querySelector('#import-cancel').onclick = overlay.remove.bind(overlay);
-    area.value = Object.keys(window.cardCounts).join(' ');
-
-    overlay.querySelector('#import-ok').onclick = () => {
-      if (overlay.querySelector('#import-clear').checked) {
-        container.innerHTML = '';
-        window.cardCounts = {}; updateCount();
-      }  
-      area.value.trim().split(/\s+/).forEach(tok => {
-        const parts = tok.split('-');
-        if (parts.length >= 2) window.addCard(`${parts[0]}-${parts[1]}`);
-      });
-      overlay.remove();
-    };
-  });
-
-  // ── Top-Bar Actions ─────────────────────────────────────────────────
-  printBtn.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
-    modal.classList.add('hidden');
-    window.print();
-    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
-  });
-  fullProxyBtn.addEventListener('click', () => {
-    // toggle between full and proxy art if you've stored data-fullArt / data-proxyArt
-    // ...
-  });
-  resetBtn.addEventListener('click', () => {
-    window.cardCounts = {};
-    container.innerHTML = '';
-    saveState();
-    updateCount();
-  });
-
-  // ── Overview ────────────────────────────────────────────────────────
+  // Overview builder with guard
   function buildOverview() {
     const prev = document.getElementById('overview-modal');
     if (prev) return prev.remove();
@@ -362,46 +149,50 @@
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
       if (!count) return;
       const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-      const cls = Array.from(cardEl.classList).find(c => order.includes(c)) || 'unit';
+      if (!cardEl) return;
+      const cls = order.find(t => cardEl.classList.contains(t)) || 'unit';
       sections[cls] = sections[cls] || [];
       sections[cls].push(vn);
     });
 
-    const listEl = overlay.querySelector('#overview-list');
+    const listEl = document.getElementById('overview-list');
     order.forEach(type => {
-      if (!sections[type]) return;
+      const vns = sections[type];
+      if (!vns) return;
       const sec = document.createElement('div');
       sec.innerHTML = `<h3>${type.charAt(0).toUpperCase() + type.slice(1)}</h3>`;
-      sections[type].forEach(vn => {
+
+      vns.forEach(vn => {
         const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-        const cols = (cardEl.querySelector('.color-indicator .inline-icon') ? 
-          Array.from(cardEl.querySelectorAll('.color-indicator .inline-icon')).map(i=>i.outerHTML).join(' ') 
-          : '');
+        if (!cardEl) return;
+        const icons = Array.from(cardEl.querySelectorAll('.color-indicator .inline-icon'))
+                          .map(i => i.outerHTML).join(' ');
+        const name = cardEl.querySelector('.name')?.textContent || vn;
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.innerHTML = `
-          <span class="overview-icon">${cols}</span>
-          <span>${cardEl.querySelector('.name').textContent} – ${vn}</span>
+          <span class="overview-icon">${icons}</span>
+          <span>${name} – ${vn}</span>
           <button class="overview-dec" data-vn="${vn}">−</button>
           <span class="overview-count">${window.cardCounts[vn]}</span>
           <button class="overview-inc" data-vn="${vn}">+</button>
         `;
         sec.appendChild(row);
       });
+
       listEl.appendChild(sec);
     });
 
-    listEl.querySelectorAll('.overview-inc').forEach(b => 
+    listEl.querySelectorAll('.overview-inc').forEach(b =>
       b.addEventListener('click', () => window.addCard(b.dataset.vn))
     );
-    listEl.querySelectorAll('.overview-dec').forEach(b => 
+    listEl.querySelectorAll('.overview-dec').forEach(b =>
       b.addEventListener('click', () => window.removeCard(b.dataset.vn))
     );
   }
-
   btnOverview.addEventListener('click', buildOverview);
 
-  // ── Observer & Init ─────────────────────────────────────────────────
+  // Observer & init
   new MutationObserver(() => {
     updateCount();
     Object.keys(window.cardCounts).forEach(refreshBadge);
