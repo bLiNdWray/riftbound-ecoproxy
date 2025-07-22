@@ -31,7 +31,6 @@
   const observer = new MutationObserver(() => {
     const total = container.querySelectorAll('.card').length;
     if (countLabel) countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
-    // update badges
     const variants = [...container.querySelectorAll('.card[data-variant]')].map(c => c.dataset.variant);
     const counts = variants.reduce((acc, vn) => ({...acc, [vn]: (acc[vn]||0) +1}), {});
     Object.entries(counts).forEach(([vn, c]) => {
@@ -48,6 +47,7 @@
     if (el) {
       window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
       saveState();
+      console.log('addCard -> state:', window.cardCounts);
     }
     return el;
   };
@@ -58,6 +58,7 @@
       window.cardCounts[vn]--;
       if (window.cardCounts[vn] <= 0) delete window.cardCounts[vn];
       saveState();
+      console.log('removeCard -> state:', window.cardCounts);
     }
     return removed;
   };
@@ -71,11 +72,12 @@
     container.innerHTML = '';
     window.cardCounts = {};
     saveState();
+    console.log('reset -> cleared state and DOM');
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    // No need to replay counts here: DOM scan drives state
     observer.takeRecords();
+    console.log('DOMContentLoaded -> initial cards:', container.querySelectorAll('.card').length);
   });
 
   // — Handlers —
@@ -90,6 +92,14 @@
 
   // — Overview Modal —
   function buildOverview() {
+    console.log('buildOverview -> container exists?', !!container);
+    console.log('buildOverview -> total cards:', container.querySelectorAll('.card').length);
+    const variants = [...container.querySelectorAll('.card[data-variant]')].map(c => c.dataset.variant);
+    console.log('buildOverview -> variants array:', variants);
+
+    const counts = variants.reduce((acc, vn) => ({...acc, [vn]: (acc[vn]||0) +1}), {});
+    console.log('buildOverview -> counts object:', counts);
+
     const prev = document.getElementById('overview-modal');
     if (prev) prev.remove();
     const overlay = document.createElement('div');
@@ -101,22 +111,25 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    // build list from DOM
     const listEl = overlay.querySelector('#overview-list');
-    const variants = [...container.querySelectorAll('.card[data-variant]')].map(c => c.dataset.variant);
-    const counts = variants.reduce((acc, vn) => ({...acc, [vn]: (acc[vn]||0) +1}), {});
-    // map to array with names
+    listEl.innerHTML = '';
+
     const entries = Object.entries(counts).map(([vn, count]) => {
       const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
       return { name: cardEl?.dataset.name || vn, vn, count };
-    }).sort((a,b) => a.name.localeCompare(b.name));
+    }).sort((a, b) => a.name.localeCompare(b.name));
 
-    entries.forEach(({name, vn, count}) => {
+    console.log('buildOverview -> entries array:', entries);
+
+    entries.forEach(({ name, vn, count }) => {
       const row = document.createElement('div');
       row.className = 'overview-item';
       row.innerHTML = `<span class="overview-text">${name} – ${vn}</span>` +
                       `<span class="overview-count">(${count})</span>`;
       listEl.appendChild(row);
+      console.log(`buildOverview -> added row ${name}-${vn} (${count})`);
     });
+
+    console.log('buildOverview -> total rows:', listEl.childElementCount);
   }
 })();
