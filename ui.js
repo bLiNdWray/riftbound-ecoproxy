@@ -280,21 +280,22 @@ row.innerHTML = `
 
   function wireOverviewButtons(listEl) {
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.onclick = () => {
-      const vn = btn.dataset.vn;
-      if (window.removeCard(vn)) {
-        buildOverview();
-      }
-    };
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    if (window.removeCard(vn)) {
+      buildOverview();  // re-draw with fresh counts
+    }
   });
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.onclick = () => {
-      const vn = btn.dataset.vn;
-      if (window.addCard(vn)) {
-        buildOverview();
-      }
-    };
+});
+
+listEl.querySelectorAll('.overview-inc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    if (window.addCard(vn)) {
+      buildOverview();
+    }
   });
+});
 }
 wireOverviewButtons(listEl);
  }
