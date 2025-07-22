@@ -165,14 +165,78 @@
 
   // ── Overview ────────────────────────────────────────────────────────
   function buildOverview(){
-    const prev=document.getElementById('overview-modal'); if(prev)return prev.remove();
-    const overlay=document.createElement('div'); overlay.id='overview-modal'; overlay.className='modal-overlay';
-    overlay.innerHTML=`<div class="modal-content"><button id="close-overview" class="modal-close">×</button><h2>Overview</h2><div id="overview-list"></div></div>`;
-    document.body.appendChild(overlay); overlay.querySelector('#close-overview').onclick=overlay.remove.bind(overlay);
-    const order=['Legend','Battlefield','Runes','Units','Spells'];
-    const grp={};
-    Object.entries(window.cardCounts).forEach(([vn,count])=>{ if(!count)return; const el=container.querySelector(`.card[data-variant="${vn}"]`); const type= el.classList.contains('legend')?'Legend': el.classList.contains('battlefield')?'Battlefield': el.classList.contains('rune')?'Runes': el.classList.contains('unit')?'Units': el.classList.contains('spell')?'Spells':'Other'; grp[type]=grp[type]||{}; grp[type][vn]=count; });
-    const listEl=overlay.querySelector('#overview-list');
-    order.forEach(type=>{
-      if(!grp[type])return;
-      const section=document.createElement('div'); section.innerHTML=`<h
+    const prev = document.getElementById('overview-modal');
+    if (prev) return prev.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'overview-modal'; overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button id="close-overview" class="modal-close">×</button>
+        <h2>Overview</h2>
+        <div id="overview-list"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#close-overview').onclick = overlay.remove.bind(overlay);
+
+    const order = ['Legend','Battlefield','Runes','Units','Spells'];
+    const grp = {};
+    Object.entries(window.cardCounts).forEach(([vn, count]) => {
+      if (!count) return;
+      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+      let type = 'Other';
+      if (cardEl.classList.contains('legend')) type = 'Legend';
+      else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
+      else if (cardEl.classList.contains('rune')) type = 'Runes';
+      else if (cardEl.classList.contains('unit')) type = 'Units';
+      else if (cardEl.classList.contains('spell')) type = 'Spells';
+      grp[type] = grp[type] || {};
+      grp[type][vn] = count;
+    });
+
+    const listEl = overlay.querySelector('#overview-list');
+    order.forEach(type => {
+      if (!grp[type]) return;
+      const section = document.createElement('div');
+      section.innerHTML = `<h3>${type}</h3>`;
+      Object.entries(grp[type]).forEach(([vn, count]) => {
+        const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+        const icons = [...cardEl.querySelectorAll('.color-indicator img.inline-icon')]
+          .map(i => i.outerHTML)
+          .join(' ');
+        const name = cardEl.querySelector('.name')?.textContent || vn;
+        const row = document.createElement('div'); row.className = 'overview-item';
+        row.innerHTML = `
+          <span class="overview-icons">${icons}</span> - ${name} - ${vn}
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
+        section.appendChild(row);
+      });
+      listEl.appendChild(section);
+    });
+
+    // Wire inc/dec buttons
+    listEl.querySelectorAll('.overview-inc').forEach(btn => {
+      btn.addEventListener('click', () => window.addCard(btn.dataset.vn));
+    });
+    listEl.querySelectorAll('.overview-dec').forEach(btn => {
+      btn.addEventListener('click', () => window.removeCard(btn.dataset.vn));
+    });
+  }
+  btnOverview.addEventListener('click', buildOverview);
+
+  // ── Observer & Init ────────────────────────────────────────────────
+  new MutationObserver(() => {
+    updateCount();
+    Object.keys(window.cardCounts).forEach(refreshBadge);
+  }).observe(container, { childList: true });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    Object.entries(window.cardCounts).forEach(([vn, c]) => {
+      for (let i = 0; i < c; i++) renderCards([vn], false);
+    });
+    updateCount();
+  });
+})();
