@@ -281,14 +281,15 @@ wireOverviewButtons(listEl);
    
 // — Live Recount via MutationObserver —
 (() => {
-  const container = document.getElementById('card-container');
-  if (!container) return;
-  const observer = new MutationObserver(() => {
-    updateCount();
-    new Set(
-      [...container.querySelectorAll('.card[data-variant]')].map(c => c.getAttribute('data-variant'))
-    ).forEach(refreshBadge);
-  });
-  observer.observe(container, { childList: true });
+ const observer = new MutationObserver(() => {
+  updateCount();
+  // refreshBadge for every variant left in the DOM
+  new Set(
+    [...document.querySelectorAll('.card[data-variant]')]
+      .map(c=>c.getAttribute('data-variant'))
+  ).forEach(refreshBadge);
+});
+observer.observe(document.getElementById('card-container'), { childList: true });
+
 })();
 })();
