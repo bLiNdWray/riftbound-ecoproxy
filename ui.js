@@ -42,42 +42,33 @@ function updateCount() {
   }
 }
 
- // — Wrap addCard so it also refreshes UI immediately —
+// Wrap addCard so we can see counts
 const origAdd = window.addCard;
 window.addCard = vn => {
   const ok = origAdd(vn);
   if (ok) {
-    // bump our internal count map
     window.addedCounts[vn] = (window.addedCounts[vn]||0) + 1;
-    saveState();
-
-    // **NEW**: update this variant’s badge and the top‐bar total
+    console.log('[addCard]', vn, '→', window.addedCounts[vn]);
     refreshBadge(vn);
     updateCount();
   }
   return ok;
 };
 
-// — Wrap removeCard so it too refreshes UI immediately —
+// Wrap removeCard for debugging
 const origRm = window.removeCard;
 window.removeCard = (vn, el) => {
-  // find an element if none passed
   const cardEl = el || document.querySelector(`.card[data-variant="${vn}"]`);
   if (!cardEl) return false;
-
   const ok = origRm(vn, cardEl);
   if (ok) {
-    // decrement our internal count
     window.addedCounts[vn] = Math.max(0, (window.addedCounts[vn]||0) - 1);
-    saveState();
-
-    // **NEW**: update badge & total right away
+    console.log('[removeCard]', vn, '→', window.addedCounts[vn]);
     refreshBadge(vn);
     updateCount();
   }
   return ok;
 };
-
 
   // — Search modal —
   openSearchBtn.onclick  = () => searchModal.classList.remove('hidden');
