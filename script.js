@@ -24,14 +24,14 @@
       cb(data);
     };
     const qs = Object.entries(params)
-      .map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
     const script = document.createElement('script');
     script.src = `${API_BASE}?${qs}&callback=${callbackName}`;
     document.head.appendChild(script);
   }
 
-  // — Types —
+  // — Allowed types & class map —
   const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
   const typeClassMap = {
     unit: 'unit',
@@ -51,7 +51,8 @@
   const params     = new URLSearchParams(window.location.search);
   const initialIds = (params.get('id')||'')
     .split(',')
-    .map(s=>s.trim()).filter(Boolean);
+    .map(s=>s.trim())
+    .filter(Boolean);
   if (initialIds.length) {
     renderCards(initialIds, true);
     initialIds.forEach(id => addedCounts[id] = 1);
@@ -109,8 +110,8 @@
     ids.forEach(vn => {
       jsonpFetch({ sheet: SHEET_NAME, id: vn }, data => {
         if (!Array.isArray(data) || !data[0]) return;
-        const c = data[0];
-        const t = (c.type||'').trim().toLowerCase();
+        const c   = data[0];
+        const t   = (c.type||'').trim().toLowerCase();
         if (!allowedTypes.includes(t)) return;
         const el = {
           unit:        () => makeUnit(c),
@@ -130,20 +131,39 @@
   function addCard(vn) {
     renderCards([vn], false);
     addedCounts[vn] = (addedCounts[vn]||0) + 1;
+    return true;
   }
   function removeCard(vn, el) {
     if ((addedCounts[vn]||0) > 0) {
       addedCounts[vn]--;
       el.remove();
+      return true;
     }
+    return false;
   }
 
-  // — Builders — insert your HTML templates here
+  // — Description formatter —
+  function formatDescription(txt = '', color) {
+    let out = String(txt);
+    function replaceCode(code, imgTag) {
+      out = out.replace(new RegExp(`\\s*\\[${code}\\]\\s*`, 'gi'), imgTag);
+    }
+    replaceCode('Tap',   `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+    replaceCode('power', `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => {
+      replaceCode(col, `<img src="images/${col}.png" class="inline-icon" alt="${col}">`);
+    });
+    return out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
+  }
+
+  // — Card builder & templates —
   function build(id, html) {
     const wrapper = document.createElement('div');
     wrapper.className = 'card';
-    wrapper.setAttribute('data-variant', id);
+    wrapper.dataset.variant = id;
     wrapper.insertAdjacentHTML('beforeend', html);
+
     const badge = document.createElement('div');
     badge.className = 'qty-badge';
     badge.textContent = addedCounts[id] || 0;
@@ -167,11 +187,100 @@
     return wrapper;
   }
 
-  // (Insert here your makeUnit, makeSpell, makeGear… functions calling build)
+  function makeUnit(c) {
+    const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const costN     = Number(c.energy) || 0;
+    const powN      = Number(c.power)  || 0;
+    const costIcons = Array(powN).fill().map(_=>
+      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
+    ).join('');
+    const mightHTML = c.might
+      ? `<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`
+      : '';
+    const descHTML  = formatDescription(c.description, cols[0]||'');
+    const tags      = (c.tags||'').split(/;\s*/).join(' ');
+    const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+    return build(c.variantNumber, `
+      <div class="top-bar">
+        <span class="cost">${costN}${costIcons}</span>
+        <span class="might">${mightHTML}</span>
+      </div>
+      <div class="name">${c.name}</div>
+      <div class="middle">
+        <div class="desc-wrap">${descHTML}</div>
+        <div class="color-indicator">${colorIcon}<span class="color-text">${cols.join(' ')}</span></div>
+      </div>
+      <div class="bottom-bar">
+        <span class="type-line">${c.type}${tags?' - '+tags:''}</span>
+      </div>`);
+  }
 
-  // Expose to ui.js
+  function makeSpell(c) {
+    const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const costN     = Number(c.energy) || 0;
+    const powN      = Number(c.power)  || 0;
+    const costIcons = Array(powN).fill().map(_=>
+      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`
+    ).join('');
+    const descHTML  = formatDescription(c.description, cols[0]||'');
+    const colorIcon = `<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+    return build(c.variantNumber, `
+      <div class="top-bar">
+        <span class="cost">${costN}${costIcons}</span>
+      </div>
+      <div class="name">${c.name}</div>
+      <div class="middle">
+        <div class="desc-wrap">${descHTML}</div>
+        <div class="color-indicator">${colorIcon}<span class="color-text">${cols.join(' ')}</span></div>
+      </div>
+      <div class="bottom-bar">
+        <span class="type-line">${c.type}</span>
+      </div>`);
+  }
+
+  function makeBattlefield(c) {
+    const desc = c.description || '';
+    return build(c.variantNumber, `
+      <div class="bf-columns">
+        <div class="bf-col side left"><div class="bf-text">${desc}</div></div>
+        <div class="bf-col center">
+          <div class="bf-type-text">${c.type.toUpperCase()}</div>
+          <div class="bf-name">${c.name}</div>
+        </div>
+        <div class="bf-col side right"><div class="bf-text">${desc}</div></div>
+      </div>`);
+  }
+
+  function makeLegend(c) {
+    const cols      = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const iconsHTML = cols.map(col => `<img src="images/${col}.png" alt="${col}">`).join('');
+    const [charName, moniker] = (c.name||'').split(',').map(s=>s.trim());
+    const bodyHTML  = formatDescription(c.description, cols[0]||'');
+    return build(c.variantNumber, `
+      <div class="legend-header">
+        <div class="legend-icons">${iconsHTML}</div>
+        <div class="legend-title">LEGEND</div>
+      </div>
+      <div class="legend-name">
+        <div class="main-title">${charName}</div>
+        ${moniker?`<div class="subtitle">${moniker}</div>`:''}
+      </div>
+      <div class="legend-body">
+        <div class="legend-body-text">${bodyHTML}</div>
+      </div>`);
+  }
+
+  function makeRune(c) {
+    const title = c.name || '';
+    const cols  = (c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const imgSrc= `images/${cols[0]||'Body'}.png`;
+    return build(c.variantNumber, `
+      <div class="rune-title">${title}</div>
+      <div class="rune-image"><img src="${imgSrc}" alt="${title}"></div>`);
+  }
+
+  // — Expose to ui.js —
   window.renderCards  = renderCards;
   window.addCard      = addCard;
   window.removeCard   = removeCard;
-
 })();
