@@ -23,7 +23,35 @@
       window.addedCounts = {};
     }
   }
+function syncCounts() {
+  const counts = {};
+  // 1) Tally
+  document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
+    const vn = card.dataset.variant;
+    counts[vn] = (counts[vn] || 0) + 1;
+  });
 
+  // 2) Update each badge
+  Object.entries(counts).forEach(([vn, n]) => {
+    document.querySelectorAll(
+      `#card-container .card[data-variant="${vn}"] .qty-badge`
+    ).forEach(b => b.textContent = n);
+  });
+
+  // 3) Zero‐out badges for variants that had them but are now gone
+  document.querySelectorAll('#card-container .card').forEach(card => {
+    const vn = card.dataset.variant;
+    if (!counts[vn]) {
+      const b = card.querySelector('.qty-badge');
+      if (b) b.textContent = '0';
+    }
+  });
+
+  // 4) Update top‐bar total
+  const total = Object.values(counts).reduce((sum, c) => sum + c, 0);
+  const lbl   = document.getElementById('card-count');
+  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+}
   // — Badge & total counter updates —
 function refreshBadge(vn) {
   const badge = document.querySelector(
@@ -42,30 +70,24 @@ function updateCount() {
   }
 }
 
-// Wrap addCard so we can see counts
+// — Wrap addCard to re-inventory on success —
 const origAdd = window.addCard;
 window.addCard = vn => {
   const ok = origAdd(vn);
   if (ok) {
-    window.addedCounts[vn] = (window.addedCounts[vn]||0) + 1;
-    console.log('[addCard]', vn, '→', window.addedCounts[vn]);
-    refreshBadge(vn);
-    updateCount();
+    syncCounts();
   }
   return ok;
 };
 
-// Wrap removeCard for debugging
+// — Wrap removeCard to re-inventory on success —
 const origRm = window.removeCard;
 window.removeCard = (vn, el) => {
   const cardEl = el || document.querySelector(`.card[data-variant="${vn}"]`);
   if (!cardEl) return false;
   const ok = origRm(vn, cardEl);
   if (ok) {
-    window.addedCounts[vn] = Math.max(0, (window.addedCounts[vn]||0) - 1);
-    console.log('[removeCard]', vn, '→', window.addedCounts[vn]);
-    refreshBadge(vn);
-    updateCount();
+    syncCounts();
   }
   return ok;
 };
