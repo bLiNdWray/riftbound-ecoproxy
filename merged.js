@@ -360,28 +360,27 @@ function buildOverview() {
     listEl.appendChild(section);
   });
 
-  // ── wire inc/dec inside overview ───────────────────────────────────
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      // increment in main container
-      window.addCard(vn);
-      // update this row's count badge
-      const countSpan = btn.parentElement.querySelector('.overview-count');
-      countSpan.textContent = window.cardCounts[vn] || 0;
-    });
+// ── wire inc/dec inside overview ───────────────────────────────────
+listEl.querySelectorAll('.overview-inc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    window.addCard(vn);
+    const countSpan = btn.parentElement.querySelector('.overview-count');
+    countSpan.textContent = window.cardCounts[vn] || 0;
   });
+});
 
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      // decrement in main container
-      window.removeCard(vn);
-      // update this row's count badge
-      const countSpan = btn.parentElement.querySelector('.overview-count');
-      countSpan.textContent = window.cardCounts[vn] || 0;
-    });
+listEl.querySelectorAll('.overview-dec').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    // find one card instance in the main grid
+    const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+    window.removeCard(vn, cardEl);
+    const countSpan = btn.parentElement.querySelector('.overview-count');
+    countSpan.textContent = window.cardCounts[vn] || 0;
   });
+});
+
 
 }
 btnOverview.addEventListener('click', buildOverview);
