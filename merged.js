@@ -224,7 +224,7 @@
           || cardEl.querySelector('.bf-name')
           || cardEl.querySelector('.rune-title');
         const name = nameEl ? nameEl.textContent.trim() : vn;
-        const row = document.createElement('div'); row.className = 'overview-item'; = document.createElement('div'); row.className = 'overview-item';
+        const row = document.createElement('div'); row.className = 'overview-item';
         row.innerHTML = `
           <span class="overview-icons">${icons}</span> ${name} - ${vn}
           <button class="overview-dec" data-vn="${vn}">−</button>
