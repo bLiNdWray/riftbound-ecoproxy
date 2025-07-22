@@ -241,19 +241,20 @@
         const name = nameEl ? nameEl.textContent.trim() : vn;
 
         // row HTML
-        const row = document.createElement('div');
-        row.className = 'overview-item';
-        row.innerHTML =
-  '<span class="overview-icons">' + icons + '</span>' +
-  '<span class="overview-text">'   + name  + '</span>' +
-  '<span class="overview-variant">' + vn   + '</span>' +
+       const row = document.createElement('div');
+row.className = 'overview-item';
+row.innerHTML =
+  '<span class="overview-label">' +
+    icons +
+    '<span class="overview-text">' + name + '</span>' +
+  '</span>' +
+  '<span class="overview-variant">' + vn + '</span>' +
   '<span class="overview-controls">' +
-    '<button class="overview-dec" data-vn="'   + vn + '">−</button>' +
-    '<span class="overview-count">'  + count + '</span>' +
-    '<button class="overview-inc" data-vn="'   + vn + '">+</button>' +
+    '<button class="overview-dec" data-vn="' + vn + '">−</button>' +
+    '<span class="overview-count">' + count + '</span>' +
+    '<button class="overview-inc" data-vn="' + vn + '">+</button>' +
   '</span>';
-
-        section.appendChild(row);
+section.appendChild(row);
       });
       listEl.appendChild(section);
     });
