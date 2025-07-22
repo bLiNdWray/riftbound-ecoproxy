@@ -180,34 +180,30 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    const listEl = document.getElementById('overview-list');
-    // Clear existing
+    // Use overlay scope for list
+    const listEl = overlay.querySelector('#overview-list');
     listEl.innerHTML = '';
 
-    // Prepare sorted entries by name
     const entries = Object.entries(window.cardCounts)
       .map(([vn, count]) => {
         const cardEl = document.querySelector(
           `#card-container .card[data-variant="${vn}"]`
         );
-        return {
-          vn,
-          name: cardEl?.dataset.name || vn,
-          count
-        };
+        return { vn, name: cardEl?.dataset.name || vn, count };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    // Build list rows
     entries.forEach(({vn, name, count}) => {
       const row = document.createElement('div');
       row.className = 'overview-item';
       row.innerHTML = `
-        <span class="overview-text">${name} – ${vn} (${count})</span>
+        <span class="overview-text">${name} – ${vn}</span>
+        <span class="overview-count">(${count})</span>
       `;
       listEl.appendChild(row);
     });
 
-    // Buttons to be added later via wireOverviewButtons
+    // Now wire buttons when needed
+    wireOverviewButtons(listEl);
   }
 })();
