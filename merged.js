@@ -182,7 +182,7 @@
     const grp = {};
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
       if (!count) return;
-      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+      const cardEl = container.querySelector('.card[data-variant="' + vn + '"]');
       let type = 'Other';
       if (cardEl.classList.contains('legend')) type = 'Legend';
       else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
