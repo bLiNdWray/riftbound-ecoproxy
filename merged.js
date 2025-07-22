@@ -15,10 +15,10 @@
   const resetBtn     = document.getElementById('btn-reset');
   const btnOverview  = document.getElementById('btn-overview');
 
-  // Exposed counts (single source of truth)
+  // Exposed counts
   window.cardCounts = {};
 
-  // ── JSONP Fetch Helper ──────────────────────────────────────────────
+  // ── JSONP Fetch Helper ─────────────────────────────────────────────
   function jsonpFetch(params, cb) {
     const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e4);
     window[callbackName] = data => { delete window[callbackName]; document.head.removeChild(script); cb(data); };
@@ -28,79 +28,151 @@
     document.head.appendChild(script);
   }
 
-  // ── Card Rendering Core ─────────────────────────────────────────────
-  const allowedTypes = ['unit', 'spell', 'gear', 'battlefield', 'legend', 'rune'];
-  const typeClassMap = { unit: 'unit', spell: 'spell', gear: 'spell', battlefield: 'battlefield', legend: 'legend', rune: 'rune' };
+  // ── Core Types ─────────────────────────────────────────────────────
+  const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
+  const typeClassMap = { unit:'unit', spell:'spell', gear:'spell', battlefield:'battlefield', legend:'legend', rune:'rune' };
   let allCards = [];
   jsonpFetch({ sheet: SHEET_NAME }, data => { allCards = Array.isArray(data) ? data : []; });
 
-  // Helpers
-  function formatDescription(txt = '') {
+  // ── Helpers ─────────────────────────────────────────────────────────
+  function formatDescription(txt=''){
     let out = String(txt);
-    function replaceCode(code, imgTag) {
-      const re = new RegExp(`\\s*\\[${code}\\]\\s*`, 'gi'); out = out.replace(re, imgTag);
-    }
-    replaceCode('Tap', `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
-    replaceCode('Might', `<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
-    replaceCode('power', `<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
-    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col => replaceCode(col, `<img src="images/${col}.png" class="inline-icon" alt="${col}">`));
+    function replaceCode(code,imgTag){ const re=new RegExp(`\\s*\\[${code}\\]\\s*`,'gi'); out=out.replace(re,imgTag); }
+    replaceCode('Tap',  `<img src="images/Tap.png" class="inline-icon" alt="Tap">`);
+    replaceCode('Might',`<img src="images/SwordIconRB.png" class="inline-icon" alt="Might">`);
+    replaceCode('power',`<img src="images/RainbowRune.png" class="inline-icon" alt="Power">`);
+    ['Body','Calm','Chaos','Fury','Mind','Order'].forEach(col=> replaceCode(col,`<img src="images/${col}.png" class="inline-icon" alt="${col}">`));
     return out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
   }
-  function build(id, html) {
-    const wrapper = document.createElement('div'); wrapper.className = 'card'; wrapper.dataset.variant = id;
-    wrapper.insertAdjacentHTML('beforeend', html);
-    const badge = document.createElement('div'); badge.className = 'qty-badge'; badge.textContent = window.cardCounts[id]||0; wrapper.appendChild(badge);
-    const hover = document.createElement('div'); hover.className='hover-bar';
-    const plus = document.createElement('button'); plus.className='add-btn'; plus.textContent='+';
-    const minus = document.createElement('button'); minus.className='remove-btn'; minus.textContent='−';
-    hover.append(plus, minus); wrapper.appendChild(hover);
-    plus.onclick =()=>window.addCard(id); minus.onclick=e=>{e.stopPropagation(); window.removeCard(id,wrapper);};
+
+  function build(id,html){
+    const wrapper=document.createElement('div'); wrapper.className='card'; wrapper.dataset.variant=id;
+    wrapper.insertAdjacentHTML('beforeend',html);
+    const badge=document.createElement('div'); badge.className='qty-badge'; badge.textContent=window.cardCounts[id]||0; wrapper.appendChild(badge);
+    const hover=document.createElement('div'); hover.className='hover-bar';
+    const plus=document.createElement('button'); plus.className='add-btn'; plus.textContent='+';
+    const minus=document.createElement('button'); minus.className='remove-btn'; minus.textContent='−';
+    hover.append(plus,minus); wrapper.appendChild(hover);
+    plus.addEventListener('click',()=>window.addCard(id));
+    minus.addEventListener('click',e=>{ e.stopPropagation(); window.removeCard(id,wrapper); });
     return wrapper;
   }
-  function makeUnit(c){ /* as before */ return build(c.variantNumber,`...`);}  
-  function makeSpell(c){ /* as before */ return build(c.variantNumber,`...`);}  
-  function makeBattlefield(c){ /* as before */ return build(c.variantNumber,`...`);}  
-  function makeLegend(c){ /* as before */ return build(c.variantNumber,`...`);}  
-  function makeRune(c){ /* as before */ return build(c.variantNumber,`...`);}  
 
-  // Render
-  function renderSearchResults(list){ results.innerHTML=''; list.forEach(c=>{/* ... */}); }
-  function renderCards(ids,clear=true){/* ... */}
+  // ── Card Builders ───────────────────────────────────────────────────
+  function makeUnit(c){
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const costN=Number(c.energy)||0, powN=Number(c.power)||0;
+    const costIcons=Array(powN).fill().map(()=>`<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`).join('');
+    const mightHTML=c.might?`<img src="images/SwordIconRB.png" class="might-icon" alt="Might"> ${c.might}`:'';
+    const desc=formatDescription(c.description);
+    const tags=(c.tags||'').split(/;\s*/).join(' ');
+    const colorIcon=`<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+    return build(c.variantNumber,`
+      <div class="top-bar"><span class="cost">${costN}${costIcons}</span><span class="might">${mightHTML}</span></div>
+      <div class="name">${c.name}</div>
+      <div class="middle"><div class="desc-wrap">${desc}</div><div class="color-indicator">${colorIcon}<span class="color-text">${cols.join(' ')}</span></div></div>
+      <div class="bottom-bar"><span class="type-line">${c.type}${tags?' - '+tags:''}</span></div>
+    `);
+  }
 
-  // Add/Remove
-  window.addCard=(vn)=>{/* ... */}; window.removeCard=(vn,el)=>{/* ... */};
+  function makeSpell(c){
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const costN=Number(c.energy)||0, powN=Number(c.power)||0;
+    const costIcons=Array(powN).fill().map(()=>`<img src="images/${cols[0]||'Body'}2.png" class="cost-icon" alt="">`).join('');
+    const desc=formatDescription(c.description);
+    const tags=(c.tags||'').split(/;\s*/).join(' ');
+    const colorIcon=`<img src="images/${cols[0]||'Body'}.png" class="inline-icon" alt="">`;
+    return build(c.variantNumber,`
+      <div class="top-bar"><span class="cost">${costN}${costIcons}</span></div>
+      <div class="name">${c.name}</div>
+      <div class="middle"><div class="desc-wrap">${desc}</div><div class="color-indicator">${colorIcon}<span class="color-text">${cols.join(' ')}</span></div></div>
+      <div class="bottom-bar"><span class="type-line">${c.type}${tags?' - '+tags:''}</span></div>
+    `);
+  }
 
-  // Persistence
+  function makeBattlefield(c){
+    const desc=c.description||'';
+    return build(c.variantNumber,`
+      <div class="bf-columns">
+        <div class="bf-col side left"><div class="bf-text">${desc}</div></div>
+        <div class="bf-col center"><div class="bf-type-text">${c.type.toUpperCase()}</div><div class="bf-name">${c.name}</div></div>
+        <div class="bf-col side right"><div class="bf-text">${desc}</div></div>
+      </div>
+    `);
+  }
+
+  function makeLegend(c){
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const iconsHTML=cols.map(col=>`<img src="images/${col}.png" alt="${col}">`).join(' ');
+    const [charName, moniker]=(c.name||'').split(',').map(s=>s.trim());
+    const body=formatDescription(c.description);
+    return build(c.variantNumber,`
+      <div class="legend-header"><div class="legend-icons">${iconsHTML}</div><div class="legend-title">LEGEND</div></div>
+      <div class="legend-name"><div class="main-title">${charName}</div>${moniker?`<div class="subtitle">${moniker}</div>`:''}</div>
+      <div class="legend-body"><div class="legend-body-text">${body}</div></div>
+    `);
+  }
+
+  function makeRune(c){
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const img=cols[0]||'Body';
+    return build(c.variantNumber,`
+      <div class="rune-title">${c.name}</div>
+      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>
+    `);
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────
+  function renderSearchResults(list){
+    results.innerHTML='';
+    list.forEach(c=>{
+      const t=(c.type||'').trim().toLowerCase(); if(!allowedTypes.includes(t))return;
+      const el={ unit:makeUnit, spell:makeSpell, gear:makeSpell, battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
+      el.classList.add(typeClassMap[t]); results.appendChild(el);
+    });
+  }
+
+  function renderCards(ids,clear=true){
+    if(clear)container.innerHTML='';
+    ids.forEach(vn=>{
+      jsonpFetch({ sheet: SHEET_NAME, id: vn }, data=>{
+        if(!data[0])return; const c=data[0], t=(c.type||'').trim().toLowerCase();
+        if(!allowedTypes.includes(t))return;
+        const el={ unit:makeUnit, spell:makeSpell, gear:makeSpell, battlefield:makeBattlefield, legend:makeLegend, rune:makeRune }[t](c);
+        el.classList.add(typeClassMap[t]); container.appendChild(el);
+      });
+    });
+  }
+
+  // ── Add/Remove ───────────────────────────────────────────────────────
+  window.addCard=v=>{ renderCards([v],false); window.cardCounts[v]=(window.cardCounts[v]||0)+1; refreshBadge(v); updateCount(); saveState(); };
+  window.removeCard=(v,el)=>{ if(el)el.remove(); window.cardCounts[v]=Math.max((window.cardCounts[v]||1)-1,0); refreshBadge(v); updateCount(); saveState(); };
+
+  // ── Persistence & Helpers ─────────────────────────────────────────────
   function saveState(){localStorage.setItem('riftboundCardCounts',JSON.stringify(window.cardCounts));}
   function loadState(){try{window.cardCounts=JSON.parse(localStorage.getItem('riftboundCardCounts'))||{}}catch{window.cardCounts={}}}
+  function refreshBadge(v){ const b=container.querySelector(`.card[data-variant="${v}"] .qty-badge`); if(b)b.textContent=container.querySelectorAll(`.card[data-variant="${v}"]`).length; }
+  function updateCount(){ const total=container.querySelectorAll('.card').length; document.getElementById('card-count').textContent=total+' card'+(total!==1?'s':''); }
 
-  // UI Helpers
-  function refreshBadge(vn){/* ... */} function updateCount(){/* ... */}
+  // ── UI Actions ───────────────────────────────────────────────────────
+  openBtn.addEventListener('click',()=>{ modal.classList.remove('hidden'); input.value=''; results.innerHTML=''; input.focus(); });
+  closeBtn.addEventListener('click',()=>modal.classList.add('hidden'));
+  input.addEventListener('input',()=>{ const q=input.value.trim().toLowerCase(); if(!q)return results.innerHTML=''; renderSearchResults(allCards.filter(c=>(c.name.toLowerCase().includes(q)||c.variantNumber.toLowerCase().includes(q))&&allowedTypes.includes(c.type.toLowerCase()))); });
+  importBtn.addEventListener('click',()=>{ /* existing import logic unchanged */ });
+  printBtn.addEventListener('click',()=>{ document.getElementById('top-bar').style.display='none'; modal.classList.add('hidden'); window.print(); setTimeout(()=>document.getElementById('top-bar').style.display='',0); });
+  fullProxyBtn.addEventListener('click',()=>{ /* existing full proxy logic */ });
+  resetBtn.addEventListener('click',()=>{ window.cardCounts={}; container.innerHTML=''; saveState(); updateCount(); });
 
-  // Search
-  openBtn.onclick=()=>{/* ... */}; closeBtn.onclick=()=>modal.classList.add('hidden'); input.oninput=()=>{/* ... */};
-
-  // Import
-  importBtn.onclick=()=>{/* ... */};
-
-  // Top-Bar
-  printBtn.onclick=()=>{/* ... */}; fullProxyBtn.onclick=()=>{/* ... */}; resetBtn.onclick=()=>{/* ... */};
-
-  // Overview
+  // ── Overview ────────────────────────────────────────────────────────
   function buildOverview(){
     const prev=document.getElementById('overview-modal'); if(prev)return prev.remove();
     const overlay=document.createElement('div'); overlay.id='overview-modal'; overlay.className='modal-overlay';
     overlay.innerHTML=`<div class="modal-content"><button id="close-overview" class="modal-close">×</button><h2>Overview</h2><div id="overview-list"></div></div>`;
     document.body.appendChild(overlay); overlay.querySelector('#close-overview').onclick=overlay.remove.bind(overlay);
     const order=['Legend','Battlefield','Runes','Units','Spells'];
-    const grp={}; Object.entries(window.cardCounts).forEach(([vn,count])=>{if(!count)return; const cardEl=container.querySelector(`[data-variant="${vn}"]`); const type= cardEl.classList.contains('legend')?'Legend':cardEl.classList.contains('battlefield')?'Battlefield':cardEl.classList.contains('rune')?'Runes':cardEl.classList.contains('unit')?'Units':cardEl.classList.contains('spell')?'Spells':'Other'; grp[type]=grp[type]||{}; grp[type][vn]=count;});
-    const listEl=overlay.querySelector('#overview-list'); order.forEach(type=>{if(!grp[type])return; const section=document.createElement('div'); section.innerHTML=`<h3>${type}</h3>`; Object.entries(grp[type]).forEach(([vn,count])=>{ const cardEl=container.querySelector(`[data-variant="${vn}"]`); const icons=[...cardEl.querySelectorAll('.color-indicator img.inline-icon')].map(i=>i.outerHTML).join(' '); const name=cardEl.querySelector('.name')?.textContent||vn; const row=document.createElement('div'); row.className='overview-item'; row.innerHTML=`<span class="overview-icons">${icons}</span> - ${name} - ${vn} <button class="overview-dec" data-vn="${vn}">−</button> <span class="overview-count">${count}</span> <button class="overview-inc" data-vn="${vn}">+</button>`; section.appendChild(row); }); listEl.appendChild(section); });
-    listEl.querySelectorAll('.overview-inc').forEach(b=>b.onclick=()=>window.addCard(b.dataset.vn));
-    listEl.querySelectorAll('.overview-dec').forEach(b=>b.onclick=()=>window.removeCard(b.dataset.vn));
-  }
-  btnOverview.onclick=buildOverview;
-
-  // Init
-  new MutationObserver(()=>{updateCount();Object.keys(window.cardCounts).forEach(refreshBadge);}).observe(container,{childList:true});
-  document.addEventListener('DOMContentLoaded',()=>{ loadState(); Object.entries(window.cardCounts).forEach(([vn,c])=>{for(let i=0;i<c;i++) renderCards([vn],false);}); updateCount(); });
-})();
+    const grp={};
+    Object.entries(window.cardCounts).forEach(([vn,count])=>{ if(!count)return; const el=container.querySelector(`.card[data-variant="${vn}"]`); const type= el.classList.contains('legend')?'Legend': el.classList.contains('battlefield')?'Battlefield': el.classList.contains('rune')?'Runes': el.classList.contains('unit')?'Units': el.classList.contains('spell')?'Spells':'Other'; grp[type]=grp[type]||{}; grp[type][vn]=count; });
+    const listEl=overlay.querySelector('#overview-list');
+    order.forEach(type=>{
+      if(!grp[type])return;
+      const section=document.createElement('div'); section.innerHTML=`<h
