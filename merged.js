@@ -204,7 +204,16 @@
   // ── Persistence & Helpers ────────────────────────────────────────────
   function saveState(){ localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts)); }
   function loadState(){ try{ window.cardCounts = JSON.parse(localStorage.getItem('riftboundCardCounts'))||{}; }catch{ window.cardCounts = {}; } }
-  function refreshBadge(vn){ const b=container.querySelector(`.card[data-variant="${vn}"] .qty-badge`); if(b) b.textContent = container.querySelectorAll(`.card[data-variant="${vn}"]`).length; }
+function refreshBadge(vn) {
+  // get the current count
+  const count = window.cardCounts[vn] || 0;
+  // find all badges for this variant
+  const badges = container.querySelectorAll(`.card[data-variant="${vn}"] .qty-badge`);
+  // update each one
+  badges.forEach(b => {
+    b.textContent = count;
+  });
+}
   function updateCount(){ const t=container.querySelectorAll('.card').length; document.getElementById('card-count').textContent = t + ' card' + (t!==1?'s':''); }
 
   // ── Search Modal ─────────────────────────────────────────────────────
