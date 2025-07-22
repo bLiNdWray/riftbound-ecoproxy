@@ -216,7 +216,7 @@
         const name = nameEl ? nameEl.textContent.trim() : vn;
         const row = document.createElement('div'); row.className = 'overview-item';
         row.innerHTML = `
-          <span class="overview-icons">${icons}</span> - ${name} - ${vn}
+          <span class="overview-icons">${icons}</span> ${name} - ${vn}
           <button class="overview-dec" data-vn="${vn}">−</button>
           <span class="overview-count">${count}</span>
           <button class="overview-inc" data-vn="${vn}">+</button>
