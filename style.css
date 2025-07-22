@@ -242,15 +242,21 @@ html, body {
 .overview-item {
   display: flex;
   align-items: center;
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
+  flex-wrap: wrap;    /* wrap onto new line if too long */
+  gap: 0.5rem;        /* space between chunks */
 }
 
 /* Icons container */
 .overview-icons {
   display: inline-flex;
   align-items: center;
-  margin-right: 0.5rem;
+  gap: 0.25rem;       /* space between icons */
+  flex-shrink: 0;     /* don’t let icons force row to grow */
+}
+.overview-icons img {
+  width: 1.2em;
+  height: auto;
+  display: block;
 }
 
 /* Count badge */
@@ -259,14 +265,7 @@ html, body {
 }
 
 /* Increment/decrement buttons */
+.overview-item span,
 .overview-item button {
-  background: #007bff;
-  border: none;
-  color: #fff;
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: 1rem;
-  line-height: 1;
-  border-radius: 3px;
-  cursor: pointer;
+  flex-shrink: 0;
 }
