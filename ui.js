@@ -176,38 +176,38 @@ document
     updateCount();
   });
 
-// Attach click handlers to Overview +/– buttons by re-rendering on change
+// — Wire up Overview buttons — 
 function wireOverviewButtons(listEl) {
-  // “–” buttons
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.onclick = () => {
-      const vn = btn.dataset.vn;
-      if (window.removeCard(vn)) {
-        buildOverview();
-      }
-    };
-  });
-
   // “+” buttons
   listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.onclick = () => {
+    btn.addEventListener('click', () => {
       const vn = btn.dataset.vn;
       if (window.addCard(vn)) {
         buildOverview();
       }
-    };
+    });
+  });
+
+  // “–” buttons
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      if (window.removeCard(vn)) {
+        buildOverview();
+      }
+    });
   });
 }
 
-  
- function buildOverview() {
-  // remove existing
+// — Overview Builder —
+function buildOverview() {
+  // Remove any existing modal
   const prev = document.getElementById('overview-modal');
   if (prev) prev.remove();
 
-  // overlay
+  // Create overlay
   const overlay = document.createElement('div');
-  overlay.id = 'overview-modal';
+  overlay.id        = 'overview-modal';
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal-content">
@@ -218,76 +218,59 @@ function wireOverviewButtons(listEl) {
   document.body.appendChild(overlay);
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  const typesOrder = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
-  const groups = {};
+  // Define the order
+  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
+  const groups     = {};
 
-  // collect counts per variant
+  // Group by reading the live DOM
   document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
     const vn   = card.getAttribute('data-variant');
-    const type = card.dataset.type || 'Other';
+    const type = card.classList.contains('legend')      ? 'Legend'
+               : card.classList.contains('rune')        ? 'Runes'
+               : card.classList.contains('battlefield') ? 'Battlefield'
+               : card.classList.contains('unit')        ? 'Units'
+               : card.classList.contains('spell')       ? 'Spells'
+               : 'Other';
     groups[type] = groups[type] || {};
     groups[type][vn] = (groups[type][vn] || 0) + 1;
   });
 
   const listEl = document.getElementById('overview-list');
 
-  // iterate types in order, fallback types appended at end
-  typesOrder.concat(
-    Object.keys(groups).filter(t => !typesOrder.includes(t))
-  ).forEach(type => {
-    if (!groups[type]) return;
+  // Render each section
+  typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
+    .forEach(type => {
+      if (!groups[type]) return;
+      const total = Object.values(groups[type]).reduce((a,b)=>a+b,0);
+      const section = document.createElement('div');
+      section.className = 'overview-section';
+      section.innerHTML = `<h3>${type} (${total})</h3>`;
+      
+      // Rows
+      Object.entries(groups[type]).forEach(([vn,count]) => {
+        const cardEl = document.querySelector(
+          `#card-container .card[data-variant="${vn}"]`
+        );
+        const name = cardEl?.dataset.name || vn;
+        const logo = cardEl?.dataset.colorLogo || '';
+        const row  = document.createElement('div');
+        row.className = 'overview-item';
+        row.innerHTML = `
+          <img src="${logo}" class="overview-logo" alt="icon" />
+          <span class="overview-text">${name} – ${vn}</span>
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
+        section.appendChild(row);
+      });
 
-    // section header
-    const totalOfType = Object.values(groups[type]).reduce((a, b) => a + b, 0);
-    const section = document.createElement('div');
-    section.className = 'overview-section';
-    section.innerHTML = `<h3>${type} ( ${totalOfType} )</h3>`;
-
-    // variant rows
-    Object.entries(groups[type]).forEach(([vn, count]) => {
-      const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
-      const name   = cardEl?.dataset.name || vn;
-      const logo   = cardEl?.dataset.colorLogo || '';
-
-      const row = document.createElement('div');
-      row.className = 'overview-item';
-      row.setAttribute('data-variant', vn);
-row.innerHTML = `
-  <img src="${logo}" class="overview-logo" alt="color icon" />
-  <span class="overview-text">${name} – ${vn}</span>
-  <button class="overview-dec" data-vn="${vn}">−</button>
-  <span class="overview-count">${count}</span>
-  <button class="overview-inc" data-vn="${vn}">+</button>
-`;
-      section.appendChild(row);
+      listEl.appendChild(section);
     });
 
-    listEl.appendChild(section);
-  });
-
-  function wireOverviewButtons(listEl) {
-listEl.querySelectorAll('.overview-inc').forEach(btn => {
-  btn.onclick = () => {
-    const vn = btn.dataset.vn;
-    if (window.addCard(vn)) {
-      buildOverview();
-    }
-  };
-});
-
-listEl.querySelectorAll('.overview-dec').forEach(btn => {
-  btn.onclick = () => {
-    const vn = btn.dataset.vn;
-    // remove exactly one matching card from the DOM via your API
-    if (window.removeCard(vn)) {
-      // re-draw Overview from scratch
-      buildOverview();
-    }
-  };
-});
+  // Finally, wire up the newly-rendered buttons
+  wireOverviewButtons(listEl);
 }
-wireOverviewButtons(listEl);
- }
    
 // — Live Recount via MutationObserver —
 (() => {
