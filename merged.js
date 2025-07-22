@@ -360,21 +360,17 @@ function buildOverview() {
     listEl.appendChild(section);
   });
 
-  // wire inc/dec inside overview to use the same add/remove logic & update badge
+  // ── wire inc/dec inside overview ───────────────────────────────────
   listEl.querySelectorAll('.overview-inc').forEach(btn => {
     btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      window.addCard(vn);
-      const badge = btn.parentElement.querySelector('.overview-count');
-      badge.textContent = parseInt(badge.textContent,10) + 1;
+      window.addCard(btn.dataset.vn);
+      buildOverview();
     });
   });
   listEl.querySelectorAll('.overview-dec').forEach(btn => {
     btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      window.removeCard(vn);
-      const badge = btn.parentElement.querySelector('.overview-count');
-      badge.textContent = Math.max(parseInt(badge.textContent,10) - 1, 0);
+      window.removeCard(btn.dataset.vn);
+      buildOverview();
     });
   });
 }
