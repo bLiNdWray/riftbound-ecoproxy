@@ -146,38 +146,16 @@ html, body {
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
-/* Search Close Button */
-#search-modal .search-header .modal-close {
-  font-size: 1.5rem;
-  color: #666;
-}
-
 /* Search Panel & Results */
-#search-modal .search-panel {
-  width: 100%;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
 #search-modal .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   padding: 16px;
   margin-top: 8px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
-.donate-buttons {
-  display: inline-flex;
-  gap: 12px;
-  align-items: center;
-}
-.donate-buttons img {
-  display: block;
-  cursor: pointer;
-}
-
+/* Print Styles */
 @media print {
   .card {
     break-inside: avoid;
@@ -213,17 +191,6 @@ html, body {
   position: relative;
 }
 
-/* Close button */
-#overview-modal .modal-close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-
 /* Section headers */
 #overview-modal h3 {
   margin-top: 1rem;
@@ -232,7 +199,7 @@ html, body {
   padding-bottom: 0.25rem;
 }
 
-/* 3-column Overview layout */
+/* 3-column Overview layout: icons+name | variant | controls */
 .overview-item {
   display: grid;
   grid-template-columns: auto auto auto;
@@ -240,7 +207,7 @@ html, body {
   gap: 0.5rem;
 }
 
-/* Icons + Name in column 1 */
+/* Icons + Name (column 1) */
 .overview-icons,
 .overview-text {
   grid-column: 1;
@@ -256,28 +223,31 @@ html, body {
   display: block;
 }
 
-/* Variant number in column 2 */
+/* Variant number centered (column 2) */
 .overview-variant {
   grid-column: 2;
-  justify-self: end;
+  justify-self: center;
   font-weight: bold;
 }
 
-/* Controls in column 3 */
+/* Controls cluster (column 3) */
 .overview-dec,
 .overview-count,
 .overview-inc {
   grid-column: 3;
+  display: inline-block;
 }
+
+/* Spacing in controls */
 .overview-dec,
 .overview-inc {
   margin: 0 0.2rem;
 }
 .overview-count {
-  justify-self: center;
   background: #f0f0f0;
   padding: 0 0.4em;
   border-radius: 3px;
+  justify-self: center;
 }
 
 /* Theme-matched buttons */
