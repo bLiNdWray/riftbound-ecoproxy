@@ -260,3 +260,38 @@ html, body {
 .overview-inc:hover {
   background: #0056b3;
 }
+/* Overview Modal Overlay & Content (re-using existing modal styles) */
+#overview-modal.modal-overlay {
+  /* inherits from .modal-overlay: semi-transparent background, centering */
+}
+#overview-modal .modal-content {
+  /* inherits from .modal-content: white box, padding, shadows */
+}
+
+/* Overview List Container */
+#overview-list {
+  max-height: 60vh;        /* allow scrolling if long */
+  overflow-y: auto;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Each row in the list */
+.overview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+/* Text & count styling */
+.overview-text {
+  font-weight: 500;
+}
+.overview-count {
+  font-size: 0.9rem;
+  color: #666;
+}
