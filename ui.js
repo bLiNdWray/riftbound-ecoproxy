@@ -8,7 +8,11 @@
   const btnFullProxy = document.getElementById('btn-full-proxy');
   const btnReset     = document.getElementById('btn-reset');
   const countLabel   = document.getElementById('card-count');
-  const container    = document.getElementById('card-container');
+
+  // — State —
+  window.cardCounts = {};
+  let isImporting   = false;
+  let fullProxy     = false;
 
   // — Persistence —
   function saveState() {
@@ -16,60 +20,78 @@
   }
   function loadState() {
     try {
-      return JSON.parse(localStorage.getItem('riftboundCardCounts')) || {};
+      const s = localStorage.getItem('riftboundCardCounts');
+      window.cardCounts = s ? JSON.parse(s) : {};
     } catch {
-      return {};
+      window.cardCounts = {};
     }
   }
 
-  // — State Init —
-  window.cardCounts = loadState();
-  let fullProxy     = false;
+ // ===== Helpers =====
+function refreshBadge(vn) {
+  // count DOM elements for this variant
+  const count = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  const badge = document.querySelector(
+    `#card-container .card[data-variant="${vn}"] .qty-badge`
+  );
+  if (badge) badge.textContent = count;
+}
 
-  // — MutationObserver for live badges and total count —
-  const observer = new MutationObserver(() => {
-    const cards = container.querySelectorAll('.card');
-    const total = cards.length;
-    if (countLabel) countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
-    // badge updates
-    const counts = {};
-    cards.forEach(c => {
-      const vn = c.dataset.variant;
-      if (!vn) return;
-      counts[vn] = (counts[vn] || 0) + 1;
-    });
-    Object.entries(counts).forEach(([vn, c]) => {
-      const badge = container.querySelector(`.card[data-variant="${vn}"] .qty-badge`);
-      if (badge) badge.textContent = c;
-    });
+function updateCount() {
+  // total = all cards in container
+  const total = document.querySelectorAll('#card-container .card').length;
+  const lbl   = document.getElementById('card-count');
+  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+}
+
+// ===== Wrap addCard/removeCard =====
+const origAdd = window.addCard;
+window.addCard = function(vn) {
+  const beforeDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  origAdd(vn);
+  const afterDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  if (afterDOM > beforeDOM) {
+    // only refresh the badge for this vn
+    refreshBadge(vn);
+    // and update the global counter
+    updateCount();
+    return true;
+  }
+  return false;
+};
+
+const origRm = window.removeCard;
+window.removeCard = function(vn, el) {
+  origRm(vn, el);
+  // after DOM removal, update this badge & total
+  refreshBadge(vn);
+  updateCount();
+};
+
+// ===== On Load: Recount everything =====
+document.addEventListener('DOMContentLoaded', () => {
+  // once cards are initially drawn:
+  document.querySelectorAll('#card-container .card').forEach(card => {
+    const vn = card.getAttribute('data-variant');
+    refreshBadge(vn);
   });
-  observer.observe(container, { childList: true, subtree: true });
+  updateCount();
+});
 
-  // — Wrap addCard/removeCard to persist counts —
-  const origAdd = window.addCard;
-  window.addCard = function(vn) {
-    const el = origAdd(vn);
-    if (el) {
-      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
-      saveState();
-    }
-    return el;
-  };
-  const origRemove = window.removeCard;
-  window.removeCard = function(vn, el) {
-    const removed = origRemove(vn, el);
-    if (removed && window.cardCounts[vn]) {
-      window.cardCounts[vn]--;
-      if (window.cardCounts[vn] <= 0) delete window.cardCounts[vn];
-      saveState();
-    }
-    return removed;
-  };
 
-  // — Handlers —
-  function handleImport() {
+  // — Import List Modal —
+  btnImport.addEventListener('click',()=>{
+    // remove old
     const prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
+    if(prev) prev.remove();
+
+    // build modal (inline styles removed)
     const overlay = document.createElement('div');
     overlay.id = 'import-modal';
     overlay.className = 'modal-overlay';
@@ -85,39 +107,78 @@
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    const area  = overlay.querySelector('#import-area');
-    const clear = overlay.querySelector('#import-clear');
-    overlay.querySelector('#close-import').onclick  = () => overlay.remove();
-    overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
-    area.value = Object.keys(window.cardCounts).join(' ');
-    overlay.querySelector('#import-ok').onclick = () => {
+
+    // refs
+    const areaEl   = overlay.querySelector('#import-area');
+    const clearChk = overlay.querySelector('#import-clear');
+    const closeBtn = overlay.querySelector('#close-import');
+    const cancelBtn= overlay.querySelector('#import-cancel');
+    const okBtn    = overlay.querySelector('#import-ok');
+
+    closeBtn.onclick  = ()=>overlay.remove();
+    cancelBtn.onclick = ()=>overlay.remove();
+
+    // prefill
+    areaEl.value = Object.keys(window.cardCounts).join(' ');
+
+    okBtn.onclick = ()=>{
       overlay.remove();
-      if (clear.checked) {
-        container.innerHTML = '';
+      if(clearChk.checked) {
+        document.getElementById('card-container').innerHTML = '';
         window.cardCounts = {};
-        saveState();
+        updateCount();
       }
-      const tokens = (area.value||'').trim().split(/\s+/).filter(Boolean);
-      tokens.forEach(tok => {
+      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      isImporting = true;
+      tokens.forEach(tok=>{
         const parts = tok.split('-');
-        if (parts.length < 2) return;
-        const vn = parts[0] + '-' + parts[1];
+        if(parts.length<2) return;
+        const vn = parts[0]+'-'+parts[1];
         window.addCard(vn);
       });
+      isImporting = false;
+      saveState();
+      updateCount();
     };
-  }
+  });
 
-  function handlePrint() {
-    document.getElementById('top-bar').style.display = 'none';
+  // — Other Top-Bar Buttons —
+  btnPrint.addEventListener('click',()=>{
+    document.getElementById('top-bar').style.display='none';
+    document.getElementById('search-modal').classList.add('hidden');
     window.print();
-    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
-  }
+    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
+  });
+  btnOverview.addEventListener('click',buildOverview);
+  btnFullProxy.addEventListener('click',()=>{
+    fullProxy = !fullProxy;
+    Object.keys(window.cardCounts).forEach(vn=>{
+      const img = document.querySelector(`[data-variant="${vn}"] img.card-img`);
+      if(img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+    });
+  });
+  btnReset.addEventListener('click',()=>{
+    window.cardCounts = {};
+    document.getElementById('card-container').innerHTML = '';
+    saveState();
+    updateCount();
+  });
 
-  function buildOverview() {
+  // — On Load: Restore State —
+  document.addEventListener('DOMContentLoaded',()=>{
+    loadState();
+    Object.entries(window.cardCounts).forEach(([vn,c])=>{
+      for(let i=0;i<c;i++) window.addCard(vn);
+    });
+    updateCount();
+  });
+
+  // — Overview Builder —
+  function buildOverview(){
     const prev = document.getElementById('overview-modal');
-    if (prev) prev.remove();
+    if(prev) prev.remove();
     const overlay = document.createElement('div');
-    overlay.id        = 'overview-modal';
+    overlay.id = 'overview-modal';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal-content">
@@ -126,38 +187,58 @@
         <div id="overview-list"></div>
       </div>`;
     document.body.appendChild(overlay);
-    overlay.querySelector('#close-overview').onclick = () => overlay.remove();
+    overlay.querySelector('#close-overview').onclick = ()=>overlay.remove();
 
-    const listEl = overlay.querySelector('#overview-list');
-    listEl.innerHTML = '';
-    // Gather variants from DOM
-    const variants = Array.from(container.querySelectorAll('.card[data-variant]')).map(c => c.dataset.variant);
-    const counts   = variants.reduce((acc, vn) => (acc[vn] = (acc[vn]||0)+1, acc), {});
-    // Build entries
-    Object.entries(counts).sort((a,b) => a[0].localeCompare(b[0])).forEach(([vn, count]) => {
-      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-      const name   = cardEl?.dataset.name || vn;
-      const row    = document.createElement('div');
-      row.className = 'overview-item';
-      row.innerHTML = `<span class="overview-text">${name} – ${vn}</span>`+
-                      `<span class="overview-count">(${count})</span>`;
-      listEl.appendChild(row);
+    const order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
+    const grp = {};
+    Object.keys(window.cardCounts).forEach(vn=>{
+      const el = document.querySelector(`[data-variant="${vn}"]`);
+      const t  = el&&el.dataset.type?el.dataset.type:'Other';
+      (grp[t]=grp[t]||[]).push(vn);
+    });
+    const listEl = document.getElementById('overview-list');
+    order.forEach(type=>{
+      if(!grp[type]) return;
+      const sec = document.createElement('div');
+      const h = document.createElement('h3');
+      h.textContent = type; sec.appendChild(h);
+      grp[type].forEach(vn=>{
+        const el    = document.querySelector(`[data-variant="${vn}"]`);
+        const name  = el&&el.dataset.name?el.dataset.name:vn;
+        const setNo = el&&el.dataset.set?el.dataset.set:'';
+        const logo  = el&&el.dataset.colorLogo?el.dataset.colorLogo:'';
+        const row = document.createElement('div');
+        row.className = 'overview-item';
+        row.innerHTML=`
+          <img src="${logo}" class="overview-logo"/>
+          <span>${name} (${setNo})</span>
+          <button class="overview-dec" data-vn="${vn}">–</button>
+          <span class="overview-count">${window.cardCounts[vn]}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>`;
+        sec.appendChild(row);
+      });
+      listEl.appendChild(sec);
     });
   }
+// — Live Recount via MutationObserver —
+(() => {
+  const container = document.getElementById('card-container');
+  if (!container) return;
 
-  // — Attach Listeners —
-  btnImport.addEventListener('click', handleImport);
-  btnPrint.addEventListener('click', handlePrint);
-  btnOverview.addEventListener('click', buildOverview);
-  btnFullProxy.addEventListener('click', () => fullProxy = !fullProxy);
-  btnReset.addEventListener('click', () => {
-    container.innerHTML = '';
-    window.cardCounts = {};
-    saveState();
+  const observer = new MutationObserver(() => {
+    // Recount top-bar total
+    updateCount();
+
+    // Recount each variant’s badge
+    // Gather all variants currently in the DOM
+    const variants = new Set();
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      variants.add(card.getAttribute('data-variant'));
+    });
+    // Update each badge
+    variants.forEach(vn => refreshBadge(vn));
   });
 
-  // — Initialize —
-  document.addEventListener('DOMContentLoaded', () => {
-    // nothing to replay; observer handles UI
-  });
+  observer.observe(container, { childList: true });
+})();
 })();
