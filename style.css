@@ -246,6 +246,11 @@ html, body {
   gap: 0.5rem;
   padding: 0.25rem 0;
 }
+.overview-icons img {
+  width: 1.2em;
+  height: auto;
+  display: block;
+}
 
 /* Icons column (auto width) */
 /* Name/variant column stretches to fill space */
