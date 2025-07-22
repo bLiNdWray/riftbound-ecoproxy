@@ -127,8 +127,13 @@
     setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
   });
 
-    // — Overview Button —
+  // — Overview Button w/ Debug —
   btnOverview.addEventListener('click', () => buildOverview());
+
+  btnFullProxy.addEventListener('click', () => {
+    fullProxy = !fullProxy;
+    console.log('Full proxy toggled:', fullProxy);
+  });
 
   btnReset.addEventListener('click', () => {
     container.innerHTML = '';
@@ -139,28 +144,17 @@
   // — On Load: Restore State —
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
+    console.log('Loaded state:', window.cardCounts);
     Object.entries(window.cardCounts).forEach(([vn, c]) => {
       for (let i = 0; i < c; i++) window.addCard(vn);
     });
   });
 
-  // — Overview Builder & Wiring —
-  function wireOverviewButtons(listEl) {
-    listEl.querySelectorAll('.overview-inc').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vn = btn.dataset.vn;
-        if (window.addCard(vn)) buildOverview();
-      });
-    });
-    listEl.querySelectorAll('.overview-dec').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const vn = btn.dataset.vn;
-        if (window.removeCard(vn)) buildOverview();
-      });
-    });
-  }
-
+  // — Overview Builder & Debug —
   function buildOverview() {
+    console.log('buildOverview called');
+    console.log('Current counts:', JSON.stringify(window.cardCounts));
+
     const prev = document.getElementById('overview-modal');
     if (prev) prev.remove();
 
@@ -176,7 +170,6 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    // Use overlay scope for list
     const listEl = overlay.querySelector('#overview-list');
     listEl.innerHTML = '';
 
@@ -189,6 +182,8 @@
       })
       .sort((a, b) => a.name.localeCompare(b.name));
 
+    console.log('Overview entries:', entries);
+
     entries.forEach(({vn, name, count}) => {
       const row = document.createElement('div');
       row.className = 'overview-item';
@@ -197,9 +192,9 @@
         <span class="overview-count">(${count})</span>
       `;
       listEl.appendChild(row);
+      console.log(`Added row for ${name}-${vn}: count=${count}`);
     });
 
-    // Now wire buttons when needed
-    wireOverviewButtons(listEl);
+    console.log('Overview list populated:', listEl.childElementCount, 'items');
   }
 })();
