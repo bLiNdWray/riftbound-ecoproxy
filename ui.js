@@ -49,46 +49,21 @@ function updateCount() {
 // ===== Wrap addCard/removeCard =====
 const origAdd = window.addCard;
 window.addCard = function(vn) {
-  const beforeDOM = document.querySelectorAll(
-    `#card-container .card[data-variant="${vn}"]`
-  ).length;
+  const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
   origAdd(vn);
-  const afterDOM = document.querySelectorAll(
-    `#card-container .card[data-variant="${vn}"]`
-  ).length;
-  if (afterDOM > beforeDOM) {
-    // only refresh the badge for this vn
-    refreshBadge(vn);
-    // and update the global counter
-    updateCount();
-    return true;
-  }
-  return false;
+  return document.querySelectorAll(`[data-variant="${vn}"]`).length > before;
 };
 
-// Wrap script.js's removeCard so it works with or without an el argument
-const origRm = typeof window.removeCard === 'function'
-  ? window.removeCard
-  : (vn, el) => {};
-
+  
+const origRm = window.removeCard;
 window.removeCard = function(vn, el) {
-  // 1) If no element supplied, grab the first matching card in #card-container
-  let cardEl = el;
-  if (!cardEl) {
-    cardEl = document.querySelector(
-      `#card-container .card[data-variant="${vn}"]`
-    );
-    if (!cardEl) return false;  // nothing to remove
-  }
-
-  // 2) Call the original with (vn, cardEl)
+  // find a real cardEl if none passed
+  const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
+  if (!cardEl) return false;
   origRm(vn, cardEl);
-
-  // 3) Update overview & badges
-  refreshBadge(vn);
-  updateCount();
   return true;
 };
+
 
 // ===== On Load: Recount everything =====
 document.addEventListener('DOMContentLoaded', () => {
