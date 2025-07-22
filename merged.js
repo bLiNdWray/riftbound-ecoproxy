@@ -160,9 +160,55 @@
     const q = input.value.trim().toLowerCase(); if (!q) return results.innerHTML = '';
     renderSearchResults(allCards.filter(c => ((c.name||'').toLowerCase().includes(q) || (c.variantNumber||'').toLowerCase().includes(q)) && allowedTypes.includes((c.type||'').toLowerCase())));
   });
-  importBtn.addEventListener('click', /* import logic unchanged */);
+  // Import List
+  importBtn.addEventListener('click', () => {
+    const prev = document.getElementById('import-modal');
+    if (prev) return prev.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <label><input type="checkbox" id="import-clear" /> Clear existing cards before import</label>
+        <div class="modal-actions">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok" class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const area = overlay.querySelector('#import-area');
+    overlay.querySelector('#close-import').onclick = overlay.remove.bind(overlay);
+    overlay.querySelector('#import-cancel').onclick = overlay.remove.bind(overlay);
+    area.value = Object.keys(window.cardCounts).join(' ');
+
+    overlay.querySelector('#import-ok').onclick = () => {
+      if (overlay.querySelector('#import-clear').checked) {
+        container.innerHTML = '';
+        window.cardCounts = {};
+        updateCount();
+      }
+      area.value.trim().split(/\s+/).forEach(tok => {
+        const parts = tok.split('-');
+        if (parts.length >= 2) window.addCard(parts[0] + '-' + parts[1]);
+      });
+      overlay.remove();
+    };
+  });
   printBtn.addEventListener('click', () => { document.getElementById('top-bar').style.display='none'; modal.classList.add('hidden'); window.print(); setTimeout(() => document.getElementById('top-bar').style.display='', 0); });
-  fullProxyBtn.addEventListener('click', /* full proxy logic unchanged */);
+  // Toggle Full Proxy view
+  fullProxyBtn.addEventListener('click', () => {
+    window.fullProxy = !window.fullProxy;
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      const img = card.querySelector('img.card-img');
+      if (!img) return;
+      img.src = window.fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+    });
+  });
   resetBtn.addEventListener('click', () => { window.cardCounts = {}; container.innerHTML = ''; saveState(); updateCount(); });
 
   // ── Overview ─────────────────────────────────────────────────────────
