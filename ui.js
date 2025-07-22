@@ -180,55 +180,34 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
-    const groups = {};
-    Object.entries(window.cardCounts).forEach(([vn, count]) => {
-      const cardEl = document.querySelector(
-        `#card-container .card[data-variant="${vn}"]`
-      );
-      const type = cardEl
-        ? ( cardEl.classList.contains('legend')      ? 'Legend'
-            : cardEl.classList.contains('rune')        ? 'Runes'
-            : cardEl.classList.contains('battlefield') ? 'Battlefield'
-            : cardEl.classList.contains('unit')        ? 'Units'
-            : cardEl.classList.contains('spell')       ? 'Spells'
-            : cardEl.classList.contains('gear')        ? 'Gear'
-            : 'Other')
-        : 'Other';
-      groups[type] = groups[type] || {};
-      groups[type][vn] = count;
+    const listEl = document.getElementById('overview-list');
+    // Clear existing
+    listEl.innerHTML = '';
+
+    // Prepare sorted entries by name
+    const entries = Object.entries(window.cardCounts)
+      .map(([vn, count]) => {
+        const cardEl = document.querySelector(
+          `#card-container .card[data-variant="${vn}"]`
+        );
+        return {
+          vn,
+          name: cardEl?.dataset.name || vn,
+          count
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Build list rows
+    entries.forEach(({vn, name, count}) => {
+      const row = document.createElement('div');
+      row.className = 'overview-item';
+      row.innerHTML = `
+        <span class="overview-text">${name} – ${vn} (${count})</span>
+      `;
+      listEl.appendChild(row);
     });
 
-    const listEl = document.getElementById('overview-list');
-    typesOrder
-      .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
-      .forEach(type => {
-        const sectionData = groups[type];
-        if (!sectionData) return;
-        const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
-        const section = document.createElement('div');
-        section.className = 'overview-section';
-        section.innerHTML = `<h3>${type} (${total})</h3>`;
-        Object.entries(sectionData).forEach(([vn, count]) => {
-          const cardEl = document.querySelector(
-            `#card-container .card[data-variant="${vn}"]`
-          );
-          const name = cardEl?.dataset.name || vn;
-          const logo = cardEl?.dataset.colorLogo || '';
-          const row  = document.createElement('div');
-          row.className = 'overview-item';
-          row.innerHTML = `
-            <img src="${logo}" class="overview-logo" alt="icon"/>
-            <span class="overview-text">${name} – ${vn}</span>
-            <button class="overview-dec" data-vn="${vn}">−</button>
-            <span class="overview-count">${count}</span>
-            <button class="overview-inc" data-vn="${vn}">+</button>
-          `;
-          section.appendChild(row);
-        });
-        listEl.appendChild(section);
-      });
-
-    wireOverviewButtons(listEl);
+    // Buttons to be added later via wireOverviewButtons
   }
 })();
