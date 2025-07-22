@@ -300,3 +300,65 @@ html, body {
 .overview-item button:hover {
   background: #0056b3;
 }
+/* 3-column Overview layout */
+.overview-item {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Icons + Name share column 1 */
+.overview-icons,
+.overview-text {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Icons sizing */
+.overview-icons img {
+  width: 1.2em;
+  height: auto;
+  display: block;
+}
+
+/* Variant in column 2, right-aligned */
+.overview-variant {
+  grid-column: 2;
+  justify-self: end;
+  font-weight: bold;
+}
+
+/* All controls in column 3, laid out inline */
+.overview-dec,
+.overview-count,
+.overview-inc {
+  grid-column: 3;
+}
+.overview-dec,
+.overview-inc {
+  margin: 0 0.2rem;
+}
+
+/* Controls container tweak (optional): */
+.overview-item > button,
+.overview-item > .overview-count {
+  justify-self: center;
+}
+
+/* Match your theme’s buttons */
+.overview-item button {
+  background: #007bff;
+  color: #fff;
+  border: 1px solid #0056b3;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.overview-item button:hover {
+  background: #0056b3;
+}
