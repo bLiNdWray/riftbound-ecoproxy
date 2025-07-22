@@ -201,10 +201,14 @@ html, body {
 
 /* Overview: single‐line, 3-column layout */
 .overview-item {
+  /* three columns: 
+     1) auto-sized label, 
+     2) 6ch-wide variant (enough for “OGN-123”), 
+     3) auto-sized controls */
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto 6ch auto;
   align-items: center;
-  white-space: nowrap;    /* never wrap anything */
+  white-space: nowrap;
   gap: 1rem;
 }
 
@@ -247,8 +251,7 @@ html, body {
 .overview-variant {
   grid-column: 2;
   justify-self: center;
-  white-space: nowrap;
-  font-weight: bold;
+  text-align: center;
 }
 
 /* Cell 2: variant centered */
@@ -261,9 +264,6 @@ html, body {
 /* Cell 3: controls cluster */
 .overview-controls {
   grid-column: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
   justify-self: end;
 }
 
