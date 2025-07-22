@@ -1,17 +1,17 @@
-// ui.js – hooks on top of script.js
+// ui.js – UI hooks on top of script.js
 (function() {
-  const 
-    openSearchBtn  = document.getElementById('open-search'),
-    closeSearchBtn = document.getElementById('close-search'),
-    searchModal    = document.getElementById('search-modal'),
-    btnImport      = document.getElementById('btn-import'),
-    btnPrint       = document.getElementById('btn-print'),
-    btnOverview    = document.getElementById('btn-overview'),
-    btnFullProxy   = document.getElementById('btn-full-proxy'),
-    btnReset       = document.getElementById('btn-reset'),
-    countLabel     = document.getElementById('card-count');
+  // — Element refs —
+  const openSearchBtn  = document.getElementById('open-search');
+  const closeSearchBtn = document.getElementById('close-search');
+  const searchModal    = document.getElementById('search-modal');
+  const btnImport      = document.getElementById('btn-import');
+  const btnPrint       = document.getElementById('btn-print');
+  const btnOverview    = document.getElementById('btn-overview');
+  const btnFullProxy   = document.getElementById('btn-full-proxy');
+  const btnReset       = document.getElementById('btn-reset');
+  const countLabel     = document.getElementById('card-count');
 
-  // Persistence
+  // — State persistence —
   function saveState() {
     localStorage.setItem('riftboundCardCounts', JSON.stringify(window.addedCounts));
   }
@@ -24,7 +24,7 @@
     }
   }
 
-  // Badge + top counter
+  // — Badge & total counter updates —
   function refreshBadge(vn) {
     const n = document.querySelectorAll(
       `#card-container .card[data-variant="${vn}"]`
@@ -39,12 +39,12 @@
     if (countLabel) countLabel.textContent = total + ' card' + (total!==1?'s':'');
   }
 
-  // Wrap to persist
+  // — Wrap add/remove to persist counts —
   const origAdd = window.addCard;
   window.addCard = vn => {
     const ok = origAdd(vn);
     if (ok) {
-      window.addedCounts[vn] = (window.addedCounts[vn]||0)+1;
+      window.addedCounts[vn] = (window.addedCounts[vn]||0) + 1;
       saveState();
     }
     return ok;
@@ -61,88 +61,130 @@
     return ok;
   };
 
-  // Search modal
+  // — Search modal —
   openSearchBtn.onclick  = () => searchModal.classList.remove('hidden');
   closeSearchBtn.onclick = () => searchModal.classList.add('hidden');
 
-  // Import List
-  btnImport.onclick = () => { /* your existing import modal code */ };
+  // — Import List Modal —
+  btnImport.onclick = () => {
+    const prev = document.getElementById('import-modal');
+    if (prev) prev.remove();
 
-  // Print
+    const ov = document.createElement('div');
+    ov.id = 'import-modal'; ov.className = 'modal-overlay';
+    ov.innerHTML = `
+      <div class="modal-content">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <label><input type="checkbox" id="import-clear"> Clear existing cards</label>
+        <div class="modal-actions">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok"     class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    const area   = ov.querySelector('#import-area');
+    const clear  = ov.querySelector('#import-clear');
+    const close  = ov.querySelector('#close-import');
+    const cancel = ov.querySelector('#import-cancel');
+    const ok     = ov.querySelector('#import-ok');
+
+    close.onclick  = cancel.onclick = () => ov.remove();
+    area.value     = Object.keys(window.addedCounts).join(' ');
+
+    ok.onclick = () => {
+      ov.remove();
+      if (clear.checked) {
+        document.getElementById('card-container').innerHTML = '';
+        Object.keys(window.addedCounts).forEach(v=>window.addedCounts[v]=0);
+      }
+      const toks = (area.value||'').trim().split(/\s+/).filter(Boolean);
+      toks.forEach(tok => {
+        const [a,b] = tok.split('-');
+        if (b) window.addCard(`${a}-${b}`);
+      });
+    };
+  };
+
+  // — Print, Full Proxy, Reset —
   btnPrint.onclick = () => {
     document.getElementById('top-bar').style.display='none';
     window.print();
     setTimeout(()=>document.getElementById('top-bar').style.display='',0);
   };
-
-  // Full proxy (flip images)
   btnFullProxy.onclick = () => {
     document.querySelectorAll('#card-container img.card-img')
       .forEach(img => img.src = img.dataset.fullArt);
   };
-
-  // Reset
   btnReset.onclick = () => {
     document.getElementById('card-container').innerHTML = '';
     Object.keys(window.addedCounts).forEach(v=>window.addedCounts[v]=0);
     updateCount();
   };
 
-  // Live observer
+  // — Live MutationObserver —
   new MutationObserver(() => {
     updateCount();
     new Set(
       [...document.querySelectorAll('.card[data-variant]')]
         .map(c=>c.dataset.variant)
     ).forEach(refreshBadge);
-  }).observe(document.getElementById('card-container'),{ childList:true });
+  }).observe(document.getElementById('card-container'),{childList:true});
 
-  // Overview
+  // — Overview builder & wiring —
   function wireOverview(listEl) {
-    listEl.querySelectorAll('.overview-inc').forEach(b=>{
-      b.onclick = ()=>{ if(window.addCard(b.dataset.vn)) buildOverview(); };
-    });
-    listEl.querySelectorAll('.overview-dec').forEach(b=>{
-      b.onclick = ()=>{ if(window.removeCard(b.dataset.vn)) buildOverview(); };
-    });
+    listEl.querySelectorAll('.overview-inc').forEach(b =>
+      b.onclick = () => window.addCard(b.dataset.vn) && buildOverview()
+    );
+    listEl.querySelectorAll('.overview-dec').forEach(b =>
+      b.onclick = () => window.removeCard(b.dataset.vn) && buildOverview()
+    );
   }
 
   function buildOverview() {
     const prev = document.getElementById('overview-modal');
     if (prev) prev.remove();
-    const ovr = document.createElement('div');
-    ovr.id= 'overview-modal'; ovr.className='modal-overlay';
-    ovr.innerHTML=`
+
+    const ov = document.createElement('div');
+    ov.id = 'overview-modal'; ov.className = 'modal-overlay';
+    ov.innerHTML = `
       <div class="modal-content">
         <button id="close-overview" class="modal-close">×</button>
         <h2>Overview</h2>
         <div id="overview-list"></div>
       </div>`;
-    document.body.appendChild(ovr);
-    ovr.querySelector('#close-overview').onclick = ()=>ovr.remove();
+    document.body.appendChild(ov);
+    ov.querySelector('#close-overview').onclick = () => ov.remove();
 
     const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
     const groups     = {};
+
+    // build from addedCounts (keeps zero rows)
     Object.entries(window.addedCounts).forEach(([vn,c])=>{
-      groups['All'] = groups['All']||{}; groups['All'][vn]=c;
+      groups['All'] = groups['All']||{};
+      groups['All'][vn] = c;
     });
+
     const listEl = document.getElementById('overview-list');
     typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
-      .forEach(type=>{
-        const data = groups[type]|| (type==='All'?groups['All']:null);
+      .forEach(type => {
+        const data = groups[type] || (type==='All'?groups['All']:null);
         if (!data) return;
         const total = Object.values(data).reduce((a,b)=>a+b,0);
         const sec   = document.createElement('div');
-        sec.className='overview-section';
-        sec.innerHTML=`<h3>${type} (${total})</h3>`;
-        Object.entries(data).forEach(([vn,count])=>{
+        sec.className  = 'overview-section';
+        sec.innerHTML = `<h3>${type} (${total})</h3>`;
+
+        Object.entries(data).forEach(([vn, count])=>{
           const cardEl = document.querySelector(`.card[data-variant="${vn}"]`);
-          const name   = cardEl?.querySelector('.name')?.textContent.trim()||vn;
-          const logo   = cardEl?.querySelector('img.card-img')?.src||'';
+          const name   = cardEl?.querySelector('.name')?.textContent.trim() || vn;
+          const logo   = cardEl?.querySelector('img.card-img')?.src || '';
           const row    = document.createElement('div');
-          row.className='overview-item';
-          row.innerHTML=`
-            <img src="${logo}" class="overview-logo"/>
+          row.className = 'overview-item';
+          row.innerHTML = `
+            <img src="${logo}" class="overview-logo" alt="icon"/>
             <span class="overview-text">${name} – ${vn}</span>
             <button class="overview-dec" data-vn="${vn}">−</button>
             <span class="overview-count">${count}</span>
@@ -158,7 +200,7 @@
 
   btnOverview.onclick = buildOverview;
 
-  // Restore on load
+  // — Restore on load —
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
     Object.entries(window.addedCounts).forEach(([vn,c])=>{
@@ -166,4 +208,5 @@
     });
     updateCount();
   });
+
 })();
