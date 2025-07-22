@@ -244,12 +244,14 @@
         const row = document.createElement('div');
         row.className = 'overview-item';
         row.innerHTML =
-          '<span class="overview-icons">' + icons + '</span>' +
-          '<span class="overview-text">'   + name  + '</span>' +
-          '<span class="overview-variant">' + vn   + '</span>' +
-          '<button class="overview-dec" data-vn="'   + vn + '">−</button>' +
-          '<span class="overview-count">'  + count + '</span>' +
-          '<button class="overview-inc" data-vn="'   + vn + '">+</button>';
+  '<span class="overview-icons">' + icons + '</span>' +
+  '<span class="overview-text">'   + name  + '</span>' +
+  '<span class="overview-variant">' + vn   + '</span>' +
+  '<span class="overview-controls">' +
+    '<button class="overview-dec" data-vn="'   + vn + '">−</button>' +
+    '<span class="overview-count">'  + count + '</span>' +
+    '<button class="overview-inc" data-vn="'   + vn + '">+</button>' +
+  '</span>';
 
         section.appendChild(row);
       });
