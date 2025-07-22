@@ -127,7 +127,11 @@
     setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
   });
 
-  btnOverview.addEventListener('click', buildOverview);
+  // — Overview Button (stripped) —
+  btnOverview.addEventListener('click', () => {
+    // TODO: rebuild overview functionality from scratch
+    console.log('Overview functionality coming soon');
+  });
 
   btnFullProxy.addEventListener('click', () => {
     fullProxy = !fullProxy;
