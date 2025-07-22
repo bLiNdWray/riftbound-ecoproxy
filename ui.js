@@ -1,187 +1,244 @@
-// ui.js – UI Layer & Counters
 (function() {
-  // — Element refs —
-  const openSearchBtn  = document.getElementById('open-search');
-  const closeSearchBtn = document.getElementById('close-search');
-  const searchModal    = document.getElementById('search-modal');
-  const btnImport      = document.getElementById('btn-import');
-  const btnPrint       = document.getElementById('btn-print');
-  const btnOverview    = document.getElementById('btn-overview');
-  const btnFullProxy   = document.getElementById('btn-full-proxy');
-  const btnReset       = document.getElementById('btn-reset');
-  const countLabel     = document.getElementById('card-count');
+  const TOPBAR_HEIGHT = 50;
 
-  // — Sync function to inventory DOM and update all counters —
-  function syncCounts() {
-    const counts = {};
-    document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
-      const vn = card.dataset.variant;
-      counts[vn] = (counts[vn]||0) + 1;
-    });
-    // update badges
-    document.querySelectorAll('#card-container .card').forEach(card => {
-      const vn    = card.dataset.variant;
-      const badge = card.querySelector('.qty-badge');
-      badge.textContent = counts[vn] || 0;
-    });
-    // update top-bar
-    const total = Object.values(counts).reduce((a,b)=>a+b,0);
-    if (countLabel) {
-      countLabel.textContent = total + ' card' + (total!==1?'s':'');
+  // — Elements —
+  const btnImport    = document.getElementById('btn-import');
+  const btnPrint     = document.getElementById('btn-print');
+  const btnOverview  = document.getElementById('btn-overview');
+  const btnFullProxy = document.getElementById('btn-full-proxy');
+  const btnReset     = document.getElementById('btn-reset');
+  const countLabel   = document.getElementById('card-count');
+
+  // — State —
+  window.cardCounts = {};
+  let isImporting   = false;
+  let fullProxy     = false;
+
+  // — Persistence —
+  function saveState() {
+    localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts));
+  }
+  function loadState() {
+    try {
+      const s = localStorage.getItem('riftboundCardCounts');
+      window.cardCounts = s ? JSON.parse(s) : {};
+    } catch {
+      window.cardCounts = {};
     }
   }
 
-  // — Wrap add/remove to call syncCounts() —
-  const rawAdd = window.addCard;
-  window.addCard = vn => {
-    const ok = rawAdd(vn);
-    if (ok) syncCounts();
-    return ok;
-  };
-  const rawRm  = window.removeCard;
-  window.removeCard = (vn,el) => {
-    const cardEl = el || document.querySelector(`.card[data-variant="${vn}"]`);
-    if (!cardEl) return false;
-    const ok = rawRm(vn, cardEl);
-    if (ok) syncCounts();
-    return ok;
-  };
+ // ===== Helpers =====
+function refreshBadge(vn) {
+  // count DOM elements for this variant
+  const count = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  const badge = document.querySelector(
+    `#card-container .card[data-variant="${vn}"] .qty-badge`
+  );
+  if (badge) badge.textContent = count;
+}
 
-  // — Search modal —
-  openSearchBtn?.addEventListener('click', () => searchModal.classList.remove('hidden'));
-  closeSearchBtn?.addEventListener('click', () => searchModal.classList.add('hidden'));
+function updateCount() {
+  // total = all cards in container
+  const total = document.querySelectorAll('#card-container .card').length;
+  const lbl   = document.getElementById('card-count');
+  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+}
+
+// ===== Wrap addCard/removeCard =====
+const origAdd = window.addCard;
+window.addCard = function(vn) {
+  const beforeDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  origAdd(vn);
+  const afterDOM = document.querySelectorAll(
+    `#card-container .card[data-variant="${vn}"]`
+  ).length;
+  if (afterDOM > beforeDOM) {
+    // only refresh the badge for this vn
+    refreshBadge(vn);
+    // and update the global counter
+    updateCount();
+    return true;
+  }
+  return false;
+};
+
+const origRm = window.removeCard;
+window.removeCard = function(vn, el) {
+  origRm(vn, el);
+  // after DOM removal, update this badge & total
+  refreshBadge(vn);
+  updateCount();
+};
+
+// ===== On Load: Recount everything =====
+document.addEventListener('DOMContentLoaded', () => {
+  // once cards are initially drawn:
+  document.querySelectorAll('#card-container .card').forEach(card => {
+    const vn = card.getAttribute('data-variant');
+    refreshBadge(vn);
+  });
+  updateCount();
+});
+
 
   // — Import List Modal —
-  btnImport.addEventListener('click', () => {
+  btnImport.addEventListener('click',()=>{
+    // remove old
     const prev = document.getElementById('import-modal');
-    if (prev) prev.remove();
-    const ov = document.createElement('div');
-    ov.id = 'import-modal'; ov.className = 'modal-overlay';
-    ov.innerHTML = `
+    if(prev) prev.remove();
+
+    // build modal (inline styles removed)
+    const overlay = document.createElement('div');
+    overlay.id = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
       <div class="modal-content">
         <button id="close-import" class="modal-close">×</button>
         <h2>Import List</h2>
-        <textarea id="import-area" placeholder="e.g. OGN-045-03"></textarea>
-        <label><input type="checkbox" id="import-clear"> Clear existing cards</label>
+        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <label><input type="checkbox" id="import-clear" /> Clear existing cards before import</label>
         <div class="modal-actions">
           <button id="import-cancel" class="topbar-btn">Cancel</button>
           <button id="import-ok"     class="topbar-btn">Import</button>
         </div>
       </div>`;
-    document.body.appendChild(ov);
+    document.body.appendChild(overlay);
 
-    const area   = ov.querySelector('#import-area');
-    const clear  = ov.querySelector('#import-clear');
-    const close  = ov.querySelector('#close-import');
-    const cancel = ov.querySelector('#import-cancel');
-    const ok     = ov.querySelector('#import-ok');
+    // refs
+    const areaEl   = overlay.querySelector('#import-area');
+    const clearChk = overlay.querySelector('#import-clear');
+    const closeBtn = overlay.querySelector('#close-import');
+    const cancelBtn= overlay.querySelector('#import-cancel');
+    const okBtn    = overlay.querySelector('#import-ok');
 
-    close.onclick = cancel.onclick = () => ov.remove();
-    area.value    = ''; // start blank
+    closeBtn.onclick  = ()=>overlay.remove();
+    cancelBtn.onclick = ()=>overlay.remove();
 
-    ok.onclick = () => {
-      ov.remove();
-      if (clear.checked) {
+    // prefill
+    areaEl.value = Object.keys(window.cardCounts).join(' ');
+
+    okBtn.onclick = ()=>{
+      overlay.remove();
+      if(clearChk.checked) {
         document.getElementById('card-container').innerHTML = '';
+        window.cardCounts = {};
+        updateCount();
       }
-      (area.value||'').trim().split(/\s+/).forEach(tok => {
-        const [a,b] = tok.split('-');
-        if (b) window.addCard(`${a}-${b}`);
+      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      isImporting = true;
+      tokens.forEach(tok=>{
+        const parts = tok.split('-');
+        if(parts.length<2) return;
+        const vn = parts[0]+'-'+parts[1];
+        window.addCard(vn);
       });
+      isImporting = false;
+      saveState();
+      updateCount();
     };
   });
 
-  // — Print, Full Proxy, Reset —
-  btnPrint.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
+  // — Other Top-Bar Buttons —
+  btnPrint.addEventListener('click',()=>{
+    document.getElementById('top-bar').style.display='none';
+    document.getElementById('search-modal').classList.add('hidden');
     window.print();
-    setTimeout(()=>document.getElementById('top-bar').style.display = '', 0);
+    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
   });
-  btnFullProxy.addEventListener('click', () => {
-    document.querySelectorAll('#card-container img.card-img')
-      .forEach(img => img.src = img.dataset.fullArt || img.src);
+  btnOverview.addEventListener('click',buildOverview);
+  btnFullProxy.addEventListener('click',()=>{
+    fullProxy = !fullProxy;
+    Object.keys(window.cardCounts).forEach(vn=>{
+      const img = document.querySelector(`[data-variant="${vn}"] img.card-img`);
+      if(img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+    });
   });
-  btnReset.addEventListener('click', () => {
+  btnReset.addEventListener('click',()=>{
+    window.cardCounts = {};
     document.getElementById('card-container').innerHTML = '';
-    syncCounts();
+    saveState();
+    updateCount();
   });
 
-  // — Overview wiring & builder —
-  function wireOverview(listEl) {
-    listEl.querySelectorAll('.overview-inc').forEach(b=>
-      b.addEventListener('click', ()=> window.addCard(b.dataset.vn) && buildOverview())
-    );
-    listEl.querySelectorAll('.overview-dec').forEach(b=>
-      b.addEventListener('click', ()=> window.removeCard(b.dataset.vn) && buildOverview())
-    );
-  }
+  // — On Load: Restore State —
+  document.addEventListener('DOMContentLoaded',()=>{
+    loadState();
+    Object.entries(window.cardCounts).forEach(([vn,c])=>{
+      for(let i=0;i<c;i++) window.addCard(vn);
+    });
+    updateCount();
+  });
 
-  function buildOverview() {
+  // — Overview Builder —
+  function buildOverview(){
     const prev = document.getElementById('overview-modal');
-    if (prev) prev.remove();
-    const ov = document.createElement('div');
-    ov.id = 'overview-modal'; ov.className = 'modal-overlay';
-    ov.innerHTML = `
+    if(prev) prev.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'overview-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
       <div class="modal-content">
         <button id="close-overview" class="modal-close">×</button>
         <h2>Overview</h2>
         <div id="overview-list"></div>
       </div>`;
-    document.body.appendChild(ov);
-    ov.querySelector('#close-overview').onclick = () => ov.remove();
+    document.body.appendChild(overlay);
+    overlay.querySelector('#close-overview').onclick = ()=>overlay.remove();
 
-    const variants = {};
-    document.querySelectorAll('#card-container .card[data-variant]').forEach(c=>{
-      const vn = c.dataset.variant;
-      variants[vn] = (variants[vn]||0) + 1;
+    const order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
+    const grp = {};
+    Object.keys(window.cardCounts).forEach(vn=>{
+      const el = document.querySelector(`[data-variant="${vn}"]`);
+      const t  = el&&el.dataset.type?el.dataset.type:'Other';
+      (grp[t]=grp[t]||[]).push(vn);
     });
-
-    const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
-    const grouped = {};
-    Object.entries(variants).forEach(([vn, count])=>{
-      const cardEl = document.querySelector(`.card[data-variant="${vn}"]`);
-      const type = cardEl?.classList.contains('legend')      ? 'Legend'
-                 : cardEl?.classList.contains('rune')        ? 'Runes'
-                 : cardEl?.classList.contains('battlefield') ? 'Battlefield'
-                 : cardEl?.classList.contains('unit')        ? 'Units'
-                 : cardEl?.classList.contains('spell')       ? 'Spells'
-                 : 'Other';
-      grouped[type] = grouped[type] || {};
-      grouped[type][vn] = count;
-    });
-
     const listEl = document.getElementById('overview-list');
-    typesOrder.concat(Object.keys(grouped).filter(t=>!typesOrder.includes(t)))
-    .forEach(type => {
-      const data = grouped[type];
-      if (!data) return;
-      const total = Object.values(data).reduce((a,b)=>a+b,0);
+    order.forEach(type=>{
+      if(!grp[type]) return;
       const sec = document.createElement('div');
-      sec.className = 'overview-section';
-      sec.innerHTML = `<h3>${type} (${total})</h3>`;
-      Object.entries(data).forEach(([vn,count])=>{
-        const cardEl = document.querySelector(`.card[data-variant="${vn}"]`);
-        const name   = cardEl?.querySelector('.name')?.textContent.trim() || vn;
-        const logo   = cardEl?.querySelector('img.card-img')?.src || '';
-        const row    = document.createElement('div');
+      const h = document.createElement('h3');
+      h.textContent = type; sec.appendChild(h);
+      grp[type].forEach(vn=>{
+        const el    = document.querySelector(`[data-variant="${vn}"]`);
+        const name  = el&&el.dataset.name?el.dataset.name:vn;
+        const setNo = el&&el.dataset.set?el.dataset.set:'';
+        const logo  = el&&el.dataset.colorLogo?el.dataset.colorLogo:'';
+        const row = document.createElement('div');
         row.className = 'overview-item';
-        row.innerHTML = `
-          <img src="${logo}" class="overview-logo" alt="icon"/>
-          <span class="overview-text">${name} – ${vn}</span>
-          <button class="overview-dec" data-vn="${vn}">−</button>
-          <span class="overview-count">${count}</span>
-          <button class="overview-inc" data-vn="${vn}">+</button>
-        `;
+        row.innerHTML=`
+          <img src="${logo}" class="overview-logo"/>
+          <span>${name} (${setNo})</span>
+          <button class="overview-dec" data-vn="${vn}">–</button>
+          <span class="overview-count">${window.cardCounts[vn]}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>`;
         sec.appendChild(row);
       });
       listEl.appendChild(sec);
     });
-
-    wireOverview(listEl);
   }
+// — Live Recount via MutationObserver —
+(() => {
+  const container = document.getElementById('card-container');
+  if (!container) return;
 
-  btnOverview.addEventListener('click', buildOverview);
+  const observer = new MutationObserver(() => {
+    // Recount top-bar total
+    updateCount();
 
-  // — Initial sync on load —
-  document.addEventListener('DOMContentLoaded', syncCounts);
+    // Recount each variant’s badge
+    // Gather all variants currently in the DOM
+    const variants = new Set();
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      variants.add(card.getAttribute('data-variant'));
+    });
+    // Update each badge
+    variants.forEach(vn => refreshBadge(vn));
+  });
+
+  observer.observe(container, { childList: true });
+})();
 })();
