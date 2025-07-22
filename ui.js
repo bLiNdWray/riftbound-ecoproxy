@@ -11,7 +11,6 @@
 
   // — State —
   window.cardCounts = {};
-  let isImporting   = false;
   let fullProxy     = false;
 
   // — Persistence —
@@ -39,44 +38,62 @@
   }
 
   function updateCount() {
-    const total = Object.values(window.cardCounts).reduce((a,b) => a + b, 0);
+    const total = Object.values(window.cardCounts).reduce((a, b) => a + b, 0);
     if (countLabel) countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
 
-  // ===== Wrap addCard/removeCard and sync counts =====
+  // ===== Wrap addCard/removeCard for accurate returns =====
   const origAdd = window.addCard;
   window.addCard = function(vn) {
-    const added = origAdd(vn);
-    if (added) {
+    const before = document.querySelectorAll(
+      `#card-container .card[data-variant="${vn}"]`
+    ).length;
+    // call original
+    origAdd(vn);
+    const after = document.querySelectorAll(
+      `#card-container .card[data-variant="${vn}"]`
+    ).length;
+    if (after > before) {
       window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
       saveState();
       updateCount();
       refreshBadge(vn);
+      return true;
     }
-    return added;
+    return false;
   };
 
   const origRm = window.removeCard;
   window.removeCard = function(vn, el) {
-    const removed = origRm(vn, el);
-    if (removed) {
+    const selector = `#card-container .card[data-variant=\"${vn}\"]`;
+    const before = document.querySelectorAll(
+      selector
+    ).length;
+    const cardEl = el || document.querySelector(selector);
+    if (!cardEl) return false;
+    origRm(vn, cardEl);
+    const after = document.querySelectorAll(
+      selector
+    ).length;
+    if (after < before) {
       window.cardCounts[vn] = (window.cardCounts[vn] || 1) - 1;
       if (window.cardCounts[vn] <= 0) delete window.cardCounts[vn];
       saveState();
       updateCount();
       refreshBadge(vn);
+      return true;
     }
-    return removed;
+    return false;
   };
 
-  // ===== On Load: Recount everything =====
+  // ===== On Load: Restore state =====
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c]) => {
-      for (let i = 0; i < c; i++) origAdd(vn);
+    Object.entries(window.cardCounts).forEach(([vn, count]) => {
+      for (let i = 0; i < count; i++) {
+        origAdd(vn);
+      }
     });
-
-    // Fix badges
     Object.keys(window.cardCounts).forEach(refreshBadge);
     updateCount();
   });
@@ -102,13 +119,13 @@
       </div>`;
     document.body.appendChild(overlay);
 
-    const areaEl   = overlay.querySelector('#import-area');
+    const areaEl = overlay.querySelector('#import-area');
     const clearChk = overlay.querySelector('#import-clear');
     const closeBtn = overlay.querySelector('#close-import');
-    const cancelBtn= overlay.querySelector('#import-cancel');
-    const okBtn    = overlay.querySelector('#import-ok');
+    const cancelBtn = overlay.querySelector('#import-cancel');
+    const okBtn = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick  = () => overlay.remove();
+    closeBtn.onclick = () => overlay.remove();
     cancelBtn.onclick = () => overlay.remove();
 
     areaEl.value = Object.keys(window.cardCounts).join(' ');
@@ -121,7 +138,7 @@
         saveState();
         updateCount();
       }
-      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      const tokens = (areaEl.value || '').trim().split(/\s+/).filter(Boolean);
       tokens.forEach(tok => {
         const parts = tok.split('-');
         if (parts.length < 2) return;
@@ -138,13 +155,8 @@
     window.print();
     setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
   });
-
   btnOverview.addEventListener('click', buildOverview);
-  btnFullProxy.addEventListener('click', () => {
-    fullProxy = !fullProxy;
-    // your fullProxy logic...
-  });
-
+  btnFullProxy.addEventListener('click', () => { fullProxy = !fullProxy; });
   btnReset.addEventListener('click', () => {
     window.cardCounts = {};
     saveState();
@@ -174,7 +186,7 @@
     if (prev) prev.remove();
 
     const overlay = document.createElement('div');
-    overlay.id        = 'overview-modal';
+    overlay.id = 'overview-modal';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal-content">
@@ -193,7 +205,7 @@
         `#card-container .card[data-variant="${vn}"]`
       );
       const type = cardEl
-        ? ( cardEl.classList.contains('legend')      ? 'Legend'
+        ? (cardEl.classList.contains('legend')      ? 'Legend'
           : cardEl.classList.contains('rune')        ? 'Runes'
           : cardEl.classList.contains('battlefield') ? 'Battlefield'
           : cardEl.classList.contains('unit')        ? 'Units'
@@ -207,38 +219,37 @@
     });
 
     const listEl = document.getElementById('overview-list');
-    typesOrder
-      .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
-      .forEach(type => {
-        const sectionData = groups[type];
-        if (!sectionData) return;
+    typesOrder.concat(Object.keys(groups).filter(t => !typesOrder.includes(t))).forEach(type => {
+      const sectionData = groups[type];
+      if (!sectionData) return;
 
-        const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
-        const section = document.createElement('div');
-        section.className = 'overview-section';
-        section.innerHTML = `<h3>${type} (${total})</h3>`;
+      const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
+      const section = document.createElement('div');
+      section.className = 'overview-section';
+      section.innerHTML = `<h3>${type} (${total})</h3>`;
 
-        Object.entries(sectionData).forEach(([vn, count]) => {
-          const cardEl = document.querySelector(
-            `#card-container .card[data-variant="${vn}"]`
-          );
-          const name = cardEl?.dataset.name || vn;
-          const logo = cardEl?.dataset.colorLogo || '';
-          const row  = document.createElement('div');
-          row.className = 'overview-item';
-          row.innerHTML = `
-            <img src="${logo}" class="overview-logo" alt="icon"/>
-            <span class="overview-text">${name} – ${vn}</span>
-            <button class="overview-dec" data-vn="${vn}">−</button>
-            <span class="overview-count">${count}</span>
-            <button class="overview-inc" data-vn="${vn}">+</button>
-          `;
-          section.appendChild(row);
-        });
-
-        listEl.appendChild(section);
+      Object.entries(sectionData).forEach(([vn, count]) => {
+        const cardEl = document.querySelector(
+          `#card-container .card[data-variant="${vn}"]`
+        );
+        const name = cardEl?.dataset.name || vn;
+        const logo = cardEl?.dataset.colorLogo || '';
+        const row = document.createElement('div');
+        row.className = 'overview-item';
+        row.innerHTML = `
+          <img src="${logo}" class="overview-logo" alt="icon"/>
+          <span class="overview-text">${name} – ${vn}</span>
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
+        section.appendChild(row);
       });
+
+      listEl.appendChild(section);
+    });
 
     wireOverviewButtons(listEl);
   }
+
 })();
