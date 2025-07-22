@@ -66,12 +66,28 @@ window.addCard = function(vn) {
   return false;
 };
 
-const origRm = window.removeCard;
+// Wrap script.js's removeCard so it works with or without an el argument
+const origRm = typeof window.removeCard === 'function'
+  ? window.removeCard
+  : (vn, el) => {};
+
 window.removeCard = function(vn, el) {
-  origRm(vn, el);
-  // after DOM removal, update this badge & total
+  // 1) If no element supplied, grab the first matching card in #card-container
+  let cardEl = el;
+  if (!cardEl) {
+    cardEl = document.querySelector(
+      `#card-container .card[data-variant="${vn}"]`
+    );
+    if (!cardEl) return false;  // nothing to remove
+  }
+
+  // 2) Call the original with (vn, cardEl)
+  origRm(vn, cardEl);
+
+  // 3) Update overview & badges
   refreshBadge(vn);
   updateCount();
+  return true;
 };
 
 // ===== On Load: Recount everything =====
