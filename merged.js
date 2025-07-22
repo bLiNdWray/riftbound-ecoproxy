@@ -200,10 +200,20 @@
       section.innerHTML = `<h3>${type}</h3>`;
       Object.entries(grp[type]).forEach(([vn, count]) => {
         const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-        const icons = [...cardEl.querySelectorAll('.color-indicator img.inline-icon')]
-          .map(i => i.outerHTML)
-          .join(' ');
-        const name = cardEl.querySelector('.name')?.textContent || vn;
+        // extract icons: color-indicator or legend-icons
+        let icons = '';
+        const colWrap = cardEl.querySelector('.color-indicator');
+        if (colWrap) icons = [...colWrap.querySelectorAll('img.inline-icon')].map(i=>i.outerHTML).join(' ');
+        else {
+          const lgWrap = cardEl.querySelector('.legend-icons');
+          if (lgWrap) icons = [...lgWrap.querySelectorAll('img')].map(i=>i.outerHTML).join(' ');
+        }
+        // extract name with fallbacks
+        const nameEl = cardEl.querySelector('.name')
+                      || cardEl.querySelector('.main-title')
+                      || cardEl.querySelector('.bf-name')
+                      || cardEl.querySelector('.rune-title');
+        const name = nameEl ? nameEl.textContent.trim() : vn;
         const row = document.createElement('div'); row.className = 'overview-item';
         row.innerHTML = `
           <span class="overview-icons">${icons}</span> - ${name} - ${vn}
@@ -217,14 +227,10 @@
     });
 
     // Wire inc/dec buttons
-    listEl.querySelectorAll('.overview-inc').forEach(btn => {
-      btn.addEventListener('click', () => window.addCard(btn.dataset.vn));
-    });
-    listEl.querySelectorAll('.overview-dec').forEach(btn => {
-      btn.addEventListener('click', () => window.removeCard(btn.dataset.vn));
-    });
+    listEl.querySelectorAll('.overview-inc').forEach(btn => btn.addEventListener('click', () => window.addCard(btn.dataset.vn)));
+    listEl.querySelectorAll('.overview-dec').forEach(btn => btn.addEventListener('click', () => window.removeCard(btn.dataset.vn)));
   }
-  btnOverview.addEventListener('click', buildOverview);
+  btnOverview.addEventListener('click', buildOverview);('click', buildOverview);
 
   // ── Observer & Init ────────────────────────────────────────────────
   new MutationObserver(() => {
