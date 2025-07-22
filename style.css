@@ -204,8 +204,8 @@ html, body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1rem;
-  white-space: nowrap;    /* prevent any wrapping */
+  white-space: nowrap;      /* never wrap */
+  gap: 0.5rem;
 }
 
 /* Icons + Name together in column 1 */
@@ -223,38 +223,38 @@ html, body {
   height: auto;
   display: block;
 }
-
+/* Controls wrapper (col 3) */
+.overview-controls {
+  grid-column: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
 /* Variant centered in column 2 */
 .overview-variant {
   grid-column: 2;
   justify-self: center;
   white-space: nowrap;
-  flex-shrink: 0;
   font-weight: bold;
 }
 
-/* Controls (–, count, +) in column 3 */
-.overview-dec,
-.overview-count,
-.overview-inc {
-  grid-column: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Ensure buttons stay on the same line */
-.overview-item button,
+/* Buttons & count styling */
 .overview-count {
-  white-space: nowrap;
-  flex-shrink: 0;
+  background: #f0f0f0;
+  padding: 0 0.4em;
+  border-radius: 3px;
 }
-
-/* Tweak gaps if it still feels too wide */
-.overview-item {
-  gap: 0.5rem;
+.overview-item button {
+  background: #007bff;
+  color: #fff;
+  border: 1px solid #0056b3;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-
 .overview-item button:hover {
   background: #0056b3;
 }
