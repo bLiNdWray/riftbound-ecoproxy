@@ -167,15 +167,14 @@ html, body {
   }
 }
 
-/* Overview modal overlay */
 /* Overview modal styling */
 .overview-item {
   display: grid;
-  grid-template-columns: auto 6ch auto;  /* label | variant | controls */
+  grid-template-columns: 35% 6ch auto;  /* label (35%) | variant (6ch) | controls */
   align-items: center;
   white-space: nowrap;    /* never wrap */
   gap: 1rem;
-  padding: 0.25rem 0;      /* a little vertical breathing room */
+  padding: 0.25rem 0;     /* vertical padding */
 }
 
 /* Cell 1: icon + name */
@@ -184,6 +183,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  width: 100%;            /* fill the 35% column */
 }
 .overview-label img {
   width: 1.2em;
