@@ -200,7 +200,8 @@
       section.innerHTML = `<h3>${type}</h3>`;
       Object.entries(grp[type]).forEach(([vn, count]) => {
         const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
-                // extract icons: color-indicator, legend-icons, or rune-image
+        if (!cardEl) return; // skip if card not in DOM
+        // extract icons: color-indicator, legend-icons, or rune-image
         let icons = '';
         const colWrap = cardEl.querySelector('.color-indicator');
         if (colWrap) {
@@ -218,7 +219,7 @@
             if (runeImg) icons = runeImg.outerHTML;
           }
         }
-                // extract name with fallbacks
+        // extract name with fallbacks
         const nameEl = cardEl.querySelector('.name')
           || cardEl.querySelector('.main-title')
           || cardEl.querySelector('.bf-name')
@@ -233,7 +234,7 @@
         `;
         section.appendChild(row);
       });
-      listEl.appendChild(section);
+      listEl.appendChild(section);.appendChild(section);
     });
 
     // Wire inc/dec buttons
