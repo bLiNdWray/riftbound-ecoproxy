@@ -42,14 +42,13 @@
     if (countLabel) countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
 
-  // ===== Wrap addCard/removeCard for accurate returns =====
+  // ===== Wrap addCard/removeCard =====
   const origAdd = window.addCard;
   window.addCard = function(vn) {
     const before = document.querySelectorAll(
       `#card-container .card[data-variant="${vn}"]`
     ).length;
-    // call original
-    origAdd(vn);
+    const result = origAdd(vn);
     const after = document.querySelectorAll(
       `#card-container .card[data-variant="${vn}"]`
     ).length;
@@ -66,15 +65,11 @@
   const origRm = window.removeCard;
   window.removeCard = function(vn, el) {
     const selector = `#card-container .card[data-variant=\"${vn}\"]`;
-    const before = document.querySelectorAll(
-      selector
-    ).length;
+    const before = document.querySelectorAll(selector).length;
     const cardEl = el || document.querySelector(selector);
     if (!cardEl) return false;
-    origRm(vn, cardEl);
-    const after = document.querySelectorAll(
-      selector
-    ).length;
+    const result = origRm(vn, cardEl);
+    const after = document.querySelectorAll(selector).length;
     if (after < before) {
       window.cardCounts[vn] = (window.cardCounts[vn] || 1) - 1;
       if (window.cardCounts[vn] <= 0) delete window.cardCounts[vn];
@@ -91,14 +86,15 @@
     loadState();
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
       for (let i = 0; i < count; i++) {
-        // use wrapped addCard to sync badges and counts
-        window.addCard(vn);
+        origAdd(vn);
       }
     });
+    Object.keys(window.cardCounts).forEach(refreshBadge);
     updateCount();
   });
 
-  // — Import List Modal —('click', () => {
+  // — Import List Modal —
+  btnImport.addEventListener('click', () => {
     const prev = document.getElementById('import-modal');
     if (prev) prev.remove();
 
@@ -118,13 +114,13 @@
       </div>`;
     document.body.appendChild(overlay);
 
-    const areaEl = overlay.querySelector('#import-area');
+    const areaEl   = overlay.querySelector('#import-area');
     const clearChk = overlay.querySelector('#import-clear');
     const closeBtn = overlay.querySelector('#close-import');
-    const cancelBtn = overlay.querySelector('#import-cancel');
-    const okBtn = overlay.querySelector('#import-ok');
+    const cancelBtn= overlay.querySelector('#import-cancel');
+    const okBtn    = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick = () => overlay.remove();
+    closeBtn.onclick  = () => overlay.remove();
     cancelBtn.onclick = () => overlay.remove();
 
     areaEl.value = Object.keys(window.cardCounts).join(' ');
@@ -137,11 +133,11 @@
         saveState();
         updateCount();
       }
-      const tokens = (areaEl.value || '').trim().split(/\s+/).filter(Boolean);
+      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
       tokens.forEach(tok => {
         const parts = tok.split('-');
-        if (parts.length < 2) return;
-        const vn = parts[0] + '-' + parts[1];
+        if (parts.length<2) return;
+        const vn = parts[0]+'-'+parts[1];
         window.addCard(vn);
       });
     };
@@ -149,14 +145,14 @@
 
   // — Other Top-Bar Buttons —
   btnPrint.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
+    document.getElementById('top-bar').style.display='none';
     document.getElementById('search-modal').classList.add('hidden');
     window.print();
-    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
+    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
   });
   btnOverview.addEventListener('click', buildOverview);
-  btnFullProxy.addEventListener('click', () => { fullProxy = !fullProxy; });
-  btnReset.addEventListener('click', () => {
+  btnFullProxy.addEventListener('click',()=>{ fullProxy = !fullProxy; });
+  btnReset.addEventListener('click',()=>{
     window.cardCounts = {};
     saveState();
     document.getElementById('card-container').innerHTML = '';
@@ -185,7 +181,7 @@
     if (prev) prev.remove();
 
     const overlay = document.createElement('div');
-    overlay.id = 'overview-modal';
+    overlay.id        = 'overview-modal';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal-content">
@@ -200,55 +196,34 @@
     const groups = {};
 
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
-      const cardEl = document.querySelector(
-        `#card-container .card[data-variant="${vn}"]`
-      );
-      const type = cardEl
-        ? (cardEl.classList.contains('legend')      ? 'Legend'
-          : cardEl.classList.contains('rune')        ? 'Runes'
-          : cardEl.classList.contains('battlefield') ? 'Battlefield'
-          : cardEl.classList.contains('unit')        ? 'Units'
-          : cardEl.classList.contains('spell')       ? 'Spells'
-          : cardEl.classList.contains('gear')        ? 'Gear'
-          : 'Other')
-        : 'Other';
-
-      groups[type] = groups[type] || {};
-      groups[type][vn] = count;
+      groups['All'] = groups['All'] || {};
+      groups['All'][vn] = count;
     });
 
     const listEl = document.getElementById('overview-list');
-    typesOrder.concat(Object.keys(groups).filter(t => !typesOrder.includes(t))).forEach(type => {
-      const sectionData = groups[type];
-      if (!sectionData) return;
+    if (Object.keys(groups).length === 0 || Object.keys(groups['All'] || {}).length === 0) {
+      listEl.innerHTML = '<p class="overview-empty">No cards to display</p>';
+      return;
+    }
 
-      const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
-      const section = document.createElement('div');
-      section.className = 'overview-section';
-      section.innerHTML = `<h3>${type} (${total})</h3>`;
-
-      Object.entries(sectionData).forEach(([vn, count]) => {
-        const cardEl = document.querySelector(
-          `#card-container .card[data-variant="${vn}"]`
-        );
-        const name = cardEl?.dataset.name || vn;
-        const logo = cardEl?.dataset.colorLogo || '';
-        const row = document.createElement('div');
-        row.className = 'overview-item';
-        row.innerHTML = `
-          <img src="${logo}" class="overview-logo" alt="icon"/>
-          <span class="overview-text">${name} – ${vn}</span>
-          <button class="overview-dec" data-vn="${vn}">−</button>
-          <span class="overview-count">${count}</span>
-          <button class="overview-inc" data-vn="${vn}">+</button>
-        `;
-        section.appendChild(row);
-      });
-
-      listEl.appendChild(section);
+    Object.entries(groups['All']).forEach(([vn, count]) => {
+      const cardEl = document.querySelector(
+        `#card-container .card[data-variant="${vn}"]`
+      );
+      const name = cardEl?.dataset.name || vn;
+      const logo = cardEl?.dataset.colorLogo || '';
+      const row = document.createElement('div');
+      row.className = 'overview-item';
+      row.innerHTML = `
+        <img src="${logo}" class="overview-logo" alt="icon"/>
+        <span class="overview-text">${name} – ${vn}</span>
+        <button class="overview-dec" data-vn="${vn}">−</button>
+        <span class="overview-count">${count}</span>
+        <button class="overview-inc" data-vn="${vn}">+</button>
+      `;
+      listEl.appendChild(row);
     });
 
     wireOverviewButtons(listEl);
   }
-
 })();
