@@ -114,15 +114,15 @@ html, body {
   background: #fff;
   border-bottom: 1px solid #ddd;
   z-index: 2001;
-  justify-content: center;  /* center children horizontally */
+  justify-content: center;
 }
 #search-modal .modal-content {
   width: 100% !important;
   max-width: none !important;
-  border-radius: 0;      /* optional: flush to edges */
-  box-shadow: none;      /* optional: flatten */
-  margin: 0;             /* remove auto-centering */
-  padding: 0;            /* you can re-add padding inside .search-header */
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Search Input */
@@ -136,7 +136,7 @@ html, body {
   outline: none;
   transition: border-color .2s, box-shadow .2s;
   width: 80% !important;
-  max-width: 800px;         /* optional cap */
+  max-width: 800px;
   margin: 0 auto;
   display: block;
   box-sizing: border-box;
@@ -179,14 +179,11 @@ html, body {
 }
 
 @media print {
-  /* Treat each card as unbreakable */
   .card {
     break-inside: avoid;
     page-break-inside: avoid;
     display: block;
   }
-
-  /* Allow the container to overflow to new pages */
   #card-container {
     overflow: visible !important;
   }
@@ -235,12 +232,21 @@ html, body {
   padding-bottom: 0.25rem;
 }
 
-/* Overview item layout */
+/* 3-column Overview layout */
 .overview-item {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto;
+  grid-template-columns: auto auto auto;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Icons + Name in column 1 */
+.overview-icons,
+.overview-text {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 /* Icon sizing */
@@ -250,88 +256,14 @@ html, body {
   display: block;
 }
 
-/* Icons column */
-.overview-icons {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Name text */
-.overview-text {
-  justify-self: start;
-}
-
-/* Variant number */
-.overview-variant {
-  justify-self: end;
-  font-weight: bold;
-}
-
-/* Decrement button */
-.overview-dec {
-  justify-self: end;
-}
-
-/* Count badge */
-.overview-count {
-  justify-self: center;
-  background: #f0f0f0;
-  padding: 0 0.4em;
-  border-radius: 3px;
-}
-
-/* Increment button */
-.overview-inc {
-  justify-self: start;
-}
-
-/* Theme-matched buttons */
-.overview-item button {
-  background: #007bff;
-  color: #fff;
-  border: 1px solid #0056b3;
-  border-radius: 4px;
-  padding: 0.2em 0.4em;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.overview-item button:hover {
-  background: #0056b3;
-}
-/* 3-column Overview layout */
-.overview-item {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Icons + Name share column 1 */
-.overview-icons,
-.overview-text {
-  grid-column: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Icons sizing */
-.overview-icons img {
-  width: 1.2em;
-  height: auto;
-  display: block;
-}
-
-/* Variant in column 2, right-aligned */
+/* Variant number in column 2 */
 .overview-variant {
   grid-column: 2;
   justify-self: end;
   font-weight: bold;
 }
 
-/* All controls in column 3, laid out inline */
+/* Controls in column 3 */
 .overview-dec,
 .overview-count,
 .overview-inc {
@@ -341,14 +273,14 @@ html, body {
 .overview-inc {
   margin: 0 0.2rem;
 }
-
-/* Controls container tweak (optional): */
-.overview-item > button,
-.overview-item > .overview-count {
+.overview-count {
   justify-self: center;
+  background: #f0f0f0;
+  padding: 0 0.4em;
+  border-radius: 3px;
 }
 
-/* Match your theme’s buttons */
+/* Theme-matched buttons */
 .overview-item button {
   background: #007bff;
   color: #fff;
