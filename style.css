@@ -254,4 +254,17 @@ html, body {
 .overview-item {
   gap: 0.5rem;
 }
-
+/* Theme-matched buttons */
+.overview-item button {
+  background: #007bff;
+  color: #fff;
+  border: 1px solid #0056b3;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.overview-item button:hover {
+  background: #0056b3;
+}
