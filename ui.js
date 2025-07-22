@@ -270,7 +270,6 @@ listEl.querySelectorAll('.overview-inc').forEach(btn => {
   btn.onclick = () => {
     const vn = btn.dataset.vn;
     if (window.addCard(vn)) {
-      // no extra calls needed; observer picks up the new <div.card> and updates
       buildOverview();
     }
   };
@@ -279,10 +278,9 @@ listEl.querySelectorAll('.overview-inc').forEach(btn => {
 listEl.querySelectorAll('.overview-dec').forEach(btn => {
   btn.onclick = () => {
     const vn = btn.dataset.vn;
-    // remove one card element
-    const success = window.removeCard(vn);
-    if (success) {
-      // now rebuild Overview to reflect new counts
+    // remove exactly one matching card from the DOM via your API
+    if (window.removeCard(vn)) {
+      // re-draw Overview from scratch
       buildOverview();
     }
   };
