@@ -164,108 +164,82 @@
   resetBtn.addEventListener('click',()=>{ window.cardCounts={}; container.innerHTML=''; saveState(); updateCount(); });
 
   // ── Overview ────────────────────────────────────────────────────────
- // ── Overview ─────────────────────────────────────────────────────────
-  function buildOverview() {
-    // remove any existing modal
+  function buildOverview(){
     const prev = document.getElementById('overview-modal');
-    if (prev) { prev.remove(); return; }
-
-    // create overlay + content
+    if (prev) return prev.remove();
     const overlay = document.createElement('div');
-    overlay.id = 'overview-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML =
-      '<div class="modal-content">' +
-        '<button id="close-overview" class="modal-close">×</button>' +
-        '<h2>Overview</h2>' +
-        '<div id="overview-list"></div>' +
-      '</div>';
+    overlay.id = 'overview-modal'; overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button id="close-overview" class="modal-close">×</button>
+        <h2>Overview</h2>
+        <div id="overview-list"></div>
+      </div>`;
     document.body.appendChild(overlay);
+    overlay.querySelector('#close-overview').onclick = overlay.remove.bind(overlay);
 
-    // wire close
-    overlay.querySelector('#close-overview').onclick = function() {
-      overlay.remove();
-    };
-
-    // group cards by type
     const order = ['Legend','Battlefield','Runes','Units','Spells'];
     const grp = {};
-    Object.entries(window.cardCounts).forEach(function([vn, count]) {
+    Object.entries(window.cardCounts).forEach(([vn, count]) => {
       if (!count) return;
-      const selector = '.card[data-variant="' + vn + '"]';
-      const cardEl = container.querySelector(selector);
-      if (!cardEl) return;
+      const cardEl = container.querySelector('.card[data-variant="' + vn + '"]');
       let type = 'Other';
-      if (cardEl.classList.contains('legend'))      type = 'Legend';
+      if (cardEl.classList.contains('legend')) type = 'Legend';
       else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
-      else if (cardEl.classList.contains('rune'))    type = 'Runes';
-      else if (cardEl.classList.contains('unit'))    type = 'Units';
-      else if (cardEl.classList.contains('spell'))   type = 'Spells';
+      else if (cardEl.classList.contains('rune')) type = 'Runes';
+      else if (cardEl.classList.contains('unit')) type = 'Units';
+      else if (cardEl.classList.contains('spell')) type = 'Spells';
       grp[type] = grp[type] || {};
       grp[type][vn] = count;
     });
 
-    // build the list
     const listEl = overlay.querySelector('#overview-list');
-    order.forEach(function(type) {
+    order.forEach(type => {
       if (!grp[type]) return;
       const section = document.createElement('div');
-      section.innerHTML = '<h3>' + type + '</h3>';
-      Object.entries(grp[type]).forEach(function([vn, count]) {
-        const selector = '.card[data-variant="' + vn + '"]';
-        const cardEl = container.querySelector(selector);
-        if (!cardEl) return;
-
-        // pick up icons
+      section.innerHTML = `<h3>${type}</h3>`;
+      Object.entries(grp[type]).forEach(([vn, count]) => {
+        const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+        if (!cardEl) return; // skip if card not in DOM
+        // extract icons: color-indicator, legend-icons, or rune-image
         let icons = '';
         const colWrap = cardEl.querySelector('.color-indicator');
         if (colWrap) {
-          icons = Array.prototype.slice.call(colWrap.querySelectorAll('img.inline-icon'))
-            .map(i => i.outerHTML).join(' ');
+          icons = [...colWrap.querySelectorAll('img.inline-icon')]
+            .map(i => i.outerHTML)
+            .join(' ');
         } else {
           const lgWrap = cardEl.querySelector('.legend-icons');
           if (lgWrap) {
-            icons = Array.prototype.slice.call(lgWrap.querySelectorAll('img'))
-              .map(i => i.outerHTML).join(' ');
+            icons = [...lgWrap.querySelectorAll('img')]
+              .map(i => i.outerHTML)
+              .join(' ');
           } else {
             const runeImg = cardEl.querySelector('.rune-image img');
             if (runeImg) icons = runeImg.outerHTML;
           }
         }
-
-        // get name
+        // extract name with fallbacks
         const nameEl = cardEl.querySelector('.name')
           || cardEl.querySelector('.main-title')
           || cardEl.querySelector('.bf-name')
           || cardEl.querySelector('.rune-title');
         const name = nameEl ? nameEl.textContent.trim() : vn;
-
-        // row HTML
-       const row = document.createElement('div');
-row.className = 'overview-item';
-row.innerHTML =
-  '<span class="overview-label">' +
-    icons +
-    '<span class="overview-text">' + name + '</span>' +
-  '</span>' +
-  '<span class="overview-variant">' + vn + '</span>' +
-  '<span class="overview-controls">' +
-    '<button class="overview-dec" data-vn="' + vn + '">−</button>' +
-    '<span class="overview-count">' + count + '</span>' +
-    '<button class="overview-inc" data-vn="' + vn + '">+</button>' +
-  '</span>';
-section.appendChild(row);
+        const row = document.createElement('div'); row.className = 'overview-item';
+        row.innerHTML = `
+          <span class="overview-icons">${icons}</span> ${name} - ${vn}
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
+        section.appendChild(row);
       });
-      listEl.appendChild(section);
+      listEl.appendChild(section);.appendChild(section);
     });
 
-    // wire inc/dec inside overview
-    listEl.querySelectorAll('.overview-inc').forEach(btn =>
-      btn.onclick = () => window.addCard(btn.dataset.vn)
-    );
-    listEl.querySelectorAll('.overview-dec').forEach(btn =>
-      btn.onclick = () => window.removeCard(btn.dataset.vn)
-    );
+    // Wire inc/dec buttons
+    listEl.querySelectorAll('.overview-inc').forEach(btn => btn.addEventListener('click', () => window.addCard(btn.dataset.vn)));
+    listEl.querySelectorAll('.overview-dec').forEach(btn => btn.addEventListener('click', () => window.removeCard(btn.dataset.vn)));
   }
   btnOverview.addEventListener('click', buildOverview);
 
