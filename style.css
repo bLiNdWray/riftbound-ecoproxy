@@ -238,34 +238,64 @@ html, body {
   padding-bottom: 0.25rem;
 }
 
-/* Each item row */
+/* Overview item layout */
 .overview-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
   align-items: center;
-  flex-wrap: wrap;    /* wrap onto new line if too long */
-  gap: 0.5rem;        /* space between chunks */
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
-/* Icons container */
+/* Icons column (auto width) */
+/* Name/variant column stretches to fill space */
 .overview-icons {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;       /* space between icons */
-  flex-shrink: 0;     /* don’t let icons force row to grow */
+  gap: 0.25rem;
 }
-.overview-icons img {
-  width: 1.2em;
-  height: auto;
-  display: block;
+
+/* Name and variant combined */
+.overview-item > span:nth-child(2) {
+  /* nothing needed here—this is the 1fr column */
+}
+
+/* Decrement button (third button) */
+.overview-dec {
+  justify-self: end;
 }
 
 /* Count badge */
 .overview-count {
-  margin: 0 0.5rem;
+  justify-self: center;
+  background: #f0f0f0;
+  padding: 0 0.4em;
+  border-radius: 3px;
 }
 
-/* Increment/decrement buttons */
-.overview-item span,
+/* Increment button */
+.overview-inc {
+  justify-self: start;
+}
+
+/* Match buttons to your theme */
 .overview-item button {
-  flex-shrink: 0;
+  background: var(--your-primary-bg);      /* e.g. #0055aa */
+  color: var(--your-on-primary);           /* e.g. #fff */
+  border: 1px solid var(--your-primary-dark);
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.overview-item button:hover {
+  background: var(--your-primary-dark);
+}
+
+/* Variant text styling */
+.overview-item span:nth-child(2) + span { 
+  /* This selects the variant text if you separated name/variant into spans */
+  font-weight: bold;
+  text-align: right;
 }
