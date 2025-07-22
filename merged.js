@@ -4,6 +4,38 @@
   const API_BASE     = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
   const SHEET_NAME   = 'Riftbound Cards';
   const container  = document.getElementById('card-container');
+
+  // ── Type Order & Sorted Insertion ─────────────────────────────────
+  const typeOrder = ['legend','battlefield','rune','unit','spell','gear'];
+  function getType(el) {
+    return typeOrder.find(t => el.classList.contains(t)) || 'unit';
+  }
+  function getName(el) {
+    return el.querySelector('.name')?.textContent.trim() ||
+           el.querySelector('.main-title')?.textContent.trim() ||
+           el.querySelector('.bf-name')?.textContent.trim() ||
+           el.querySelector('.rune-title')?.textContent.trim() || '';
+  }
+  function insertSorted(el) {
+    const newType = getType(el);
+    const newIdx  = typeOrder.indexOf(newType);
+    const children = Array.from(container.children);
+    for (const child of children) {
+      const childType = getType(child);
+      const childIdx  = typeOrder.indexOf(childType);
+      if (newIdx < childIdx) {
+        container.insertBefore(el, child);
+        return;
+      }
+      if (newIdx === childIdx) {
+        if (getName(el).localeCompare(getName(child)) < 0) {
+          container.insertBefore(el, child);
+          return;
+        }
+      }
+    }
+    container.appendChild(el);
+  }
   // ── Type Order (for sorted insertion) ─────────────────────────────────
   const typeOrder = ['legend','battlefield','rune','unit','spell','gear'];
 
