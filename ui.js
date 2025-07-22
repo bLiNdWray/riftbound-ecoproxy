@@ -27,8 +27,8 @@
     }
   }
 
- // ===== Helpers =====
- function refreshBadge(vn) {
+  // ===== Helpers =====
+  function refreshBadge(vn) {
     const count = document.querySelectorAll(
       `#card-container .card[data-variant="${vn}"]`
     ).length;
@@ -36,48 +36,64 @@
       `#card-container .card[data-variant="${vn}"] .qty-badge`
     );
     if (badge) badge.textContent = count;
- }
+  }
 
- function updateCount() {
+  function updateCount() {
     const total = document.querySelectorAll('#card-container .card').length;
     const lbl   = document.getElementById('card-count');
     if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
- }
+  }
 
-// ===== Wrap addCard/removeCard =====
-const origAdd = window.addCard;
-window.addCard = function(vn) {
-  const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-  origAdd(vn);
-  return document.querySelectorAll(`[data-variant="${vn}"]`).length > before;
-};
+  // ===== Wrap addCard/removeCard =====
+  const origAdd = window.addCard;
+  window.addCard = function(vn) {
+    const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
+    const added = origAdd(vn);
+    const after = document.querySelectorAll(`[data-variant="${vn}"]`).length;
+    if (added && after > before) {
+      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+      saveState();
+      refreshBadge(vn);
+      updateCount();
+    }
+    return added;
+  };
 
-const origRm = window.removeCard;
-window.removeCard = function(vn, el) {
-  const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
-  if (!cardEl) return false;
-  origRm(vn, cardEl);
-  return true;
-};
+  const origRm = window.removeCard;
+  window.removeCard = function(vn, el) {
+    const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
+    if (!cardEl) return false;
+    const removed = origRm(vn, cardEl);
+    if (removed) {
+      window.cardCounts[vn] = (window.cardCounts[vn] || 1) - 1;
+      if (window.cardCounts[vn] <= 0) delete window.cardCounts[vn];
+      saveState();
+      refreshBadge(vn);
+      updateCount();
+    }
+    return removed;
+  };
 
-// ===== On Load: Recount everything =====
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('#card-container .card').forEach(card => {
-    const vn = card.getAttribute('data-variant');
-    refreshBadge(vn);
+  // ===== On Load: Recount everything =====
+  document.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    // rebuild UI and badges from persisted state
+    Object.entries(window.cardCounts).forEach(([vn, count]) => {
+      for (let i = 0; i < count; i++) {
+        origAdd(vn);
+      }
+      refreshBadge(vn);
+    });
+    updateCount();
   });
-  updateCount();
-});
 
   // — Import List Modal —
-  btnImport.addEventListener('click',()=>{
-    // remove old
+  btnImport.addEventListener('click', () => {
     const prev = document.getElementById('import-modal');
-    if(prev) prev.remove();
+    if (prev) prev.remove();
 
-    // build modal (inline styles removed)
     const overlay = document.createElement('div');
-    overlay.id = 'import-modal';
+    overlay.id        = 'import-modal';
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal-content">
@@ -92,148 +108,119 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
     document.body.appendChild(overlay);
 
-    // refs
     const areaEl   = overlay.querySelector('#import-area');
     const clearChk = overlay.querySelector('#import-clear');
     const closeBtn = overlay.querySelector('#close-import');
     const cancelBtn= overlay.querySelector('#import-cancel');
     const okBtn    = overlay.querySelector('#import-ok');
 
-    closeBtn.onclick  = ()=>overlay.remove();
-    cancelBtn.onclick = ()=>overlay.remove();
+    closeBtn.onclick  = () => overlay.remove();
+    cancelBtn.onclick = () => overlay.remove();
 
     // prefill
-    areaEl.value = Object.keys(window.cardCounts).join(' ');
+    areaEl.value = Object.entries(window.cardCounts)
+      .flatMap(([vn, count]) => Array(count).fill(vn))
+      .join(' ');
 
-    okBtn.onclick = ()=>{
+    okBtn.onclick = () => {
       overlay.remove();
-      if(clearChk.checked) {
+      if (clearChk.checked) {
         document.getElementById('card-container').innerHTML = '';
         window.cardCounts = {};
+        saveState();
         updateCount();
       }
-      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      const tokens = (areaEl.value || '').trim().split(/\s+/).filter(Boolean);
       isImporting = true;
-      tokens.forEach(tok=>{
+      tokens.forEach(tok => {
         const parts = tok.split('-');
-        if(parts.length<2) return;
-        const vn = parts[0]+'-'+parts[1];
+        if (parts.length < 2) return;
+        const vn = parts[0] + '-' + parts[1];
         window.addCard(vn);
       });
       isImporting = false;
-      saveState();
       updateCount();
     };
   });
 
   // — Other Top-Bar Buttons —
-  btnPrint.addEventListener('click',()=>{
-    document.getElementById('top-bar').style.display='none';
-    document.getElementById('search-modal').classList.add('hidden');
+  btnPrint.addEventListener('click', () => {
+    document.getElementById('top-bar').style.display = 'none';
     window.print();
-    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
+    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
   });
-  // Attach Overview button
+
   btnOverview.addEventListener('click', buildOverview);
 
-  btnFullProxy.addEventListener('click',()=>{
+  btnFullProxy.addEventListener('click', () => {
     fullProxy = !fullProxy;
-    document
-      .querySelectorAll('#card-container .card[data-variant]')
-      .forEach(card => {
-        const vn   = card.getAttribute('data-variant');
-        const type = card.classList.contains('legend')      ? 'Legend'
-                   : card.classList.contains('rune')        ? 'Runes'
-                   : card.classList.contains('battlefield') ? 'Battlefield'
-                   : card.classList.contains('unit')        ? 'Units'
-                   : card.classList.contains('spell')       ? 'Spells'
-                   : card.classList.contains('gear')        ? 'Gear'
-                   : 'Other';
-
-        groups[type] = groups[type] || {};
-        groups[type][vn] = (groups[type][vn] || 0) + 1;
-      });
+    // existing fullProxy logic...
   });
-  btnReset.addEventListener('click',()=>{
+
+  btnReset.addEventListener('click', () => {
     window.cardCounts = {};
     document.getElementById('card-container').innerHTML = '';
     saveState();
     updateCount();
   });
 
-  // — On Load: Restore State —
-  document.addEventListener('DOMContentLoaded',()=>{
-    loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c])=>{
-      for(let i=0;i<c;i++) window.addCard(vn);
+  // Overview wiring
+  function wireOverviewButtons(listEl) {
+    listEl.querySelectorAll('.overview-inc').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const vn = btn.dataset.vn;
+        if (window.addCard(vn)) buildOverview();
+      });
     });
-    updateCount();
-  });
+    listEl.querySelectorAll('.overview-dec').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const vn = btn.dataset.vn;
+        if (window.removeCard(vn)) buildOverview();
+      });
+    });
+  }
 
-// Function to wire Overview modal
-function wireOverviewButtons(listEl) {
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      if (window.addCard(vn)) {
-        buildOverview();
+  // Overview Builder
+  function buildOverview() {
+    const prev = document.getElementById('overview-modal');
+    if (prev) prev.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id        = 'overview-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button id="close-overview" class="modal-close">×</button>
+        <h2>Overview</h2>
+        <div id="overview-list"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#close-overview').onclick = () => overlay.remove();
+
+    // Build grouped overview from state
+    const typesOrder = ['Legend','Runes','Battlefield','Units','Spells','Gear','Other'];
+    const groups = {};
+    Object.entries(window.cardCounts).forEach(([vn, count]) => {
+      const cardEl = document.querySelector(
+        `#card-container .card[data-variant="${vn}"]`
+      );
+      let type = 'Other';
+      if (cardEl) {
+        if (cardEl.classList.contains('legend'))      type = 'Legend';
+        else if (cardEl.classList.contains('rune'))   type = 'Runes';
+        else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
+        else if (cardEl.classList.contains('unit'))   type = 'Units';
+        else if (cardEl.classList.contains('spell'))  type = 'Spells';
+        else if (cardEl.classList.contains('gear'))   type = 'Gear';
       }
+      groups[type] = groups[type] || {};
+      groups[type][vn] = count;
     });
-  });
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      if (window.removeCard(vn)) {
-        buildOverview();
-      }
-    });
-  });
-}
 
-// Overview Builder
-function buildOverview() {
-  const prev = document.getElementById('overview-modal');
-  if (prev) prev.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id        = 'overview-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-content">
-      <button id="close-overview" class="modal-close">×</button>
-      <h2>Overview</h2>
-      <div id="overview-list"></div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.querySelector('#close-overview').onclick = () => overlay.remove();
-
-  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
-  const groups = {};
-  Object.entries(window.cardCounts).forEach(([vn, count]) => {
-    const cardEl = document.querySelector(
-      `#card-container .card[data-variant="${vn}"]`
-    );
-    const type = cardEl
-      ? ( cardEl.classList.contains('legend')      ? 'Legend'
-        : cardEl.classList.contains('rune')        ? 'Runes'
-        : cardEl.classList.contains('battlefield') ? 'Battlefield'
-        : cardEl.classList.contains('unit')        ? 'Units'
-        : cardEl.classList.contains('spell')       ? 'Spells'
-        : cardEl.classList.contains('gear')        ? 'Gear'
-        : 'Other')
-      : 'Other';
-
-    groups[type] = groups[type] || {};
-    groups[type][vn] = count;
-  });
-
-  const listEl = document.getElementById('overview-list');
-  typesOrder
-    .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
-    .forEach(type => {
+    const listEl = document.getElementById('overview-list');
+    typesOrder.forEach(type => {
       const sectionData = groups[type];
       if (!sectionData) return;
-
       const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
       const section = document.createElement('div');
       section.className = 'overview-section';
@@ -260,18 +247,18 @@ function buildOverview() {
       listEl.appendChild(section);
     });
 
-  wireOverviewButtons(listEl);
-}
+    wireOverviewButtons(listEl);
+  }
 
-// Live Recount via MutationObserver
-(() => {
- const observer = new MutationObserver(() => {
-  updateCount();
-  new Set(
-    [...document.querySelectorAll('.card[data-variant]')]
-      .map(c=>c.getAttribute('data-variant'))
-  ).forEach(refreshBadge);
-});
-observer.observe(document.getElementById('card-container'), { childList: true });
-})();
+  // Live Recount
+  (() => {
+    const observer = new MutationObserver(() => {
+      updateCount();
+      new Set(
+        [...document.querySelectorAll('.card[data-variant]')]
+          .map(c=>c.getAttribute('data-variant'))
+      ).forEach(refreshBadge);
+    });
+    observer.observe(document.getElementById('card-container'), { childList: true });
+  })();
 })();
