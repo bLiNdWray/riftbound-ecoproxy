@@ -91,15 +91,14 @@
     loadState();
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
       for (let i = 0; i < count; i++) {
-        origAdd(vn);
+        // use wrapped addCard to sync badges and counts
+        window.addCard(vn);
       }
     });
-    Object.keys(window.cardCounts).forEach(refreshBadge);
     updateCount();
   });
 
-  // — Import List Modal —
-  btnImport.addEventListener('click', () => {
+  // — Import List Modal —('click', () => {
     const prev = document.getElementById('import-modal');
     if (prev) prev.remove();
 
