@@ -66,16 +66,6 @@ window.addCard = function(vn) {
 };
 
 const origRm = window.removeCard;
-window.removeCard = function(vn, el) {
-  const removed = origRm(vn, el);
-  if (removed && window.cardCounts[vn] > 0) {
-    window.cardCounts[vn]--;
-    if (window.cardCounts[vn] === 0) delete window.cardCounts[vn];
-    saveState();
-    console.log(`cardCounts after remove:`, window.cardCounts);
-  }
-  return removed;
-};
   window.removeCard = function(vn, el) {
     const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
     if (!cardEl) return false;
