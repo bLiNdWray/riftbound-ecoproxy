@@ -268,30 +268,59 @@ html, body {
   /* inherits from .modal-content: white box, padding, shadows */
 }
 
-/* Overview List Container */
+/* — Overview Modal Styles — */
+
+/* Container for the list */
 #overview-list {
-  max-height: 60vh;        /* allow scrolling if long */
+  max-height: 60vh;          /* scroll if too long */
   overflow-y: auto;
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  padding: 0 0.5rem;
 }
 
-/* Each row in the list */
+/* Each item */
 .overview-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
-/* Text & count styling */
+/* Card name text */
 .overview-text {
+  flex: 1;
   font-weight: 500;
+  color: #333;
+  margin-right: 1rem;
 }
+
+/* Variant-count badge */
 .overview-count {
   font-size: 0.9rem;
-  color: #666;
+  color: #555;
+  margin-left: 0.5rem;
 }
+
+/* Optional: inc/dec buttons */
+.overview-inc,
+.overview-dec {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.overview-inc:hover,
+.overview-dec:hover {
+  background: #0056b3;
+}
+
