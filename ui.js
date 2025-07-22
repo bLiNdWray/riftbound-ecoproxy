@@ -220,10 +220,14 @@ function buildOverview() {
 
   // Define the order
   const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
- // 1) Group from cardCounts
+
+  // 1) Group from cardCounts
   const groups = {};
   Object.entries(window.cardCounts).forEach(([vn, count]) => {
-    const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
+    // Determine type from any one DOM card
+    const cardEl = document.querySelector(
+      `#card-container .card[data-variant="${vn}"]`
+    );
     const type = cardEl
       ? ( cardEl.classList.contains('legend')      ? 'Legend'
         : cardEl.classList.contains('rune')        ? 'Runes'
@@ -233,31 +237,36 @@ function buildOverview() {
         : cardEl.classList.contains('gear')        ? 'Gear'
         : 'Other')
       : 'Other';
+
     groups[type] = groups[type] || {};
     groups[type][vn] = count;
   });
 
-  // 2) Render each type in order…
-  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
+  // 2) Render each type in order
   const listEl = document.getElementById('overview-list');
   typesOrder
-    .concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
+    .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
     .forEach(type => {
       const sectionData = groups[type];
       if (!sectionData) return;
-      const total = Object.values(sectionData).reduce((a,b)=>a+b,0);
+
+      // Section header with total count
+      const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
       const section = document.createElement('div');
       section.className = 'overview-section';
       section.innerHTML = `<h3>${type} (${total})</h3>`;
 
+      // Variant rows
       Object.entries(sectionData).forEach(([vn, count]) => {
-        const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
-        const name  = cardEl?.dataset.name || vn;
-        const logo  = cardEl?.dataset.colorLogo || '';
-        const row   = document.createElement('div');
+        const cardEl = document.querySelector(
+          `#card-container .card[data-variant="${vn}"]`
+        );
+        const name = cardEl?.dataset.name || vn;
+        const logo = cardEl?.dataset.colorLogo || '';
+        const row  = document.createElement('div');
         row.className = 'overview-item';
         row.innerHTML = `
-          <img src="${logo}" class="overview-logo"/>
+          <img src="${logo}" class="overview-logo" alt="icon"/>
           <span class="overview-text">${name} – ${vn}</span>
           <button class="overview-dec" data-vn="${vn}">−</button>
           <span class="overview-count">${count}</span>
