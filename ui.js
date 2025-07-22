@@ -28,62 +28,46 @@
   }
 
  // ===== Helpers =====
-function refreshBadge(vn) {
-  // count DOM elements for this variant
-  const count = document.querySelectorAll(
-    `#card-container .card[data-variant="${vn}"]`
-  ).length;
-  const badge = document.querySelector(
-    `#card-container .card[data-variant="${vn}"] .qty-badge`
-  );
-  if (badge) badge.textContent = count;
-}
+ function refreshBadge(vn) {
+    const count = document.querySelectorAll(
+      `#card-container .card[data-variant="${vn}"]`
+    ).length;
+    const badge = document.querySelector(
+      `#card-container .card[data-variant="${vn}"] .qty-badge`
+    );
+    if (badge) badge.textContent = count;
+ }
 
-function updateCount() {
-  // total = all cards in container
-  const total = document.querySelectorAll('#card-container .card').length;
-  const lbl   = document.getElementById('card-count');
-  if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
-}
+ function updateCount() {
+    const total = document.querySelectorAll('#card-container .card').length;
+    const lbl   = document.getElementById('card-count');
+    if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+ }
 
 // ===== Wrap addCard/removeCard =====
 const origAdd = window.addCard;
 window.addCard = function(vn) {
-  const beforeDOM = document.querySelectorAll(
-    `#card-container .card[data-variant="${vn}"]`
-  ).length;
+  const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
   origAdd(vn);
-  const afterDOM = document.querySelectorAll(
-    `#card-container .card[data-variant="${vn}"]`
-  ).length;
-  if (afterDOM > beforeDOM) {
-    // only refresh the badge for this vn
-    refreshBadge(vn);
-    // and update the global counter
-    updateCount();
-    return true;
-  }
-  return false;
+  return document.querySelectorAll(`[data-variant="${vn}"]`).length > before;
 };
 
 const origRm = window.removeCard;
 window.removeCard = function(vn, el) {
-  origRm(vn, el);
-  // after DOM removal, update this badge & total
-  refreshBadge(vn);
-  updateCount();
+  const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
+  if (!cardEl) return false;
+  origRm(vn, cardEl);
+  return true;
 };
 
 // ===== On Load: Recount everything =====
 document.addEventListener('DOMContentLoaded', () => {
-  // once cards are initially drawn:
   document.querySelectorAll('#card-container .card').forEach(card => {
     const vn = card.getAttribute('data-variant');
     refreshBadge(vn);
   });
   updateCount();
 });
-
 
   // — Import List Modal —
   btnImport.addEventListener('click',()=>{
@@ -149,13 +133,26 @@ document.addEventListener('DOMContentLoaded', () => {
     window.print();
     setTimeout(()=>document.getElementById('top-bar').style.display='',0);
   });
-  btnOverview.addEventListener('click',buildOverview);
+  // Attach Overview button
+  btnOverview.addEventListener('click', buildOverview);
+
   btnFullProxy.addEventListener('click',()=>{
     fullProxy = !fullProxy;
-    Object.keys(window.cardCounts).forEach(vn=>{
-      const img = document.querySelector(`[data-variant="${vn}"] img.card-img`);
-      if(img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
-    });
+    document
+      .querySelectorAll('#card-container .card[data-variant]')
+      .forEach(card => {
+        const vn   = card.getAttribute('data-variant');
+        const type = card.classList.contains('legend')      ? 'Legend'
+                   : card.classList.contains('rune')        ? 'Runes'
+                   : card.classList.contains('battlefield') ? 'Battlefield'
+                   : card.classList.contains('unit')        ? 'Units'
+                   : card.classList.contains('spell')       ? 'Spells'
+                   : card.classList.contains('gear')        ? 'Gear'
+                   : 'Other';
+
+        groups[type] = groups[type] || {};
+        groups[type][vn] = (groups[type][vn] || 0) + 1;
+      });
   });
   btnReset.addEventListener('click',()=>{
     window.cardCounts = {};
@@ -173,72 +170,108 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCount();
   });
 
-  // — Overview Builder —
-  function buildOverview(){
-    const prev = document.getElementById('overview-modal');
-    if(prev) prev.remove();
-    const overlay = document.createElement('div');
-    overlay.id = 'overview-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-content">
-        <button id="close-overview" class="modal-close">×</button>
-        <h2>Overview</h2>
-        <div id="overview-list"></div>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.querySelector('#close-overview').onclick = ()=>overlay.remove();
-
-    const order = ['Legend','Runes','Units','Spells','Gear','Battlefield'];
-    const grp = {};
-    Object.keys(window.cardCounts).forEach(vn=>{
-      const el = document.querySelector(`[data-variant="${vn}"]`);
-      const t  = el&&el.dataset.type?el.dataset.type:'Other';
-      (grp[t]=grp[t]||[]).push(vn);
+// Function to wire Overview modal
+function wireOverviewButtons(listEl) {
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      if (window.addCard(vn)) {
+        buildOverview();
+      }
     });
-    const listEl = document.getElementById('overview-list');
-    order.forEach(type=>{
-      if(!grp[type]) return;
-      const sec = document.createElement('div');
-      const h = document.createElement('h3');
-      h.textContent = type; sec.appendChild(h);
-      grp[type].forEach(vn=>{
-        const el    = document.querySelector(`[data-variant="${vn}"]`);
-        const name  = el&&el.dataset.name?el.dataset.name:vn;
-        const setNo = el&&el.dataset.set?el.dataset.set:'';
-        const logo  = el&&el.dataset.colorLogo?el.dataset.colorLogo:'';
-        const row = document.createElement('div');
-        row.className = 'overview-item';
-        row.innerHTML=`
-          <img src="${logo}" class="overview-logo"/>
-          <span>${name} (${setNo})</span>
-          <button class="overview-dec" data-vn="${vn}">–</button>
-          <span class="overview-count">${window.cardCounts[vn]}</span>
-          <button class="overview-inc" data-vn="${vn}">+</button>`;
-        sec.appendChild(row);
-      });
-      listEl.appendChild(sec);
+  });
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      if (window.removeCard(vn)) {
+        buildOverview();
+      }
     });
-  }
-// — Live Recount via MutationObserver —
-(() => {
-  const container = document.getElementById('card-container');
-  if (!container) return;
+  });
+}
 
-  const observer = new MutationObserver(() => {
-    // Recount top-bar total
-    updateCount();
+// Overview Builder
+function buildOverview() {
+  const prev = document.getElementById('overview-modal');
+  if (prev) prev.remove();
 
-    // Recount each variant’s badge
-    // Gather all variants currently in the DOM
-    const variants = new Set();
-    container.querySelectorAll('.card[data-variant]').forEach(card => {
-      variants.add(card.getAttribute('data-variant'));
-    });
-    // Update each badge
-    variants.forEach(vn => refreshBadge(vn));
+  const overlay = document.createElement('div');
+  overlay.id        = 'overview-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content">
+      <button id="close-overview" class="modal-close">×</button>
+      <h2>Overview</h2>
+      <div id="overview-list"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#close-overview').onclick = () => overlay.remove();
+
+  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
+  const groups = {};
+  Object.entries(window.cardCounts).forEach(([vn, count]) => {
+    const cardEl = document.querySelector(
+      `#card-container .card[data-variant="${vn}"]`
+    );
+    const type = cardEl
+      ? ( cardEl.classList.contains('legend')      ? 'Legend'
+        : cardEl.classList.contains('rune')        ? 'Runes'
+        : cardEl.classList.contains('battlefield') ? 'Battlefield'
+        : cardEl.classList.contains('unit')        ? 'Units'
+        : cardEl.classList.contains('spell')       ? 'Spells'
+        : cardEl.classList.contains('gear')        ? 'Gear'
+        : 'Other')
+      : 'Other';
+
+    groups[type] = groups[type] || {};
+    groups[type][vn] = count;
   });
 
-  observer.observe(container, { childList: true });
+  const listEl = document.getElementById('overview-list');
+  typesOrder
+    .concat(Object.keys(groups).filter(t => !typesOrder.includes(t)))
+    .forEach(type => {
+      const sectionData = groups[type];
+      if (!sectionData) return;
+
+      const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
+      const section = document.createElement('div');
+      section.className = 'overview-section';
+      section.innerHTML = `<h3>${type} (${total})</h3>`;
+
+      Object.entries(sectionData).forEach(([vn, count]) => {
+        const cardEl = document.querySelector(
+          `#card-container .card[data-variant="${vn}"]`
+        );
+        const name = cardEl?.dataset.name || vn;
+        const logo = cardEl?.dataset.colorLogo || '';
+        const row  = document.createElement('div');
+        row.className = 'overview-item';
+        row.innerHTML = `
+          <img src="${logo}" class="overview-logo" alt="icon"/>
+          <span class="overview-text">${name} – ${vn}</span>
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        `;
+        section.appendChild(row);
+      });
+
+      listEl.appendChild(section);
+    });
+
+  wireOverviewButtons(listEl);
+}
+
+// Live Recount via MutationObserver
+(() => {
+ const observer = new MutationObserver(() => {
+  updateCount();
+  new Set(
+    [...document.querySelectorAll('.card[data-variant]')]
+      .map(c=>c.getAttribute('data-variant'))
+  ).forEach(refreshBadge);
+});
+observer.observe(document.getElementById('card-container'), { childList: true });
 })();
 })();
