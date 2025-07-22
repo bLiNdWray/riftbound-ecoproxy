@@ -199,15 +199,16 @@ html, body {
   padding-bottom: 0.25rem;
 }
 
-/* 3-column Overview layout: icons+name | variant | controls */
+/* Overview: single‐line, 3-column layout */
 .overview-item {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
+  white-space: nowrap;    /* prevent any wrapping */
 }
 
-/* Icons + Name in column 1 */
+/* Icons + Name together in column 1 */
 .overview-icons,
 .overview-text {
   grid-column: 1;
@@ -216,21 +217,16 @@ html, body {
   gap: 0.25rem;
 }
 
-/* Icon sizing */
-.overview-icons img {
-  width: 1.2em;
-  height: auto;
-  display: block;
-}
-
-/* Variant number centered (column 2) */
+/* Variant centered in column 2 */
 .overview-variant {
   grid-column: 2;
   justify-self: center;
+  white-space: nowrap;
+  flex-shrink: 0;
   font-weight: bold;
 }
 
-/* Controls cluster (column 3) */
+/* Controls (–, count, +) in column 3 */
 .overview-dec,
 .overview-count,
 .overview-inc {
@@ -240,24 +236,15 @@ html, body {
   gap: 0.25rem;
 }
 
-/* Count badge styling */
+/* Ensure buttons stay on the same line */
+.overview-item button,
 .overview-count {
-  background: #f0f0f0;
-  padding: 0 0.4em;
-  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Theme-matched buttons */
-.overview-item button {
-  background: #007bff;
-  color: #fff;
-  border: 1px solid #0056b3;
-  border-radius: 4px;
-  padding: 0.2em 0.4em;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
+/* Tweak gaps if it still feels too wide */
+.overview-item {
+  gap: 0.5rem;
 }
-.overview-item button:hover {
-  background: #0056b3;
-}
+
