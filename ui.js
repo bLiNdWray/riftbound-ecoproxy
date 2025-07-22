@@ -7,7 +7,8 @@
   const btnOverview  = document.getElementById('btn-overview');
   const btnFullProxy = document.getElementById('btn-full-proxy');
   const btnReset     = document.getElementById('btn-reset');
-  
+  const countLabel   = document.getElementById('card-count');
+
   // — State —
   window.cardCounts = {};
   let isImporting   = false;
@@ -26,7 +27,7 @@
     }
   }
 
-  // ===== Helpers =====
+  // ===== Badge & Count Helpers =====
   function refreshBadge(vn) {
     const count = document.querySelectorAll(
       `#card-container .card[data-variant="${vn}"]`
@@ -36,56 +37,121 @@
     );
     if (badge) badge.textContent = count;
   }
-
   function updateCount() {
     const total = document.querySelectorAll('#card-container .card').length;
-    const lbl   = document.getElementById('card-count');
-    if (lbl) lbl.textContent = total + ' card' + (total !== 1 ? 's' : '');
+    if (countLabel) countLabel.textContent = total + ' card' + (total !== 1 ? 's' : '');
   }
 
-  // ===== Wrap addCard/removeCard =====
+  // ===== Wrap addCard/removeCard and track counts =====
   const origAdd = window.addCard;
   window.addCard = function(vn) {
     const before = document.querySelectorAll(`[data-variant="${vn}"]`).length;
-    origAdd(vn);
-    return document.querySelectorAll(`[data-variant="${vn}"]`).length > before;
+    const added = origAdd(vn);
+    if (added) {
+      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
+      saveState();
+      refreshBadge(vn);
+      updateCount();
+    }
+    return added;
   };
 
   const origRm = window.removeCard;
   window.removeCard = function(vn, el) {
     const cardEl = el || document.querySelector(`[data-variant="${vn}"]`);
     if (!cardEl) return false;
-    origRm(vn, cardEl);
-    return true;
+    const removed = origRm(vn, cardEl);
+    if (removed && window.cardCounts[vn] > 0) {
+      window.cardCounts[vn]--;
+      if (window.cardCounts[vn] === 0) delete window.cardCounts[vn];
+      saveState();
+      refreshBadge(vn);
+      updateCount();
+    }
+    return removed;
   };
 
   // ===== On Load: Recount everything =====
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#card-container .card').forEach(card => {
       const vn = card.getAttribute('data-variant');
-      refreshBadge(vn);
+      // initialize counts from DOM
+      window.cardCounts[vn] = (window.cardCounts[vn] || 0) + 1;
     });
+    saveState();
+    Object.keys(window.cardCounts).forEach(refreshBadge);
     updateCount();
   });
 
   // — Import List Modal —
-  btnImport.addEventListener('click',()=>{/* existing import code unchanged */});
+  btnImport.addEventListener('click',()=>{
+    const prev = document.getElementById('import-modal');
+    if(prev) prev.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id        = 'import-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <button id="close-import" class="modal-close">×</button>
+        <h2>Import List</h2>
+        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
+        <label><input type="checkbox" id="import-clear" /> Clear existing cards before import</label>
+        <div class="modal-actions">
+          <button id="import-cancel" class="topbar-btn">Cancel</button>
+          <button id="import-ok"     class="topbar-btn">Import</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const areaEl   = overlay.querySelector('#import-area');
+    const clearChk = overlay.querySelector('#import-clear');
+    const closeBtn = overlay.querySelector('#close-import');
+    const cancelBtn= overlay.querySelector('#import-cancel');
+    const okBtn    = overlay.querySelector('#import-ok');
+
+    closeBtn.onclick  = ()=>overlay.remove();
+    cancelBtn.onclick = ()=>overlay.remove();
+
+    areaEl.value = Object.keys(window.cardCounts).join(' ');
+
+    okBtn.onclick = ()=>{
+      overlay.remove();
+      if(clearChk.checked) {
+        document.getElementById('card-container').innerHTML = '';
+        window.cardCounts = {};
+        saveState();
+      }
+      const tokens = (areaEl.value||'').trim().split(/\s+/).filter(Boolean);
+      tokens.forEach(tok=>{
+        const parts = tok.split('-');
+        if(parts.length<2) return;
+        const vn = parts[0]+'-'+parts[1];
+        window.addCard(vn);
+      });
+    };
+  });
 
   // — Other Top-Bar Buttons —
-  btnPrint.addEventListener('click',()=>{/* existing print code unchanged */});
+  btnPrint.addEventListener('click',()=>{
+    document.getElementById('top-bar').style.display='none';
+    document.getElementById('search-modal').classList.add('hidden');
+    window.print();
+    setTimeout(()=>document.getElementById('top-bar').style.display='',0);
+  });
   btnOverview.addEventListener('click', buildOverview);
-  btnFullProxy.addEventListener('click',()=>{/* existing fullProxy code unchanged */});
-  btnReset.addEventListener('click',()=>{/* existing reset code unchanged */});
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c])=>{
-      for(let i=0;i<c;i++) window.addCard(vn);
-    });
+  btnFullProxy.addEventListener('click',()=>{
+    fullProxy = !fullProxy;
+    // ... existing fullProxy logic ...
+  });
+  btnReset.addEventListener('click',()=>{
+    window.cardCounts = {};
+    document.getElementById('card-container').innerHTML = '';
+    saveState();
     updateCount();
   });
 
-  // ===== Overview Builder =====
+  // — Overview Builder —
   function wireOverviewButtons(listEl) {
     listEl.querySelectorAll('.overview-inc').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -117,24 +183,21 @@
     document.body.appendChild(overlay);
     overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-    // Group by window.cardCounts
     const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
     const groups = {};
     Object.entries(window.cardCounts).forEach(([vn, count]) => {
-      if (count < 1) return;
       const cardEl = document.querySelector(
         `#card-container .card[data-variant="${vn}"]`
       );
       const type = cardEl
-        ? ( cardEl.classList.contains('legend')      ? 'Legend'
-          : cardEl.classList.contains('rune')        ? 'Runes'
-          : cardEl.classList.contains('battlefield') ? 'Battlefield'
-          : cardEl.classList.contains('unit')        ? 'Units'
-          : cardEl.classList.contains('spell')       ? 'Spells'
-          : cardEl.classList.contains('gear')        ? 'Gear'
-          : 'Other')
+        ? (cardEl.classList.contains('legend')      ? 'Legend'
+           : cardEl.classList.contains('rune')        ? 'Runes'
+           : cardEl.classList.contains('battlefield') ? 'Battlefield'
+           : cardEl.classList.contains('unit')        ? 'Units'
+           : cardEl.classList.contains('spell')       ? 'Spells'
+           : cardEl.classList.contains('gear')        ? 'Gear'
+           : 'Other')
         : 'Other';
-
       groups[type] = groups[type] || {};
       groups[type][vn] = count;
     });
@@ -145,12 +208,10 @@
       .forEach(type => {
         const sectionData = groups[type];
         if (!sectionData) return;
-
         const total = Object.values(sectionData).reduce((a,b) => a + b, 0);
         const section = document.createElement('div');
         section.className = 'overview-section';
         section.innerHTML = `<h3>${type} (${total})</h3>`;
-
         Object.entries(sectionData).forEach(([vn, count]) => {
           const cardEl = document.querySelector(
             `#card-container .card[data-variant="${vn}"]`
@@ -168,18 +229,19 @@
           `;
           section.appendChild(row);
         });
-
         listEl.appendChild(section);
       });
-
     wireOverviewButtons(listEl);
   }
 
-  // Live Recount via MutationObserver
+  // — Live Recount via MutationObserver —
   (() => {
     const observer = new MutationObserver(() => {
       updateCount();
-      Object.keys(window.cardCounts).forEach(refreshBadge);
+      new Set(
+        [...document.querySelectorAll('.card[data-variant]')]
+          .map(c=>c.getAttribute('data-variant'))
+      ).forEach(refreshBadge);
     });
     observer.observe(document.getElementById('card-container'), { childList: true });
   })();
