@@ -220,43 +220,44 @@ function buildOverview() {
 
   // Define the order
   const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
-  const groups     = {};
-
-  // Group by reading the live DOM
-  document.querySelectorAll('#card-container .card[data-variant]').forEach(card => {
-    const vn   = card.getAttribute('data-variant');
-    const type = card.classList.contains('legend')      ? 'Legend'
-               : card.classList.contains('rune')        ? 'Runes'
-               : card.classList.contains('battlefield') ? 'Battlefield'
-               : card.classList.contains('unit')        ? 'Units'
-               : card.classList.contains('spell')       ? 'Spells'
-               : 'Other';
+ // 1) Group from cardCounts
+  const groups = {};
+  Object.entries(window.cardCounts).forEach(([vn, count]) => {
+    const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
+    const type = cardEl
+      ? ( cardEl.classList.contains('legend')      ? 'Legend'
+        : cardEl.classList.contains('rune')        ? 'Runes'
+        : cardEl.classList.contains('battlefield') ? 'Battlefield'
+        : cardEl.classList.contains('unit')        ? 'Units'
+        : cardEl.classList.contains('spell')       ? 'Spells'
+        : cardEl.classList.contains('gear')        ? 'Gear'
+        : 'Other')
+      : 'Other';
     groups[type] = groups[type] || {};
-    groups[type][vn] = (groups[type][vn] || 0) + 1;
+    groups[type][vn] = count;
   });
 
+  // 2) Render each type in order…
+  const typesOrder = ['Legend','Runes','Battlefield','Units','Spells'];
   const listEl = document.getElementById('overview-list');
-
-  // Render each section
-  typesOrder.concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
+  typesOrder
+    .concat(Object.keys(groups).filter(t=>!typesOrder.includes(t)))
     .forEach(type => {
-      if (!groups[type]) return;
-      const total = Object.values(groups[type]).reduce((a,b)=>a+b,0);
+      const sectionData = groups[type];
+      if (!sectionData) return;
+      const total = Object.values(sectionData).reduce((a,b)=>a+b,0);
       const section = document.createElement('div');
       section.className = 'overview-section';
       section.innerHTML = `<h3>${type} (${total})</h3>`;
-      
-      // Rows
-      Object.entries(groups[type]).forEach(([vn,count]) => {
-        const cardEl = document.querySelector(
-          `#card-container .card[data-variant="${vn}"]`
-        );
-        const name = cardEl?.dataset.name || vn;
-        const logo = cardEl?.dataset.colorLogo || '';
-        const row  = document.createElement('div');
+
+      Object.entries(sectionData).forEach(([vn, count]) => {
+        const cardEl = document.querySelector(`#card-container .card[data-variant="${vn}"]`);
+        const name  = cardEl?.dataset.name || vn;
+        const logo  = cardEl?.dataset.colorLogo || '';
+        const row   = document.createElement('div');
         row.className = 'overview-item';
         row.innerHTML = `
-          <img src="${logo}" class="overview-logo" alt="icon" />
+          <img src="${logo}" class="overview-logo"/>
           <span class="overview-text">${name} – ${vn}</span>
           <button class="overview-dec" data-vn="${vn}">−</button>
           <span class="overview-count">${count}</span>
@@ -268,7 +269,7 @@ function buildOverview() {
       listEl.appendChild(section);
     });
 
-  // Finally, wire up the newly-rendered buttons
+  // 3) Wire buttons to re-render entire Overview
   wireOverviewButtons(listEl);
 }
    
