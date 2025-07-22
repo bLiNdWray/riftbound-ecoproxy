@@ -276,13 +276,11 @@
   });
 
    // ── Overview ─────────────────────────────────────────────────────────
+// ── Overview ─────────────────────────────────────────────────────────
 function buildOverview() {
   // remove any existing modal
   const prev = document.getElementById('overview-modal');
-  if (prev) { 
-    prev.remove(); 
-    return; 
-  }
+  if (prev) { prev.remove(); return; }
 
   // create overlay + content
   const overlay = document.createElement('div');
@@ -297,17 +295,14 @@ function buildOverview() {
   document.body.appendChild(overlay);
 
   // wire close
-  overlay.querySelector('#close-overview').onclick = function() {
-    overlay.remove();
-  };
+  overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
   // group cards by type
   const order = ['Legend','Battlefield','Runes','Units','Spells'];
   const grp = {};
-  Object.entries(window.cardCounts).forEach(function([vn, count]) {
+  Object.entries(window.cardCounts).forEach(([vn, count]) => {
     if (!count) return;
-    const selector = '.card[data-variant="' + vn + '"]';
-    const cardEl = container.querySelector(selector);
+    const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
     if (!cardEl) return;
     let type = 'Other';
     if (cardEl.classList.contains('legend'))        type = 'Legend';
@@ -321,67 +316,70 @@ function buildOverview() {
 
   // build the list
   const listEl = overlay.querySelector('#overview-list');
-  order.forEach(function(type) {
+  order.forEach(type => {
     if (!grp[type]) return;
     const section = document.createElement('div');
-    section.innerHTML = '<h3>' + type + '</h3>';
-    Object.entries(grp[type]).forEach(function([vn, count]) {
-      const selector = '.card[data-variant="' + vn + '"]';
-      const cardEl = container.querySelector(selector);
+    section.innerHTML = `<h3>${type}</h3>`;
+    Object.entries(grp[type]).forEach(([vn, count]) => {
+      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
       if (!cardEl) return;
 
-      // pick up icons
+      // grab icons
       let icons = '';
-      const colWrap = cardEl.querySelector('.color-indicator');
-      if (colWrap) {
-        icons = Array.prototype.slice.call(colWrap.querySelectorAll('img.inline-icon'))
-          .map(i => i.outerHTML).join(' ');
-      } else {
-        const lgWrap = cardEl.querySelector('.legend-icons');
-        if (lgWrap) {
-          icons = Array.prototype.slice.call(lgWrap.querySelectorAll('img'))
-            .map(i => i.outerHTML).join(' ');
-        } else {
-          const runeImg = cardEl.querySelector('.rune-image img');
-          if (runeImg) icons = runeImg.outerHTML;
+      const ci = cardEl.querySelector('.color-indicator');
+      if (ci) icons = Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join(' ');
+      else {
+        const lg = cardEl.querySelector('.legend-icons');
+        if (lg) icons = Array.from(lg.querySelectorAll('img')).map(i=>i.outerHTML).join(' ');
+        else {
+          const ri = cardEl.querySelector('.rune-image img');
+          if (ri) icons = ri.outerHTML;
         }
       }
 
-      // get name
-      const nameEl = cardEl.querySelector('.name')
-                     || cardEl.querySelector('.main-title')
-                     || cardEl.querySelector('.bf-name')
-                     || cardEl.querySelector('.rune-title');
-      const name = nameEl ? nameEl.textContent.trim() : vn;
+      // grab name
+      const ne = cardEl.querySelector('.name')
+                || cardEl.querySelector('.main-title')
+                || cardEl.querySelector('.bf-name')
+                || cardEl.querySelector('.rune-title');
+      const name = ne ? ne.textContent.trim() : vn;
 
-      // row HTML
+      // row
       const row = document.createElement('div');
       row.className = 'overview-item';
       row.innerHTML =
-        '<span class="overview-label">' +
-          icons +
-          '<span class="overview-text">' + name + '</span>' +
-        '</span>' +
-        '<span class="overview-variant">' + vn + '</span>' +
-        '<span class="overview-controls">' +
-          '<button class="overview-dec" data-vn="' + vn + '">−</button>' +
-          '<span class="overview-count">' + count + '</span>' +
-          '<button class="overview-inc" data-vn="' + vn + '">+</button>' +
-        '</span>';
+        `<span class="overview-label">${icons}<span class="overview-text">${name}</span></span>` +
+        `<span class="overview-variant">${vn}</span>` +
+        `<span class="overview-controls">` +
+          `<button class="overview-dec" data-vn="${vn}">−</button>` +
+          `<span class="overview-count">${count}</span>` +
+          `<button class="overview-inc" data-vn="${vn}">+</button>` +
+        `</span>`;
       section.appendChild(row);
     });
     listEl.appendChild(section);
   });
 
-  // wire inc/dec inside overview
-  listEl.querySelectorAll('.overview-inc').forEach(btn =>
-    btn.onclick = () => window.addCard(btn.dataset.vn)
-  );
-  listEl.querySelectorAll('.overview-dec').forEach(btn =>
-    btn.onclick = () => window.removeCard(btn.dataset.vn)
-  );
+  // wire inc/dec inside overview to use the same add/remove logic & update badge
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      window.addCard(vn);
+      const badge = btn.parentElement.querySelector('.overview-count');
+      badge.textContent = parseInt(badge.textContent,10) + 1;
+    });
+  });
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      window.removeCard(vn);
+      const badge = btn.parentElement.querySelector('.overview-count');
+      badge.textContent = Math.max(parseInt(badge.textContent,10) - 1, 0);
+    });
+  });
 }
 btnOverview.addEventListener('click', buildOverview);
+
 
   // ── Observer & Init ────────────────────────────────────────────────
   new MutationObserver(()=>{ updateCount(); Object.keys(window.cardCounts).forEach(refreshBadge); })
