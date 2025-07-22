@@ -143,10 +143,22 @@ document.addEventListener('DOMContentLoaded', () => {
   btnOverview.addEventListener('click',buildOverview);
   btnFullProxy.addEventListener('click',()=>{
     fullProxy = !fullProxy;
-    Object.keys(window.cardCounts).forEach(vn=>{
-      const img = document.querySelector(`[data-variant="${vn}"] img.card-img`);
-      if(img) img.src = fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
-    });
+document
+  .querySelectorAll('#card-container .card[data-variant]')
+  .forEach(card => {
+    const vn   = card.getAttribute('data-variant');
+    // figure out type from its CSS class
+    const type = card.classList.contains('legend')      ? 'Legend'
+               : card.classList.contains('rune')        ? 'Runes'
+               : card.classList.contains('battlefield') ? 'Battlefield'
+               : card.classList.contains('unit')        ? 'Units'
+               : card.classList.contains('spell')       ? 'Spells'
+               : card.classList.contains('gear')        ? 'Gear'
+               : 'Other';
+
+    groups[type] = groups[type] || {};
+    groups[type][vn] = (groups[type][vn] || 0) + 1;
+  });
   });
   btnReset.addEventListener('click',()=>{
     window.cardCounts = {};
