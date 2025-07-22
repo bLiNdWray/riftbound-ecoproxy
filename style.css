@@ -141,7 +141,6 @@ html, body {
   display: block;
   box-sizing: border-box;
 }
-}
 #search-modal .search-header input:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
@@ -168,24 +167,22 @@ html, body {
   width: 100%;
   box-sizing: border-box;
 }
+
 .donate-buttons {
   display: inline-flex;
   gap: 12px;
   align-items: center;
 }
-
 .donate-buttons img {
   display: block;
   cursor: pointer;
 }
+
 @media print {
   /* Treat each card as unbreakable */
   .card {
-    /* Modern browsers */
     break-inside: avoid;
-    /* Fallback for older browsers */
     page-break-inside: avoid;
-    /* Ensure the card is treated as a block for printing */
     display: block;
   }
 
@@ -241,31 +238,37 @@ html, body {
 /* Overview item layout */
 .overview-item {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
+  grid-template-columns: auto 1fr auto auto auto auto;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.25rem 0;
 }
+
+/* Icon sizing */
 .overview-icons img {
   width: 1.2em;
   height: auto;
   display: block;
 }
 
-/* Icons column (auto width) */
-/* Name/variant column stretches to fill space */
+/* Icons column */
 .overview-icons {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-/* Name and variant combined */
-.overview-item > span:nth-child(2) {
-  /* nothing needed here—this is the 1fr column */
+/* Name text */
+.overview-text {
+  justify-self: start;
 }
 
-/* Decrement button (third button) */
+/* Variant number */
+.overview-variant {
+  justify-self: end;
+  font-weight: bold;
+}
+
+/* Decrement button */
 .overview-dec {
   justify-self: end;
 }
@@ -283,11 +286,11 @@ html, body {
   justify-self: start;
 }
 
-/* Match buttons to your theme */
+/* Theme-matched buttons */
 .overview-item button {
-  background: var(--your-primary-bg);      /* e.g. #0055aa */
-  color: var(--your-on-primary);           /* e.g. #fff */
-  border: 1px solid var(--your-primary-dark);
+  background: #007bff;
+  color: #fff;
+  border: 1px solid #0056b3;
   border-radius: 4px;
   padding: 0.2em 0.4em;
   font-size: 0.9rem;
@@ -295,12 +298,5 @@ html, body {
   transition: background 0.2s;
 }
 .overview-item button:hover {
-  background: var(--your-primary-dark);
-}
-
-/* Variant text styling */
-.overview-item span:nth-child(2) + span { 
-  /* This selects the variant text if you separated name/variant into spans */
-  font-weight: bold;
-  text-align: right;
+  background: #0056b3;
 }
