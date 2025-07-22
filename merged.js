@@ -341,9 +341,8 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c]) => {
-      for (let i=0; i<c; i++) renderCards([vn], false);
+     Object.entries(window.cardCounts).forEach(([vn, c]) => {
+      for (let i = 0; i < c; i++) window.addCard(vn);
     });
-    updateCount();
   });
 })();
