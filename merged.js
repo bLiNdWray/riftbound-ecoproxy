@@ -382,80 +382,111 @@
     updateCount();
   });
 
-  // ── Overview ─────────────────────────────────────────────────────────
-  function buildOverview() {
-    const prev = document.getElementById('overview-modal');
-    if (prev) { prev.remove(); return; }
-    const overlay = document.createElement('div');
-    overlay.id = 'overview-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML =
-      '<div class="modal-content">' +
-        '<button id="close-overview" class="modal-close">×</button>' +
-        '<h2>Overview</h2>' +
-        '<div id="overview-list"></div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-    overlay.querySelector('#close-overview').onclick = () => overlay.remove();
+ // ── Overview ─────────────────────────────────────────────────────────
+function buildOverview() {
+  // If already open, just close
+  const prev = document.getElementById('overview-modal');
+  if (prev) { prev.remove(); return; }
 
-    const order = ['Legend','Battlefield','Runes','Units','Spells'], grp = {};
-    Object.entries(window.cardCounts).forEach(([vn,c]) => {
-      if (!c) return;
-      const el = container.querySelector(`.card[data-variant="${vn}"]`); if (!el) return;
-      let t = 'Other';
-      if (el.classList.contains('legend'))        t='Legend';
-      else if (el.classList.contains('battlefield')) t='Battlefield';
-      else if (el.classList.contains('rune'))       t='Runes';
-      else if (el.classList.contains('unit'))       t='Units';
-      else if (el.classList.contains('spell'))      t='Spells';
-      grp[t] = grp[t]||{}; grp[t][vn] = c;
-    });
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'overview-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content">
+      <button id="close-overview" class="modal-close">×</button>
+      <h2>Overview</h2>
+      <div id="overview-list"></div>
+    </div>`;
+  document.body.appendChild(overlay);
 
-    const listEl = overlay.querySelector('#overview-list');
-    order.forEach(type => {
-      if (!grp[type]) return;
-      const section = document.createElement('div');
-      section.innerHTML = `<h3>${type}</h3>`;
-      Object.entries(grp[type]).forEach(([vn,c]) => {
-        const cardEl = container.querySelector(`.card[data-variant="${vn}"]`); if (!cardEl) return;
-        let icons = '';
-        const ci = cardEl.querySelector('.color-indicator');
-        if (ci) icons = Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join('');
+  // Close handler
+  overlay.querySelector('#close-overview').onclick = () => overlay.remove();
+
+  // Group by type in the desired order
+  const order = ['Legend','Battlefield','Runes','Units','Spells'];
+  const groups = {};
+  Object.entries(window.cardCounts).forEach(([vn, count]) => {
+    if (!count) return;
+    const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+    if (!cardEl) return;
+
+    let type = 'Other';
+    if (cardEl.classList.contains('legend'))        type = 'Legend';
+    else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
+    else if (cardEl.classList.contains('rune'))       type = 'Runes';
+    else if (cardEl.classList.contains('unit'))       type = 'Units';
+    else if (cardEl.classList.contains('spell'))      type = 'Spells';
+
+    groups[type] = groups[type] || {};
+    groups[type][vn] = count;
+  });
+
+  const listEl = overlay.querySelector('#overview-list');
+
+  // Build each section
+  order.forEach(type => {
+    if (!groups[type]) return;
+    const section = document.createElement('div');
+    section.innerHTML = `<h3>${type}</h3>`;
+    Object.entries(groups[type]).forEach(([vn, count]) => {
+      const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+      if (!cardEl) return;
+
+      // Grab icons
+      let icons = '';
+      const ci = cardEl.querySelector('.color-indicator');
+      if (ci) icons = Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join(' ');
+      else {
+        const lg = cardEl.querySelector('.legend-icons');
+        if (lg) icons = Array.from(lg.querySelectorAll('img')).map(i=>i.outerHTML).join(' ');
         else {
-          const lg = cardEl.querySelector('.legend-icons');
-          if (lg) icons = Array.from(lg.querySelectorAll('img')).map(i=>i.outerHTML).join('');
-          else {
-            const ri = cardEl.querySelector('.rune-image img');
-            if (ri) icons = ri.outerHTML;
-          }
+          const ri = cardEl.querySelector('.rune-image img');
+          if (ri) icons = ri.outerHTML;
         }
-        const ne = cardEl.querySelector('.name')||cardEl.querySelector('.main-title')||
-                   cardEl.querySelector('.bf-name')||cardEl.querySelector('.rune-title');
-        const name = ne?ne.textContent.trim():vn;
-        const row = document.createElement('div'); row.className='overview-item';
-        row.innerHTML =
-          `<span class="overview-label">${icons}<span class="overview-text">${name}</span></span>`+
-          `<span class="overview-variant">${vn}</span>`+
-          `<span class="overview-controls">`+
-            `<button class="overview-dec" data-vn="${vn}">−</button>`+
-            `<span class="overview-count">${c}</span>`+
-            `<button class="overview-inc" data-vn="${vn}">+</button>`+
-          `</span>`;
-        listEl.appendChild(row);
-      });
-    });
-    listEl.querySelectorAll('.overview-inc').forEach(b=>
-      b.onclick = () => { window.addCard(b.dataset.vn); b.nextElementSibling.textContent = window.cardCounts[b.dataset.vn]; }
-    );
-    listEl.querySelectorAll('.overview-dec').forEach(b=>
-      b.onclick = () => {
-        const m = container.querySelector(`.card[data-variant="${b.dataset.vn}"]`);
-        window.removeCard(b.dataset.vn, m);
-        b.nextElementSibling.textContent = window.cardCounts[b.dataset.vn]||0;
       }
-    );
-  }
-  btnOverview.addEventListener('click', buildOverview);
+
+      // Grab name
+      const ne = cardEl.querySelector('.name')
+                || cardEl.querySelector('.main-title')
+                || cardEl.querySelector('.bf-name')
+                || cardEl.querySelector('.rune-title');
+      const name = ne ? ne.textContent.trim() : vn;
+
+      // Create row
+      const row = document.createElement('div');
+      row.className = 'overview-item';
+      row.innerHTML = `
+        <span class="overview-label">${icons}<span class="overview-text">${name}</span></span>
+        <span class="overview-variant">${vn}</span>
+        <span class="overview-controls">
+          <button class="overview-dec" data-vn="${vn}">−</button>
+          <span class="overview-count">${count}</span>
+          <button class="overview-inc" data-vn="${vn}">+</button>
+        </span>`;
+      section.appendChild(row);
+    });
+    listEl.appendChild(section);
+  });
+
+  // Wire the buttons — they only update main container & this badge
+  listEl.querySelectorAll('.overview-inc').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      window.addCard(vn);
+      btn.parentElement.querySelector('.overview-count').textContent = window.cardCounts[vn];
+    });
+  });
+  listEl.querySelectorAll('.overview-dec').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vn = btn.dataset.vn;
+      const mainEl = container.querySelector(`.card[data-variant="${vn}"]`);
+      window.removeCard(vn, mainEl);
+      btn.parentElement.querySelector('.overview-count').textContent = window.cardCounts[vn];
+    });
+  });
+}
+btnOverview.addEventListener('click', buildOverview);
 
   // ── Observer & Init ────────────────────────────────────────────────
   new MutationObserver(() => {
