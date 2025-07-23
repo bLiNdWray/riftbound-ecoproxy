@@ -351,7 +351,7 @@
 
 
 // ── Print ─────────────────────────────────────────────────────────────
-  printBtn.addEventListener('click',()=>{
+printBtn.addEventListener('click',()=>{
     document.getElementById('top-bar').style.display='none';
     modal.classList.add('hidden');
     if(window.fullProxy) fullProxyBtn.click();
