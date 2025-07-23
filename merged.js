@@ -310,8 +310,8 @@ importBtn.addEventListener('click', () => {
   overlay.querySelector('#close-import').onclick = () => overlay.remove();
   overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
 
-  // prefill with existing counts
-  area.value = Object.keys(window.cardCounts).join(' ');
+  // **REMOVE** this line if you want an empty box every time:
+  // area.value = Object.keys(window.cardCounts).join(' ');
 
   overlay.querySelector('#import-ok').onclick = () => {
     if (clearCheckbox.checked) {
