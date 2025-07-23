@@ -351,27 +351,16 @@
 
   // ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
-  // 1) hide top bar & any modal
+  // 1) Hide the top bar and any open modal
   document.getElementById('top-bar').style.display = 'none';
   modal.classList.add('hidden');
 
-  // 2) ensure proxy art (not full art)
-  if (window.fullProxy) {
-    // reuse your existing toggle logic
-    fullProxyBtn.click();
-  }
-
-  // 3) clear any old print‐layout class, add the marker
-  container.classList.remove('print-layout');
-  container.classList.add('print-layout');
-
-  // 4) invoke print
+  // 2) Fire the print dialog
   window.print();
 
-  // 5) restore UI after print dialog closes
+  // 3) Restore the top bar after printing
   setTimeout(() => {
     document.getElementById('top-bar').style.display = '';
-    container.classList.remove('print-layout');
   }, 0);
 });
 
