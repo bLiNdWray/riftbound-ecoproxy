@@ -365,12 +365,10 @@ printBtn.addEventListener('click',()=>{
 
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
-  fullProxyBtn.addEventListener('click', () => {
-    window.fullProxy = !window.fullProxy;
+  fullProxyBtn.addEventListener('click',()=>{
+    window.fullProxy=!window.fullProxy;
     fullProxyBtn.classList.toggle('active', window.fullProxy);
-    container.querySelectorAll('img.card-img').forEach(img => {
-      img.classList.toggle('hidden', !window.fullProxy);
-    });
+    container.querySelectorAll('img.card-img').forEach(img=>img.classList.toggle('hidden',!window.fullProxy));
   });
 
   // ── Reset ─────────────────────────────────────────────────────────────
