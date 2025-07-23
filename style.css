@@ -297,6 +297,11 @@ html, body {
     width: 62.37mm !important;
     height: 87.12mm !important;
   }
+    /* Prevent cards from splitting across pages */
+  .card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 }
 
 /* Landscape: 4×2 grid of 99% cards */
@@ -316,5 +321,10 @@ html, body {
   .card {
     width: 62.37mm !important;
     height: 87.12mm !important;
+  }
+    /* Prevent cards from splitting across pages */
+  .card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
