@@ -190,51 +190,67 @@ html, body {
 }
 
 @media print {
-  /* Physical page size */
-  @page {
-    size: 63mm 88mm;
-    margin: 0;
-  }
-
-  /* Hide everything except our card container and its contents */
+  /* Base: hide everything except the cards */
   body * {
     visibility: hidden !important;
     display: none !important;
   }
-  /* Un-hide the container and *all* of its descendants */
   #card-container,
   #card-container * {
     visibility: visible !important;
     display: block !important;
   }
 
-  /* Layout cards in a flow */
-  #card-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-  }
-  .card {
-    /* 99% of 63mm × 88mm */
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+  /* Page margins zero */
+  @page { margin: 0; }
+
+  /* Portrait: 9 cards (3 columns × 3 rows) */
+  @media print and (orientation: portrait) {
+    @page { size: A4 portrait; }
+    #card-container {
+      display: grid;
+      grid-template-columns: repeat(3, 63mm);
+      grid-template-rows: repeat(3, 88mm);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      width: 63mm !important;
+      height: 88mm !important;
+      margin: 0 !important;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
   }
 
-  /* Strip out badges, hover bars, and outlines */
+  /* Landscape: 8 cards (4 columns × 2 rows) */
+  @media print and (orientation: landscape) {
+    @page { size: A4 landscape; }
+    #card-container {
+      display: grid;
+      grid-template-columns: repeat(4, 63mm);
+      grid-template-rows: repeat(2, 88mm);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      width: 63mm !important;
+      height: 88mm !important;
+      margin: 0 !important;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+
+  /* Always hide UI chrome */
   .qty-badge,
   .hover-bar {
     display: none !important;
   }
 }
+
 
 
 /* Overview modal styling */
