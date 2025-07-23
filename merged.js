@@ -1,22 +1,21 @@
 // merged.js – Riftbound Eco Proxy
 (() => {
   // ── Constants & State ──────────────────────────────────────────────
-  const API_BASE     = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
-  const SHEET_NAME   = 'Riftbound Cards';
-  const container    = document.getElementById('card-container');
-  const openBtn      = document.getElementById('open-search');
-  const closeBtn     = document.getElementById('close-search');
-  const modal        = document.getElementById('search-modal');
-  const input        = document.getElementById('card-search-input');
-  const results      = document.getElementById('search-results');
-  const importBtn    = document.getElementById('btn-import');
-  const printBtn     = document.getElementById('btn-print');
-  const fullProxyBtn = document.getElementById('btn-full-proxy');
-  const resetBtn     = document.getElementById('btn-reset');
-  const btnOverview  = document.getElementById('btn-overview');
+  const API_BASE    = 'https://script.google.com/macros/s/AKfycbxTZhEAgwVw51GeZL_9LOPAJ48bYGeR7X8eQcQMBOPWxxbEZe_A0ghsny-GdA9gdhIn/exec';
+  const SHEET_NAME  = 'Riftbound Cards';
+  const container   = document.getElementById('card-container');
+  const openBtn     = document.getElementById('open-search');
+  const closeBtn    = document.getElementById('close-search');
+  const modal       = document.getElementById('search-modal');
+  const input       = document.getElementById('card-search-input');
+  const results     = document.getElementById('search-results');
+  const importBtn   = document.getElementById('btn-import');
+  const printBtn    = document.getElementById('btn-print');
+  const fullProxyBtn= document.getElementById('btn-full-proxy');
+  const resetBtn    = document.getElementById('btn-reset');
+  const btnOverview = document.getElementById('btn-overview');
 
   window.cardCounts = {};
-  window.fullProxy  = false;
 
   // ── Sorted Insertion ────────────────────────────────────────────────
   const typeOrder = ['legend','battlefield','rune','unit','spell','gear'];
@@ -40,10 +39,15 @@
     const children = Array.from(container.children);
     for (const child of children) {
       const childType = getType(child), childIdx = typeOrder.indexOf(childType);
-      if (newIdx < childIdx ||
-         (newIdx === childIdx && getName(el).localeCompare(getName(child)) < 0)) {
+      if (newIdx < childIdx) {
         container.insertBefore(el, child);
         return;
+      }
+      if (newIdx === childIdx) {
+        if (getName(el).localeCompare(getName(child)) < 0) {
+          container.insertBefore(el, child);
+          return;
+        }
       }
     }
     container.appendChild(el);
@@ -66,9 +70,8 @@
   }
 
   // ── Card Core ───────────────────────────────────────────────────────
-  const allowedTypes  = ['unit','spell','gear','battlefield','legend','rune'];
-  const typeClassMap  = { unit:'unit', spell:'spell', gear:'spell',
-                          battlefield:'battlefield', legend:'legend', rune:'rune' };
+  const allowedTypes = ['unit','spell','gear','battlefield','legend','rune'];
+  const typeClassMap = { unit:'unit', spell:'spell', gear:'spell', battlefield:'battlefield', legend:'legend', rune:'rune' };
   let allCards = [];
   jsonpFetch({ sheet: SHEET_NAME }, data => { allCards = Array.isArray(data) ? data : []; });
 
@@ -87,169 +90,140 @@
     return out.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
   }
 
-  // Enhanced build: accepts fullArtUrl
-  function build(id, html, fullArtUrl) {
+  function build(id, html) {
     const wrapper = document.createElement('div');
     wrapper.className = 'card';
     wrapper.setAttribute('data-variant', id);
-
-    // Full-art image element
-    const img = document.createElement('img');
-    img.className = 'card-img hidden';
-    img.src = fullArtUrl;
-    img.dataset.fullArt = fullArtUrl;
-    wrapper.appendChild(img);
-
-    // Insert main HTML
     wrapper.insertAdjacentHTML('beforeend', html);
 
-    // Quantity badge
     const badge = document.createElement('div');
     badge.className = 'qty-badge';
-    badge.textContent = window.cardCounts[id] || 0;
+    badge.textContent = window.cardCounts[id]||0;
     wrapper.appendChild(badge);
 
-    // Hover controls
     const hoverBar = document.createElement('div');
     hoverBar.className = 'hover-bar';
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-btn';
-    addBtn.textContent = '+';
-    const remBtn = document.createElement('button');
-    remBtn.className = 'remove-btn';
-    remBtn.textContent = '−';
-    hoverBar.append(addBtn, remBtn);
-    wrapper.appendChild(hoverBar);
+    const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.textContent='+';
+    const remBtn = document.createElement('button'); remBtn.className='remove-btn'; remBtn.textContent='−';
+    hoverBar.append(addBtn, remBtn); wrapper.appendChild(hoverBar);
 
-    addBtn.addEventListener('click', () => window.addCard(id));
-    remBtn.addEventListener('click', e => { e.stopPropagation(); window.removeCard(id, wrapper); });
+    addBtn.addEventListener('click', ()=>window.addCard(id));
+    remBtn.addEventListener('click', e=>{e.stopPropagation();window.removeCard(id,wrapper);});
     return wrapper;
   }
 
-  // Builder functions
   function makeUnit(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean),
-          costN = Number(c.energy)||0, powN = Number(c.power)||0;
-    const costIcons = Array(powN).fill().map(()=>
-      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon">`
-    ).join('');
-    const mightHTML = c.might ? `<img src="images/SwordIconRB.png" class="might-icon"> ${c.might}` : '';
-    const desc = formatDescription(c.description),
-          tags = (c.tags||'').split(/;\s*/).join(' ');
-    const html = `
+    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean), costN=Number(c.energy)||0, powN=Number(c.power)||0;
+    const costIcons = Array(powN).fill().map(()=>`<img src="images/${cols[0]||'Body'}2.png" class="cost-icon">`).join('');
+    const mightHTML = c.might?`<img src="images/SwordIconRB.png" class="might-icon"> ${c.might}`:'';
+    const desc = formatDescription(c.description), tags=(c.tags||'').split(/;\s*/).join(' ');
+    const colorIcon=`<img src="images/${cols[0]||'Body'}.png" class="inline-icon">`;
+    return build(c.variantNumber,`
       <div class="top-bar"><span class="cost">${costN}${costIcons}</span><span class="might">${mightHTML}</span></div>
       <div class="name">${c.name}</div>
-      <div class="middle">
-        <div class="desc-wrap">${desc}</div>
-        <div class="color-indicator">
-          <img src="images/${cols[0]||'Body'}.png" class="inline-icon"><span>${cols.join(' ')}</span>
-        </div>
-      </div>
-      <div class="bottom-bar"><span>${c.type}${tags?' - '+tags:''}</span></div>`;
-    return build(c.variantNumber, html, c.variantImageUrl);
+      <div class="middle"><div class="desc-wrap">${desc}</div><div class="color-indicator">${colorIcon}<span>${cols.join(' ')}</span></div></div>
+      <div class="bottom-bar"><span>${c.type}${tags?' - '+tags:''}</span></div>`);
   }
 
   function makeSpell(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean),
-          costN = Number(c.energy)||0, powN = Number(c.power)||0;
-    const costIcons = Array(powN).fill().map(()=>
-      `<img src="images/${cols[0]||'Body'}2.png" class="cost-icon">`
-    ).join('');
-    const desc = formatDescription(c.description),
-          tags = (c.tags||'').split(/;\s*/).join(' ');
-    const html = `
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean), costN=Number(c.energy)||0, powN=Number(c.power)||0;
+    const costIcons=Array(powN).fill().map(()=>`<img src="images/${cols[0]||'Body'}2.png" class="cost-icon">`).join('');
+    const desc=formatDescription(c.description), tags=(c.tags||'').split(/;\s*/).join(' ');
+    const colorIcon=`<img src="images/${cols[0]||'Body'}.png" class="inline-icon">`;
+    return build(c.variantNumber,`
       <div class="top-bar"><span class="cost">${costN}${costIcons}</span></div>
       <div class="name">${c.name}</div>
-      <div class="middle">
-        <div class="desc-wrap">${desc}</div>
-        <div class="color-indicator">
-          <img src="images/${cols[0]||'Body'}.png" class="inline-icon"><span>${cols.join(' ')}</span>
-        </div>
-      </div>
-      <div class="bottom-bar"><span>${c.type}${tags?' - '+tags:''}</span></div>`;
-    return build(c.variantNumber, html, c.variantImageUrl);
+      <div class="middle"><div class="desc-wrap">${desc}</div><div class="color-indicator">${colorIcon}<span>${cols.join(' ')}</span></div></div>
+      <div class="bottom-bar"><span>${c.type}${tags?' - '+tags:''}</span></div>`);
   }
 
   function makeBattlefield(c) {
     const desc = c.description || '';
-    const html = `
+    return build(c.variantNumber,`
       <div class="bf-columns">
         <div class="bf-col side left"><div class="bf-text">${desc}</div></div>
-        <div class="bf-col center">
-          <div class="bf-type-text">${c.type.toUpperCase()}</div>
-          <div class="bf-name">${c.name}</div>
-        </div>
+        <div class="bf-col center"><div class="bf-type-text">${c.type.toUpperCase()}</div><div class="bf-name">${c.name}</div></div>
         <div class="bf-col side right"><div class="bf-text">${desc}</div></div>
-      </div>`;
-    return build(c.variantNumber, html, c.variantImageUrl);
+      </div>`);
   }
 
   function makeLegend(c) {
-    const cols = (c.colors||'').split(/[;,]\s*/).filter(Boolean),
-          iconsHTML = cols.map(col=>`<img src="images/${col}.png" alt="${col}">`).join(''),
-          parts = (c.name||'').split(',').map(s=>s.trim()),
-          charName = parts[0], moniker = parts[1]||'';
-    const body = formatDescription(c.description);
-    const html = `
-      <div class="legend-header">
-        <div class="legend-icons">${iconsHTML}</div>
-        <div class="legend-title">LEGEND</div>
-      </div>
-      <div class="legend-name">
-        <div class="main-title">${charName}</div>
-        ${moniker?`<div class="subtitle">${moniker}</div>`:''}
-      </div>
-      <div class="legend-body"><div class="legend-body-text">${body}</div></div>`;
-    return build(c.variantNumber, html, c.variantImageUrl);
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean);
+    const iconsHTML=cols.map(col=>`<img src="images/${col}.png" alt="${col}">`).join(' ');
+    const parts=(c.name||'').split(',').map(s=>s.trim()), charName=parts[0], moniker=parts[1]||'';
+    const body=formatDescription(c.description);
+    return build(c.variantNumber,`
+      <div class="legend-header"><div class="legend-icons">${iconsHTML}</div><div class="legend-title">LEGEND</div></div>
+      <div class="legend-name"><div class="main-title">${charName}</div>${moniker?`<div class="subtitle">${moniker}</div>`:''}</div>
+      <div class="legend-body"><div class="legend-body-text">${body}</div></div>`);
   }
 
   function makeRune(c) {
-    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean),
-          img=cols[0]||'Body';
-    const html = `
+    const cols=(c.colors||'').split(/[;,]\s*/).filter(Boolean), img=cols[0]||'Body';
+    return build(c.variantNumber,`
       <div class="rune-title">${c.name}</div>
-      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>`;
-    return build(c.variantNumber, html, c.variantImageUrl);
+      <div class="rune-image"><img src="images/${img}.png" alt="${c.name}"></div>`);
   }
 
   // ── Rendering ───────────────────────────────────────────────────────
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const t = (c.type||'').trim().toLowerCase();
-      if (!allowedTypes.includes(t)) return;
-      const el = ({ unit: makeUnit, spell: makeSpell, gear: makeSpell,
-                    battlefield: makeBattlefield, legend: makeLegend, rune: makeRune })[t](c);
-      el.classList.add(typeClassMap[t]);
+function renderSearchResults(list) {
+  // Clear previous results
+  results.innerHTML = '';
 
-      // replace default buttons
-      const oldAdd = el.querySelector('.add-btn'),
-            newAdd = oldAdd.cloneNode(true);
-      oldAdd.replaceWith(newAdd);
-      const oldRem = el.querySelector('.remove-btn'),
-            newRem = oldRem.cloneNode(true);
-      oldRem.replaceWith(newRem);
+  list.forEach(c => {
+    const t = (c.type || '').trim().toLowerCase();
+    if (!allowedTypes.includes(t)) return;
 
-      el.addEventListener('click', e => e.stopPropagation());
+    // Build the card element for the search panel
+    const el = ({
+      unit: makeUnit,
+      spell: makeSpell,
+      gear: makeSpell,
+      battlefield: makeBattlefield,
+      legend: makeLegend,
+      rune: makeRune
+    })[t](c);
+    el.classList.add(typeClassMap[t]);
 
-      const searchBadge = el.querySelector('.qty-badge');
-      if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
+    // Strip out any default listeners by replacing the buttons
+    const oldAdd = el.querySelector('.add-btn');
+    const newAdd = oldAdd.cloneNode(true);
+    oldAdd.replaceWith(newAdd);
 
-      newAdd.addEventListener('click', e => {
-        e.stopPropagation();
-        window.addCard(c.variantNumber);
-        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber];
-      });
-      newRem.addEventListener('click', e => {
-        e.stopPropagation();
-        const m = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
-        if (m) window.removeCard(c.variantNumber, m);
-        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
-      });
+    const oldRem = el.querySelector('.remove-btn');
+    const newRem = oldRem.cloneNode(true);
+    oldRem.replaceWith(newRem);
 
-      results.appendChild(el);
+    // Prevent wrapper clicks from bubbling (so modal doesn’t close)
+    el.addEventListener('click', e => e.stopPropagation());
+
+    // Sync badge count in search result
+    const searchBadge = el.querySelector('.qty-badge');
+    if (searchBadge) {
+      searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
+    }
+
+    // Wire up the new "+" button
+    newAdd.addEventListener('click', e => {
+      e.stopPropagation();
+      window.addCard(c.variantNumber);
+      if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber];
     });
-  }
+
+    // Wire up the new "−" button
+    newRem.addEventListener('click', e => {
+      e.stopPropagation();
+      const mainCard = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
+      if (mainCard) window.removeCard(c.variantNumber, mainCard);
+      if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
+    });
+
+    // Append into the search-results panel
+    results.appendChild(el);
+  });
+}
+
+
 
   function renderCards(ids, clear=true) {
     if (clear) container.innerHTML = '';
@@ -267,26 +241,23 @@
   }
 
   // ── Add/Remove ───────────────────────────────────────────────────────
-  window.addCard = vn => {
-    renderCards([vn], false);
-    window.cardCounts[vn] = (window.cardCounts[vn]||0) + 1;
-    refreshBadge(vn);
-    updateCount();
-    saveState();
-  };
-  window.removeCard = (vn, el) => {
-    if (el) el.remove();
-    window.cardCounts[vn] = Math.max((window.cardCounts[vn]||1) - 1, 0);
-    refreshBadge(vn);
-    updateCount();
-    saveState();
-  };
+  window.addCard = vn => { renderCards([vn], false); window.cardCounts[vn] = (window.cardCounts[vn]||0)+1; refreshBadge(vn); updateCount(); saveState(); };
+  window.removeCard = (vn,el) => { if(el)el.remove(); window.cardCounts[vn] = Math.max((window.cardCounts[vn]||1)-1,0); refreshBadge(vn); updateCount(); saveState(); };
 
   // ── Persistence & Helpers ────────────────────────────────────────────
-  function saveState()      { localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts)); }
-  function loadState()      { try { window.cardCounts = JSON.parse(localStorage.getItem('riftboundCardCounts'))||{}; } catch { window.cardCounts={}; } }
-  function refreshBadge(vn) { const cnt = window.cardCounts[vn]||0; container.querySelectorAll(`.card[data-variant="${vn}"] .qty-badge`).forEach(b=>b.textContent=cnt); }
-  function updateCount()    { const t=container.querySelectorAll('.card').length; document.getElementById('card-count').textContent = t+' card'+(t!==1?'s':''); }
+  function saveState(){ localStorage.setItem('riftboundCardCounts', JSON.stringify(window.cardCounts)); }
+  function loadState(){ try{ window.cardCounts = JSON.parse(localStorage.getItem('riftboundCardCounts'))||{}; }catch{ window.cardCounts = {}; } }
+function refreshBadge(vn) {
+  // get the current count
+  const count = window.cardCounts[vn] || 0;
+  // find all badges for this variant
+  const badges = container.querySelectorAll(`.card[data-variant="${vn}"] .qty-badge`);
+  // update each one
+  badges.forEach(b => {
+    b.textContent = count;
+  });
+}
+  function updateCount(){ const t=container.querySelectorAll('.card').length; document.getElementById('card-count').textContent = t + ' card' + (t!==1?'s':''); }
 
   // ── Search Modal ─────────────────────────────────────────────────────
   openBtn.addEventListener('click', () => {
@@ -298,147 +269,138 @@
   closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
-    if (!q) { results.innerHTML=''; return; }
+    if (!q) { results.innerHTML = ''; return; }
     const matches = allCards.filter(c => {
       const name = (c.name||'').toLowerCase();
       const vn   = (c.variantNumber||'').toLowerCase();
-      return name.includes(q)||vn.includes(q);
+      return name.includes(q) || vn.includes(q);
     });
     renderSearchResults(matches);
   });
 
-  // ── Import List ───────────────────────────────────────────────────────
-  importBtn.addEventListener('click', () => {
-    const prev = document.getElementById('import-modal');
-    if (prev) return prev.remove();
-    const overlay = document.createElement('div');
-    overlay.id = 'import-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-content import-content">
-        <button id="close-import" class="modal-close">×</button>
-        <h2>Import List</h2>
-        <p class="import-instructions">Paste Table Top Simulator code here</p>
-        <textarea id="import-area" placeholder="Import code format: SET-###-Variant#"></textarea>
-        <label class="import-clear">
-          <input type="checkbox" id="import-clear" />
-          Clear existing cards before import
-        </label>
-        <div class="modal-actions import-actions">
-          <button id="import-cancel" class="topbar-btn">Cancel</button>
-          <button id="import-ok" class="topbar-btn primary">Import</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    const area = overlay.querySelector('#import-area');
-    const clearCheckbox = overlay.querySelector('#import-clear');
-    overlay.querySelector('#close-import').onclick = () => overlay.remove();
-    overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
-    overlay.querySelector('#import-ok').onclick = () => {
-      if (clearCheckbox.checked) {
-        container.innerHTML = '';
-        window.cardCounts = {};
-        updateCount();
-      }
-      area.value.trim().split(/\s+/).forEach(tok => {
-        const p = tok.split('-');
-        if (p.length>=2) window.addCard(p[0]+'-'+p[1]);
-      });
-      area.value = '';
-      overlay.remove();
-    };
-  });
+// ── Import List ───────────────────────────────────────────────────────
+importBtn.addEventListener('click', () => {
+  // remove existing if open
+  const prev = document.getElementById('import-modal');
+  if (prev) return prev.remove();
 
-// ── Print ─────────────────────────────────────────────────────────────
-printBtn.addEventListener('click', () => {
-  const topBar = document.getElementById('top-bar');
-  topBar.style.display = 'none';
-  modal.classList.add('hidden');
-
-  // Add print-layout and mark which mode we're in
-  container.classList.add('print-layout');
-  if (window.fullProxy) {
-    container.classList.add('full-proxy-print');
-  } else {
-    container.classList.remove('full-proxy-print');
-  }
-
-  window.print();
-
-  // Restore everything
-  setTimeout(() => {
-    topBar.style.display = '';
-    container.classList.remove('print-layout', 'full-proxy-print');
-  }, 0);
-});
-  
- // ── Toggle Full Proxy ────────────────────────────────────────────────
-fullProxyBtn.addEventListener('click',()=>{window.fullProxy=!window.fullProxy;fullProxyBtn.classList.toggle('active',window.fullProxy);container.querySelectorAll('img.card-img').forEach(img=>img.classList.toggle('hidden',!window.fullProxy));});
-
-
- 
-
-
-  // ── Reset ─────────────────────────────────────────────────────────────
-  resetBtn.addEventListener('click', () => {
-    window.cardCounts = {};
-    container.innerHTML = '';
-    saveState();
-    updateCount();
-  });
-
- // ── Overview ─────────────────────────────────────────────────────────
-function buildOverview() {
-  // If already open, just close
-  const prev = document.getElementById('overview-modal');
-  if (prev) { prev.remove(); return; }
-
-  // Build overlay
+  // build overlay
   const overlay = document.createElement('div');
-  overlay.id = 'overview-modal';
+  overlay.id = 'import-modal';
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
-    <div class="modal-content">
-      <button id="close-overview" class="modal-close">×</button>
-      <h2>Overview</h2>
-      <div id="overview-list"></div>
+    <div class="modal-content import-content">
+      <button id="close-import" class="modal-close">×</button>
+      <h2>Import List</h2>
+      <p class="import-instructions">Paste Table Top Simulator code here</p>
+      <textarea id="import-area" placeholder="Import code format: SET-###-Variant#"></textarea>
+      <label class="import-clear">
+        <input type="checkbox" id="import-clear" />
+        Clear existing cards before import
+      </label>
+      <div class="modal-actions import-actions">
+        <button id="import-cancel" class="topbar-btn">Cancel</button>
+        <button id="import-ok" class="topbar-btn primary">Import</button>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
 
-  // Close handler
+  const area = overlay.querySelector('#import-area');
+  const clearCheckbox = overlay.querySelector('#import-clear');
+  overlay.querySelector('#close-import').onclick = () => overlay.remove();
+  overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
+
+  // **REMOVE** this line if you want an empty box every time:
+  // area.value = Object.keys(window.cardCounts).join(' ');
+
+  overlay.querySelector('#import-ok').onclick = () => {
+    if (clearCheckbox.checked) {
+      container.innerHTML = '';
+      window.cardCounts = {};
+      updateCount();
+    }
+    area.value.trim().split(/\s+/).forEach(tok => {
+      const parts = tok.split('-');
+      if (parts.length >= 2) window.addCard(parts[0] + '-' + parts[1]);
+    });
+    // clear the textarea before closing
+    area.value = '';
+    overlay.remove();
+  };
+});
+
+  // ── Print ─────────────────────────────────────────────────────────────
+  printBtn.addEventListener('click', () => {
+    document.getElementById('top-bar').style.display='none';
+    modal.classList.add('hidden');
+    window.print();
+    setTimeout(()=> document.getElementById('top-bar').style.display='', 0);
+  });
+
+  // ── Toggle Full Proxy ────────────────────────────────────────────────
+  fullProxyBtn.addEventListener('click', ()=> {
+    window.fullProxy = !window.fullProxy;
+    container.querySelectorAll('.card[data-variant]').forEach(card => {
+      const img = card.querySelector('img.card-img');
+      if(img) img.src = window.fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+    });
+  });
+
+  // ── Reset ─────────────────────────────────────────────────────────────
+  resetBtn.addEventListener('click', ()=> {
+    window.cardCounts={}; container.innerHTML=''; saveState(); updateCount();
+  });
+
+   // ── Overview ─────────────────────────────────────────────────────────
+// ── Overview ─────────────────────────────────────────────────────────
+function buildOverview() {
+  // remove any existing modal
+  const prev = document.getElementById('overview-modal');
+  if (prev) { prev.remove(); return; }
+
+  // create overlay + content
+  const overlay = document.createElement('div');
+  overlay.id = 'overview-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML =
+    '<div class="modal-content">' +
+      '<button id="close-overview" class="modal-close">×</button>' +
+      '<h2>Overview</h2>' +
+      '<div id="overview-list"></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  // wire close
   overlay.querySelector('#close-overview').onclick = () => overlay.remove();
 
-  // Group by type in the desired order
+  // group cards by type
   const order = ['Legend','Battlefield','Runes','Units','Spells'];
-  const groups = {};
+  const grp = {};
   Object.entries(window.cardCounts).forEach(([vn, count]) => {
     if (!count) return;
     const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
     if (!cardEl) return;
-
     let type = 'Other';
     if (cardEl.classList.contains('legend'))        type = 'Legend';
     else if (cardEl.classList.contains('battlefield')) type = 'Battlefield';
     else if (cardEl.classList.contains('rune'))       type = 'Runes';
     else if (cardEl.classList.contains('unit'))       type = 'Units';
     else if (cardEl.classList.contains('spell'))      type = 'Spells';
-
-    groups[type] = groups[type] || {};
-    groups[type][vn] = count;
+    grp[type] = grp[type] || {};
+    grp[type][vn] = count;
   });
 
+  // build the list
   const listEl = overlay.querySelector('#overview-list');
-
-  // Build each section
   order.forEach(type => {
-    if (!groups[type]) return;
+    if (!grp[type]) return;
     const section = document.createElement('div');
     section.innerHTML = `<h3>${type}</h3>`;
-    Object.entries(groups[type]).forEach(([vn, count]) => {
+    Object.entries(grp[type]).forEach(([vn, count]) => {
       const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
       if (!cardEl) return;
 
-      // Grab icons
+      // grab icons
       let icons = '';
       const ci = cardEl.querySelector('.color-indicator');
       if (ci) icons = Array.from(ci.querySelectorAll('img.inline-icon')).map(i=>i.outerHTML).join(' ');
@@ -451,59 +413,61 @@ function buildOverview() {
         }
       }
 
-      // Grab name
+      // grab name
       const ne = cardEl.querySelector('.name')
                 || cardEl.querySelector('.main-title')
                 || cardEl.querySelector('.bf-name')
                 || cardEl.querySelector('.rune-title');
       const name = ne ? ne.textContent.trim() : vn;
 
-      // Create row
+      // row
       const row = document.createElement('div');
       row.className = 'overview-item';
-      row.innerHTML = `
-        <span class="overview-label">${icons}<span class="overview-text">${name}</span></span>
-        <span class="overview-variant">${vn}</span>
-        <span class="overview-controls">
-          <button class="overview-dec" data-vn="${vn}">−</button>
-          <span class="overview-count">${count}</span>
-          <button class="overview-inc" data-vn="${vn}">+</button>
-        </span>`;
+      row.innerHTML =
+        `<span class="overview-label">${icons}<span class="overview-text">${name}</span></span>` +
+        `<span class="overview-variant">${vn}</span>` +
+        `<span class="overview-controls">` +
+          `<button class="overview-dec" data-vn="${vn}">−</button>` +
+          `<span class="overview-count">${count}</span>` +
+          `<button class="overview-inc" data-vn="${vn}">+</button>` +
+        `</span>`;
       section.appendChild(row);
     });
     listEl.appendChild(section);
   });
 
-  // Wire the buttons — they only update main container & this badge
-  listEl.querySelectorAll('.overview-inc').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      window.addCard(vn);
-      btn.parentElement.querySelector('.overview-count').textContent = window.cardCounts[vn];
-    });
+// ── wire inc/dec inside overview ───────────────────────────────────
+listEl.querySelectorAll('.overview-inc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    window.addCard(vn);
+    const countSpan = btn.parentElement.querySelector('.overview-count');
+    countSpan.textContent = window.cardCounts[vn] || 0;
   });
-  listEl.querySelectorAll('.overview-dec').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const vn = btn.dataset.vn;
-      const mainEl = container.querySelector(`.card[data-variant="${vn}"]`);
-      window.removeCard(vn, mainEl);
-      btn.parentElement.querySelector('.overview-count').textContent = window.cardCounts[vn];
-    });
+});
+
+listEl.querySelectorAll('.overview-dec').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const vn = btn.dataset.vn;
+    // find one card instance in the main grid
+    const cardEl = container.querySelector(`.card[data-variant="${vn}"]`);
+    window.removeCard(vn, cardEl);
+    const countSpan = btn.parentElement.querySelector('.overview-count');
+    countSpan.textContent = window.cardCounts[vn] || 0;
   });
+});
+
+
 }
 btnOverview.addEventListener('click', buildOverview);
 
-  // ── Observer & Init ────────────────────────────────────────────────
-  new MutationObserver(() => {
-    updateCount();
-    Object.keys(window.cardCounts).forEach(refreshBadge);
-  }).observe(container, { childList: true });
 
-  document.addEventListener('DOMContentLoaded', () => {
+  // ── Observer & Init ────────────────────────────────────────────────
+  new MutationObserver(()=>{ updateCount(); Object.keys(window.cardCounts).forEach(refreshBadge); })
+    .observe(container, { childList: true });
+  document.addEventListener('DOMContentLoaded', ()=>{
     loadState();
-    Object.entries(window.cardCounts).forEach(([vn,c]) => {
-      for (let i=0; i<c; i++) renderCards([vn], false);
-    });
+    Object.entries(window.cardCounts).forEach(([vn,c])=>{ for(let i=0;i<c;i++) renderCards([vn], false); });
     updateCount();
   });
 })();
