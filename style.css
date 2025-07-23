@@ -274,57 +274,20 @@ html, body {
   color: #fff;
 }
 /* 1) Top‐level page size & zero margins */
-@page {
-  margin: 0;
-}
-
-/* Portrait: 3×3 grid of 99% cards */
+@page { margin: 0; }
 @media print and (orientation: portrait) {
-  /* …existing rules… */
-
-  /* Hide the full-art images */
-  .card-img {
-    display: none !important;
-  }
-
-  /* Your grid and .card sizing rules here */
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(3, 62.37mm);
-    grid-template-rows: repeat(3, 87.12mm);
-  }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-  }
-    /* Prevent cards from splitting across pages */
-  .card {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
+  body * { visibility: hidden !important; display: none !important; }
+  #card-container, #card-container * { visibility: visible !important; display: block !important; }
+  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
+  #card-container.print-layout { display: grid; grid-template-columns: repeat(3, 62.37mm); grid-template-rows: repeat(3, 87.12mm); gap: 0; }
+  .card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
+  .card-img { display: none !important; }
 }
-
-/* Landscape: 4×2 grid of 99% cards */
 @media print and (orientation: landscape) {
-  /* …existing rules… */
-
-  /* Hide the full-art images */
-  .card-img {
-    display: none !important;
-  }
-
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 62.37mm);
-    grid-template-rows: repeat(2, 87.12mm);
-  }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-  }
-    /* Prevent cards from splitting across pages */
-  .card {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
+  body * { visibility: hidden !important; display: none !important; }
+  #card-container, #card-container * { visibility: visible !important; display: block !important; }
+  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
+  #card-container.print-layout { display: grid; grid-template-columns: repeat(4, 62.37mm); grid-template-rows: repeat(2, 87.12mm); gap: 0; }
+  .card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
+  .card-img { display: none !important; }
 }
