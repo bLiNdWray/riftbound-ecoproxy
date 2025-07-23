@@ -352,19 +352,27 @@
 
 // ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
-  // 1) Hide the top bar and any open modal
+  // 1) hide top bar & any modal
   document.getElementById('top-bar').style.display = 'none';
   modal.classList.add('hidden');
 
-  // 2) Fire the print dialog
+  // 2) ensure we're in proxy mode (no full‐art)
+  if (window.fullProxy) {
+    fullProxyBtn.click();
+  }
+
+  // 3) signal to CSS that we're about to print
+  container.classList.add('print-layout');
+
+  // 4) fire print
   window.print();
 
-  // 3) Restore the top bar after printing
+  // 5) clean up
   setTimeout(() => {
     document.getElementById('top-bar').style.display = '';
+    container.classList.remove('print-layout');
   }, 0);
 });
-
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
