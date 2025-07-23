@@ -247,7 +247,11 @@
 
   printBtn.addEventListener('click', ()=>{ document.getElementById('top-bar').style.display='none'; modal.classList.add('hidden'); window.print(); setTimeout(()=>document.getElementById('top-bar').style.display='',0); });
 
-  fullProxyBtn.addEventListener('click', ()=>{ window.fullProxy=!window.fullProxy; container.querySelectorAll('.card[data-variant]').forEach(card=>{ const img=card.querySelector('img.card-img'); if(img) img.src=window.fullProxy?img.dataset.fullArt:img.dataset.proxyArt; }); });
+  fullProxyBtn.addEventListener('click', () => {
+  window.fullProxy = !window.fullProxy;
+  fullProxyBtn.classList.toggle('active', window.fullProxy);
+  // …swap img.src …
+});
 
   resetBtn.addEventListener('click', ()=>{ container.innerHTML=''; window.cardCounts={}; saveState(); updateCount(); });
 
