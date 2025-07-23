@@ -349,9 +349,31 @@
     };
   });
 
-
 // ── Print ─────────────────────────────────────────────────────────────
-printBtn.addEventListener('click',()=>{document.getElementById('top-bar').style.display='none';modal.classList.add('hidden');if(window.fullProxy)fullProxyBtn.click();container.classList.add('print-layout');window.print();setTimeout(()=>{document.getElementById('top-bar').style.display='';container.classList.remove('print-layout');},0);});
+printBtn.addEventListener('click', () => {
+  const topBar = document.getElementById('top-bar');
+  topBar.style.display = 'none';
+  modal.classList.add('hidden');
+
+  // Ensure full-art images are only shown if fullProxy is true,
+  // otherwise hide them. Do not toggle the flag!
+  container.querySelectorAll('img.card-img').forEach(img => {
+    img.classList.toggle('hidden', !window.fullProxy);
+  });
+
+  container.classList.add('print-layout');
+  window.print();
+
+  // Clean up: restore top-bar visibility and remove print layout,
+  // then re-apply fullProxy state to images so the UI stays consistent.
+  setTimeout(() => {
+    topBar.style.display = '';
+    container.classList.remove('print-layout');
+    container.querySelectorAll('img.card-img').forEach(img => {
+      img.classList.toggle('hidden', !window.fullProxy);
+    });
+  }, 0);
+});
  // ── Toggle Full Proxy ────────────────────────────────────────────────
 fullProxyBtn.addEventListener('click',()=>{window.fullProxy=!window.fullProxy;fullProxyBtn.classList.toggle('active',window.fullProxy);container.querySelectorAll('img.card-img').forEach(img=>img.classList.toggle('hidden',!window.fullProxy));});
 
