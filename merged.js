@@ -312,7 +312,6 @@
     renderSearchResults(matches);
   });
 
-  // ── Import List ───────────────────────────────────────────────────────
  // ── Import List ───────────────────────────────────────────────────────
 importBtn.addEventListener('click', () => {
   // If modal already open, close it
@@ -367,19 +366,35 @@ importBtn.addEventListener('click', () => {
 
   // ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
+  // Hide the top bar and any open modal
   document.getElementById('top-bar').style.display = 'none';
   modal.classList.add('hidden');
-  // Clear any old classes
-  container.classList.remove('portrait-print','landscape-print');
-  // Detect orientation
+
+  // Ensure we’re not in full-proxy mode for printing
+  if (window.fullProxy) {
+    window.fullProxy = false;
+    fullProxyBtn.classList.remove('active');
+    // hide all full-art images
+    container.querySelectorAll('img.card-img').forEach(img => img.classList.add('hidden'));
+  }
+
+  // Remove any old print-layout classes
+  container.classList.remove('portrait-print', 'landscape-print');
+
+  // Add the correct grid class based on orientation
   const isLandscape = window.matchMedia('(orientation: landscape)').matches;
   container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
+
+  // Trigger print
   window.print();
+
+  // Restore UI after print dialog closes
   setTimeout(() => {
     document.getElementById('top-bar').style.display = '';
-    container.classList.remove('portrait-print','landscape-print');
+    container.classList.remove('portrait-print', 'landscape-print');
   }, 0);
 });
+
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
