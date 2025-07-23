@@ -172,14 +172,14 @@ function renderSearchResults(list) {
     const t = (c.type||'').trim().toLowerCase();
     if (!allowedTypes.includes(t)) return;
 
-    // Build the card element
+    // Build the card element for the search panel
     const el = ({ 
       unit: makeUnit, spell: makeSpell, gear: makeSpell,
       battlefield: makeBattlefield, legend: makeLegend, rune: makeRune 
     })[t](c);
     el.classList.add(typeClassMap[t]);
 
-    // Prevent any parent click listener from hiding the modal
+    // Prevent clicks on the card wrapper from closing the modal
     el.addEventListener('click', e => e.stopPropagation());
 
     // Wire up the "+" button
@@ -188,7 +188,6 @@ function renderSearchResults(list) {
       addBtn.addEventListener('click', e => {
         e.stopPropagation();
         window.addCard(c.variantNumber);
-        // no modal hiding here
       });
     }
 
@@ -197,15 +196,19 @@ function renderSearchResults(list) {
     if (remBtn) {
       remBtn.addEventListener('click', e => {
         e.stopPropagation();
-        const cardEl = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
-        window.removeCard(c.variantNumber, cardEl);
-        // no modal hiding here
+        // Always remove from the main container:
+        const mainCard = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
+        if (mainCard) {
+          window.removeCard(c.variantNumber, mainCard);
+        }
       });
     }
 
+    // Append into the search-results panel
     results.appendChild(el);
   });
 }
+
   function renderCards(ids, clear=true) {
     if (clear) container.innerHTML = '';
     ids.forEach(vn => {
