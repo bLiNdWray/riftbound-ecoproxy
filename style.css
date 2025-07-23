@@ -123,6 +123,7 @@ html, body {
   background: #218838;
 }
 
+
 /* Search Modal Base */
 #search-modal {
   position: fixed !important;
@@ -135,25 +136,104 @@ html, body {
   z-index: 2000;
 }
 
-/* Overview Pane */
+/* Search Header */
+#search-modal .search-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  z-index: 2001;
+  justify-content: center;
+}
+#search-modal .modal-content {
+  width: 100% !important;
+  max-width: none !important;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Search Input */
+#search-modal .search-header input {
+  flex: 1;
+  height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 80% !important;
+  max-width: 800px;
+  margin: 0 auto;
+  display: block;
+  box-sizing: border-box;
+}
+#search-modal .search-header input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+/* Search Panel & Results */
+#search-modal .results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+/* Print Styles */
+@media print {
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    display: block;
+  }
+  #card-container {
+    overflow: visible !important;
+  }
+}
+
+/* Overview modal styling */
+.overview-item {
+  display: grid;
+  grid-template-columns: 35% 6ch auto;  /* label (35%) | variant (6ch) | controls */
+  align-items: center;
+  white-space: nowrap;    /* never wrap */
+  gap: 1rem;
+  padding: 0.25rem 0;     /* vertical padding */
+}
+
+/* Cell 1: icon + name */
 .overview-label {
   grid-column: 1;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  width: 100%;
+  width: 100%;            /* fill the 35% column */
 }
 .overview-label img {
   width: 1.2em;
   height: auto;
   display: block;
 }
+
+/* Cell 2: variant number */
 .overview-variant {
   grid-column: 2;
   justify-self: center;
   font-weight: bold;
   text-align: center;
 }
+
+/* Cell 3: controls cluster */
 .overview-controls {
   grid-column: 3;
   display: inline-flex;
@@ -161,6 +241,8 @@ html, body {
   gap: 0.25rem;
   justify-self: end;
 }
+
+/* Buttons and count */
 .overview-count {
   background: #f0f0f0;
   padding: 0 0.4em;
@@ -178,101 +260,4 @@ html, body {
 }
 .overview-controls button:hover {
   background: #0056b3;
-}
-
-/* Card full-art image */
-.card-img {
-  width: 100%;
-  display: block;
-  margin-bottom: 0.5em;
-}
-.card-img.hidden {
-  display: none;
-}
-
-/* Full-Proxy button active styling */
-#btn-full-proxy {
-  border: 2px solid #007bff;
-  background: transparent;
-  color: #007bff;
-  transition: background 0.2s, color 0.2s;
-}
-#btn-full-proxy.active,
-#btn-full-proxy:hover {
-  background: #007bff;
-  color: #fff;
-}
-
-/* Print Styles */
-@media print and (orientation: portrait) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
-
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(3, 62.37mm);
-    grid-template-rows: repeat(3, 87.12mm);
-    gap: 0;
-  }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-}
-
-@media print and (orientation: landscape) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
-
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 62.37mm);
-    grid-template-rows: repeat(2, 87.12mm);
-    gap: 0;
-  }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-}
-
-/* Print: full-art vs. built proxies based on .full-proxy-print */
-@media print {
-  /* hide everything by default */
-  body * { visibility: hidden !important; display: none !important; }
-  /* show container and its cards */
-  #card-container, 
-  #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
-
-  /* FULL-PROXY ON: show only images */
-  #card-container.print-layout.full-proxy-print img.card-img {
-    display: block !important;
-  }
-  #card-container.print-layout.full-proxy-print .card > *:not(img.card-img) {
-    display: none !important;
-  }
-
-  /* FULL-PROXY OFF: show only built card HTML */
-  #card-container.print-layout:not(.full-proxy-print) img.card-img {
-    display: none !important;
-  }
-  #card-container.print-layout:not(.full-proxy-print) .card > *:not(img.card-img) {
-    display: block !important;
-  }
 }
