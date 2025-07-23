@@ -251,7 +251,6 @@ html, body {
 }
 
 /* Print: full-art vs. built proxies based on .full-proxy-print */
-
 @media print {
   /* hide everything by default */
   body * { visibility: hidden !important; display: none !important; }
@@ -260,12 +259,6 @@ html, body {
   #card-container * { visibility: visible !important; display: block !important; }
   .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
   @page { margin: 0; }
-
-  /* layout grid */
-  #card-container.print-layout {
-    display: grid;
-    /* portrait vs landscape split as before… */
-  }
 
   /* FULL-PROXY ON: show only images */
   #card-container.print-layout.full-proxy-print img.card-img {
