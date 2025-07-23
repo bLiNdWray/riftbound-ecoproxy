@@ -313,31 +313,57 @@
   });
 
   // ── Import List ───────────────────────────────────────────────────────
-  importBtn.addEventListener('click',()=>{
-    const prev=document.getElementById('import-modal');if(prev)return prev.remove();
-    const overlay=document.createElement('div');overlay.id='import-modal';overlay.className='modal-overlay';
-    overlay.innerHTML=`
-      <div class="modal-content">
-        <button id="close-import" class="modal-close">×</button>
-        <h2>Import List</h2>
-        <textarea id="import-area" placeholder="e.g. OGN-045-03 OGN-046-02"></textarea>
-        <label><input type="checkbox" id="import-clear"> Clear existing cards before import</label>
-        <div class="modal-actions">
-          <button id="import-cancel" class="topbar-btn">Cancel</button>
-          <button id="import-ok" class="topbar-btn">Import</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    const area=overlay.querySelector('#import-area');
-    overlay.querySelector('#close-import').onclick=overlay.remove.bind(overlay);
-    overlay.querySelector('#import-cancel').onclick=overlay.remove.bind(overlay);
-    area.value=Object.keys(window.cardCounts).join(' ');
-    overlay.querySelector('#import-ok').onclick=()=>{
-      if(overlay.querySelector('#import-clear').checked){container.innerHTML='';window.cardCounts={};updateCount();}
-      area.value.trim().split(/\s+/).forEach(tok=>{const p=tok.split('-');if(p.length>=2)window.addCard(p[0]+'-'+p[1]);});
-      overlay.remove();
-    };
-  });
+ // ── Import List ───────────────────────────────────────────────────────
+importBtn.addEventListener('click', () => {
+  // If modal already open, close it
+  const prev = document.getElementById('import-modal');
+  if (prev) return prev.remove();
+
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'import-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-content import-content">
+      <button id="close-import" class="modal-close">×</button>
+      <h2>Import List</h2>
+      <p class="import-instructions">Paste Table Top Simulator code here</p>
+      <textarea id="import-area" placeholder="Import code format: SET-###-Variant#"></textarea>
+      <label class="import-clear">
+        <input type="checkbox" id="import-clear" />
+        Clear existing cards before import
+      </label>
+      <div class="modal-actions import-actions">
+        <button id="import-cancel" class="topbar-btn">Cancel</button>
+        <button id="import-ok" class="topbar-btn primary">Import</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // Wire up controls
+  const area = overlay.querySelector('#import-area');
+  const clearCheckbox = overlay.querySelector('#import-clear');
+  overlay.querySelector('#close-import').onclick = () => overlay.remove();
+  overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
+
+  // Handle Import
+  overlay.querySelector('#import-ok').onclick = () => {
+    if (clearCheckbox.checked) {
+      container.innerHTML = '';
+      window.cardCounts = {};
+      updateCount();
+    }
+    area.value.trim().split(/\s+/).forEach(tok => {
+      const parts = tok.split('-');
+      if (parts.length >= 2) {
+        window.addCard(parts[0] + '-' + parts[1]);
+      }
+    });
+    // Clear textarea before closing
+    area.value = '';
+    overlay.remove();
+  };
+});
 
   // ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
