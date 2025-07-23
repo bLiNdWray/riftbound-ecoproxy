@@ -364,35 +364,20 @@ importBtn.addEventListener('click', () => {
   };
 });
 
-  // ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
-  // Hide the top bar and any open modal
-  document.getElementById('top-bar').style.display = 'none';
-  modal.classList.add('hidden');
-
-  // If we’re currently in full-art mode, toggle it off via your fullProxyBtn
-  if (window.fullProxy) {
-    fullProxyBtn.click();
-  }
-
-  // Clear any old print layout classes
-  container.classList.remove('portrait-print', 'landscape-print');
-
-  // Add the correct grid class based on orientation
-  const isLandscape = window.matchMedia('(orientation: landscape)').matches;
-  container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
-
-  // Now print
-  window.print();
-
-  // After the print dialog closes, restore the UI
-  setTimeout(() => {
-    document.getElementById('top-bar').style.display = '';
-    container.classList.remove('portrait-print', 'landscape-print');
-  }, 0);
-});
-
-
+    document.getElementById('top-bar').style.display = 'none';
+    modal.classList.add('hidden');
+    // if in full-art mode, toggle off
+    if (window.fullProxy) fullProxyBtn.click();
+    container.classList.remove('portrait-print','landscape-print');
+    const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+    container.classList.add(isLandscape?'landscape-print':'portrait-print');
+    window.print();
+    setTimeout(() => {
+      document.getElementById('top-bar').style.display = '';
+      container.classList.remove('portrait-print','landscape-print');
+    }, 0);
+  });
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
