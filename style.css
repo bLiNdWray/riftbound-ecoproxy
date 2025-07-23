@@ -273,48 +273,16 @@ html, body {
   background: #007bff;
   color: #fff;
 }
-@media print and (orientation: portrait) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
-
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(3, 62.37mm);
-    grid-template-rows: repeat(3, 87.12mm);
-    gap: 0;
+@media print {
+  /* When full-proxy OFF: hide the full-art images */
+  #card-container:not(.print-layout) img.card-img {
+    display: none !important;
   }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+  /* When full-proxy ON: hide the built card HTML, show only full-art */
+  #card-container.print-layout img.card-img {
+    display: block !important;
   }
-}
-
-@media print and (orientation: landscape) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
-
-  #card-container.print-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 62.37mm);
-    grid-template-rows: repeat(2, 87.12mm);
-    gap: 0;
-  }
-  .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+  #card-container.print-layout .card > *:not(img.card-img) {
+    display: none !important;
   }
 }
