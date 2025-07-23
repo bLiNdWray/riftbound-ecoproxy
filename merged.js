@@ -250,7 +250,9 @@
   fullProxyBtn.addEventListener('click', () => {
   window.fullProxy = !window.fullProxy;
   fullProxyBtn.classList.toggle('active', window.fullProxy);
-  // …swap img.src …
+  container.querySelectorAll('img.card-img').forEach(img => {
+    img.src = window.fullProxy ? img.dataset.fullArt : img.dataset.proxyArt;
+  });
 });
 
   resetBtn.addEventListener('click', ()=>{ container.innerHTML=''; window.cardCounts={}; saveState(); updateCount(); });
