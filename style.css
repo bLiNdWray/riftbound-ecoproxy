@@ -79,16 +79,50 @@ html, body {
   cursor: pointer;
 }
 
-/* Import Textarea */
+/* Import Modal Specific */
+.import-content {
+  max-width: 500px;
+  text-align: left;
+}
+.import-instructions {
+  margin: 0.5em 0;
+  font-style: italic;
+  color: #555;
+}
 #import-area {
   width: 100%;
-  height: 200px;
+  height: 120px;
   font-family: monospace;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 8px;
-  margin-top: 8px;
+  margin-bottom: 0.75em;
+  resize: vertical;
 }
+.import-clear {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1em;
+  font-size: 0.9rem;
+}
+.import-clear input {
+  margin-right: 0.5em;
+}
+.import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5em;
+  margin-top: 1em;
+}
+.topbar-btn.primary {
+  background: #28a745;
+  border-color: #218838;
+  color: #fff;
+}
+.topbar-btn.primary:hover {
+  background: #218838;
+}
+
 
 /* Search Modal Base */
 #search-modal {
