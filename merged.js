@@ -370,30 +370,28 @@ printBtn.addEventListener('click', () => {
   document.getElementById('top-bar').style.display = 'none';
   modal.classList.add('hidden');
 
-  // Ensure we’re not in full-proxy mode for printing
+  // If we’re currently in full-art mode, toggle it off via your fullProxyBtn
   if (window.fullProxy) {
-    window.fullProxy = false;
-    fullProxyBtn.classList.remove('active');
-    // hide all full-art images
-    container.querySelectorAll('img.card-img').forEach(img => img.classList.add('hidden'));
+    fullProxyBtn.click();
   }
 
-  // Remove any old print-layout classes
+  // Clear any old print layout classes
   container.classList.remove('portrait-print', 'landscape-print');
 
   // Add the correct grid class based on orientation
   const isLandscape = window.matchMedia('(orientation: landscape)').matches;
   container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
 
-  // Trigger print
+  // Now print
   window.print();
 
-  // Restore UI after print dialog closes
+  // After the print dialog closes, restore the UI
   setTimeout(() => {
     document.getElementById('top-bar').style.display = '';
     container.classList.remove('portrait-print', 'landscape-print');
   }, 0);
 });
+
 
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
