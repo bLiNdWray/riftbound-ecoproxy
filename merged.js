@@ -47,21 +47,7 @@
     }
     container.appendChild(el);
   }
- // ── Print Button ─────────────────────────────────────────────────────
-printBtn.addEventListener('click', () => {
-  document.getElementById('top-bar').style.display = 'none';
-  modal.classList.add('hidden');
-  // Clear any old classes
-  container.classList.remove('portrait-print','landscape-print');
-  // Detect orientation
-  const isLandscape = window.matchMedia('(orientation: landscape)').matches;
-  container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
-  window.print();
-  setTimeout(() => {
-    document.getElementById('top-bar').style.display = '';
-    container.classList.remove('portrait-print','landscape-print');
-  }, 0);
-});
+
   
   // ── JSONP Fetch ─────────────────────────────────────────────────────
   function jsonpFetch(params, cb) {
@@ -330,12 +316,20 @@ printBtn.addEventListener('click', () => {
   // ... your existing cleaned-up import code here ...
 
   // ── Print ─────────────────────────────────────────────────────────────
-  printBtn.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
-    modal.classList.add('hidden');
-    window.print();
-    setTimeout(() => document.getElementById('top-bar').style.display = '', 0);
-  });
+printBtn.addEventListener('click', () => {
+  document.getElementById('top-bar').style.display = 'none';
+  modal.classList.add('hidden');
+  // Clear any old classes
+  container.classList.remove('portrait-print','landscape-print');
+  // Detect orientation
+  const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+  container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
+  window.print();
+  setTimeout(() => {
+    document.getElementById('top-bar').style.display = '';
+    container.classList.remove('portrait-print','landscape-print');
+  }, 0);
+});
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
