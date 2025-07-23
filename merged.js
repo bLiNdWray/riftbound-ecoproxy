@@ -179,35 +179,42 @@ function renderSearchResults(list) {
     })[t](c);
     el.classList.add(typeClassMap[t]);
 
-    // Prevent clicks on the card wrapper from closing the modal
+    // Prevent wrapper clicks from bubbling
     el.addEventListener('click', e => e.stopPropagation());
 
-    // Wire up the "+" button
+    // Find the badge inside this search result and sync it
+    const searchBadge = el.querySelector('.qty-badge');
+    if (searchBadge) {
+      searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
+    }
+
+    // "+" button: add to main and update badge here
     const addBtn = el.querySelector('.add-btn');
     if (addBtn) {
       addBtn.addEventListener('click', e => {
         e.stopPropagation();
         window.addCard(c.variantNumber);
+        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber];
       });
     }
 
-    // Wire up the "−" button
+    // "−" button: remove from main, but never remove this el
     const remBtn = el.querySelector('.remove-btn');
     if (remBtn) {
       remBtn.addEventListener('click', e => {
         e.stopPropagation();
-        // Always remove from the main container:
+        // remove from main container
         const mainCard = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
-        if (mainCard) {
-          window.removeCard(c.variantNumber, mainCard);
-        }
+        if (mainCard) window.removeCard(c.variantNumber, mainCard);
+        // update this search-panel badge
+        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
       });
     }
 
-    // Append into the search-results panel
     results.appendChild(el);
   });
 }
+
 
   function renderCards(ids, clear=true) {
     if (clear) container.innerHTML = '';
