@@ -350,20 +350,30 @@
   });
 
   // ── Print ─────────────────────────────────────────────────────────────
-  printBtn.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
-    modal.classList.add('hidden');
-    // if in full-art mode, toggle off
-    if (window.fullProxy) fullProxyBtn.click();
-    container.classList.remove('portrait-print','landscape-print');
-    const isLandscape = window.matchMedia('(orientation: landscape)').matches;
-    container.classList.add(isLandscape?'landscape-print':'portrait-print');
-    window.print();
-    setTimeout(() => {
-      document.getElementById('top-bar').style.display = '';
-      container.classList.remove('portrait-print','landscape-print');
-    }, 0);
-  });
+ printBtn.addEventListener('click', () => {
+  // 1) hide UI
+  document.getElementById('top-bar').style.display = 'none';
+  modal.classList.add('hidden');
+
+  // 2) ensure proxy art (not full art)
+  if (window.fullProxy) fullProxyBtn.click();
+
+  // 3) clear any old print‐layout classes
+  container.classList.remove('portrait-print','landscape-print');
+
+  // 4) add the grid class—but we'll let CSS media queries pick which one
+  container.classList.add('print-layout');
+
+  // 5) print
+  window.print();
+
+  // 6) restore UI
+  setTimeout(() => {
+    document.getElementById('top-bar').style.display = '';
+    container.classList.remove('print-layout');
+  }, 0);
+});
+
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
