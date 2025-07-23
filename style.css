@@ -190,7 +190,7 @@ html, body {
 }
 
 @media print {
-  /* Base: hide everything except the cards */
+  /* Hide everything except the card container and its cards */
   body * {
     visibility: hidden !important;
     display: none !important;
@@ -201,56 +201,67 @@ html, body {
     display: block !important;
   }
 
-  /* Page margins zero */
-  @page { margin: 0; }
-
-  /* Portrait: 9 cards (3 columns × 3 rows) */
-  @media print and (orientation: portrait) {
-    @page { size: A4 portrait; }
-    #card-container {
-      display: grid;
-      grid-template-columns: repeat(3, 63mm);
-      grid-template-rows: repeat(3, 88mm);
-      gap: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      width: 63mm !important;
-      height: 88mm !important;
-      margin: 0 !important;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-  }
-
-  /* Landscape: 8 cards (4 columns × 2 rows) */
-  @media print and (orientation: landscape) {
-    @page { size: A4 landscape; }
-    #card-container {
-      display: grid;
-      grid-template-columns: repeat(4, 63mm);
-      grid-template-rows: repeat(2, 88mm);
-      gap: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      width: 63mm !important;
-      height: 88mm !important;
-      margin: 0 !important;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-  }
-
-  /* Always hide UI chrome */
+  /* Remove any UI chrome */
+  .hover-bar,
+  .add-btn,
+  .remove-btn,
   .qty-badge,
-  .hover-bar {
+  .topbar-btn,
+  #open-search,
+  #btn-print,
+  #btn-import,
+  #btn-full-proxy,
+  #btn-reset,
+  #btn-overview,
+  .modal-close {
     display: none !important;
   }
-}
 
+  /* Zero page margins */
+  @page { margin: 0; }
+
+  /* Portrait: 3×3 grid, 99% of 63×88 mm */
+  @media print and (orientation: portrait) {
+    #card-container {
+      display: grid;
+      grid-template-columns: repeat(3, 62.37mm);
+      grid-template-rows: repeat(3, 87.12mm);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      width: 62.37mm !important;
+      height: 87.12mm !important;
+      margin: 0 !important;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* Landscape: 4×2 grid, 99% sizing */
+  @media print and (orientation: landscape) {
+    #card-container {
+      display: grid;
+      grid-template-columns: repeat(4, 62.37mm);
+      grid-template-rows: repeat(2, 87.12mm);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      width: 62.37mm !important;
+      height: 87.12mm !important;
+      margin: 0 !important;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+}
 
 
 /* Overview modal styling */
