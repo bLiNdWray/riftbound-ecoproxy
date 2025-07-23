@@ -273,17 +273,23 @@ html, body {
   background: #007bff;
   color: #fff;
 }
+/* 1) Top‐level page size & zero margins */
+@page {
+  margin: 0;
+}
+
+/* 2) Portrait: 3×3 grid of 99% cards */
 @media print and (orientation: portrait) {
   body * { visibility: hidden !important; display: none !important; }
   #card-container, #card-container * { visibility: visible !important; display: block !important; }
   .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
 
   #card-container.print-layout {
     display: grid;
     grid-template-columns: repeat(3, 62.37mm);
     grid-template-rows: repeat(3, 87.12mm);
     gap: 0;
+    margin: 0;
   }
   .card {
     width: 62.37mm !important;
@@ -296,17 +302,18 @@ html, body {
   }
 }
 
+/* 3) Landscape: 4×2 grid of 99% cards */
 @media print and (orientation: landscape) {
   body * { visibility: hidden !important; display: none !important; }
   #card-container, #card-container * { visibility: visible !important; display: block !important; }
   .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  @page { margin: 0; }
 
   #card-container.print-layout {
     display: grid;
     grid-template-columns: repeat(4, 62.37mm);
     grid-template-rows: repeat(2, 87.12mm);
     gap: 0;
+    margin: 0;
   }
   .card {
     width: 62.37mm !important;
