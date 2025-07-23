@@ -189,8 +189,8 @@ html, body {
   margin-top: 8px;
 }
 
+/* Hide everything except card container & cards when printing */
 @media print {
-  /* Hide everything except the card container and its cards */
   body * {
     visibility: hidden !important;
     display: none !important;
@@ -201,7 +201,7 @@ html, body {
     display: block !important;
   }
 
-  /* Remove any UI chrome */
+  /* Hide all UI chrome */
   .hover-bar,
   .add-btn,
   .remove-btn,
@@ -217,29 +217,37 @@ html, body {
     display: none !important;
   }
 
-  /* Zero page margins */
-  @page { margin: 0; }
-
-  /* Portrait: 3×3 grid, 99% of 63×88 mm */
-  @media print and (orientation: portrait) {
-    #card-container {
-      display: grid;
-      grid-template-columns: repeat(3, 62.37mm);
-      grid-template-rows: repeat(3, 87.12mm);
-      gap: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      width: 62.37mm !important;
-      height: 87.12mm !important;
-      margin: 0 !important;
-      page-break-inside: avoid;
-      break-inside: avoid;
-      border: none !important;
-      box-shadow: none !important;
-    }
+  @page {
+    margin: 0;
   }
+  
+  /* Portrait layout: 3×3 grid of 62.37×87.12mm cards */
+  #card-container.portrait-print {
+    display: grid;
+    grid-template-columns: repeat(3, 62.37mm);
+    grid-template-rows: repeat(3, 87.12mm);
+    gap: 0;
+  }
+  
+  /* Landscape layout: 4×2 grid of 62.37×87.12mm cards */
+  #card-container.landscape-print {
+    display: grid;
+    grid-template-columns: repeat(4, 62.37mm);
+    grid-template-rows: repeat(2, 87.12mm);
+    gap: 0;
+  }
+
+  .card {
+    width: 62.37mm !important;
+    height: 87.12mm !important;
+    margin: 0 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
 
   /* Landscape: 4×2 grid, 99% sizing */
   @media print and (orientation: landscape) {
