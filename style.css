@@ -190,24 +190,25 @@ html, body {
 }
 
 @media print {
-  /* Page setup: exact card size, no margins */
+  /* Physical page size */
   @page {
     size: 63mm 88mm;
     margin: 0;
   }
 
-  /* Hide everything except the card container */
+  /* Hide everything except our card container and its contents */
   body * {
     visibility: hidden !important;
     display: none !important;
   }
+  /* Un-hide the container and *all* of its descendants */
   #card-container,
-  #card-container .card {
+  #card-container * {
     visibility: visible !important;
     display: block !important;
   }
 
-  /* Layout cards in a simple flow without extra lines */
+  /* Layout cards in a flow */
   #card-container {
     position: absolute;
     top: 0;
@@ -215,26 +216,26 @@ html, body {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+    gap: 0;
   }
   .card {
     /* 99% of 63mm × 88mm */
     width: 62.37mm !important;
     height: 87.12mm !important;
-    margin: 1mm 0 !important;
+    margin: 0 !important;
     border: none !important;
     box-shadow: none !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Remove badges, controls, and any stray lines */
+  /* Strip out badges, hover bars, and outlines */
   .qty-badge,
-  .hover-bar,
-  .card * {
-    box-shadow: none !important;
-    outline: none !important;
+  .hover-bar {
+    display: none !important;
   }
 }
+
 
 /* Overview modal styling */
 .overview-item {
