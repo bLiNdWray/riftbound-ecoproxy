@@ -189,82 +189,62 @@ html, body {
   margin-top: 8px;
 }
 
-/* Hide everything except the cards when printing */
-@media print {
-  /* Hide all page elements */
-  body * {
-    visibility: hidden !important;
-    display: none !important;
-  }
+@media print and (orientation: portrait) {
+  /* hide everything */
+  body * { visibility: hidden !important; display: none !important; }
 
-  /* Unhide the card container and all descendants */
-  #card-container,
-  #card-container * {
-    visibility: visible !important;
-    display: block !important;
-  }
+  /* un-hide the card container and all its children */
+  #card-container, #card-container * { visibility: visible !important; display: block !important; }
 
-  /* Hide all UI chrome */
-  .hover-bar,
-  .add-btn,
-  .remove-btn,
-  .qty-badge,
-  .topbar-btn,
-  #open-search,
-  #btn-print,
-  #btn-import,
-  #btn-full-proxy,
-  #btn-reset,
-  #btn-overview,
-  .modal-close {
-    display: none !important;
-  }
+  /* hide any UI chrome */
+  .hover-bar, .add-btn, .remove-btn, .qty-badge,
+  .topbar-btn, .modal-close { display: none !important; }
 
-  /* Remove page margins */
-  @page {
+  /* page setup */
+  @page { margin: 0; }
+
+  /* 3×3 grid of 99% cards */
+  #card-container.print-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 62.37mm);
+    grid-template-rows: repeat(3, 87.12mm);
+    gap: 0;
     margin: 0;
   }
-
-  /* Base card styling */
   .card {
+    width: 62.37mm !important;
+    height: 87.12mm !important;
+    margin: 0 !important;
     border: none !important;
     box-shadow: none !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
+}
 
-  /* Portrait: 3×3 grid of 99% sized cards */
-  @media (orientation: portrait) {
-    #card-container {
-      display: grid;
-      grid-template-columns: repeat(3, 62.37mm);
-      grid-template-rows: repeat(3, 87.12mm);
-      gap: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      width: 62.37mm !important;
-      height: 87.12mm !important;
-      margin: 0 !important;
-    }
+@media print and (orientation: landscape) {
+  body * { visibility: hidden !important; display: none !important; }
+  #card-container, #card-container * { visibility: visible !important; display: block !important; }
+  .hover-bar, .add-btn, .remove-btn, .qty-badge,
+  .topbar-btn, .modal-close { display: none !important; }
+  @page { margin: 0; }
+
+  /* 4×2 grid of 99% cards */
+  #card-container.print-layout {
+    display: grid;
+    grid-template-columns: repeat(4, 62.37mm);
+    grid-template-rows: repeat(2, 87.12mm);
+    gap: 0;
+    margin: 0;
   }
-
-  /* Landscape: 4×2 grid of 99% sized cards */
-  @media (orientation: landscape) {
-    #card-container {
-      display: grid;
-      grid-template-columns: repeat(4, 62.37mm);
-      grid-template-rows: repeat(2, 87.12mm);
-      gap: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      width: 62.37mm !important;
-      height: 87.12mm !important;
-      margin: 0 !important;
-    }
+  .card {
+    width: 62.37mm !important;
+    height: 87.12mm !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 
