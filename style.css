@@ -261,3 +261,27 @@ html, body {
 .overview-controls button:hover {
   background: #0056b3;
 }
+
+
+/* _________________________________________________________Card full-art image */
+.card-img {
+  width: 100%;
+  display: block;
+  margin-bottom: 0.5em;
+}
+.card-img.hidden {
+  display: none;
+}
+
+/* Full-Proxy button active styling */
+#btn-full-proxy {
+  border: 2px solid #007bff;
+  background: transparent;
+  color: #007bff;
+  transition: background 0.2s, color 0.2s;
+}
+#btn-full-proxy.active,
+#btn-full-proxy:hover {
+  background: #007bff;
+  color: #fff;
+}
