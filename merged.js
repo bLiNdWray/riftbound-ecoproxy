@@ -47,7 +47,22 @@
     }
     container.appendChild(el);
   }
-
+ // ── Print Button ─────────────────────────────────────────────────────
+printBtn.addEventListener('click', () => {
+  document.getElementById('top-bar').style.display = 'none';
+  modal.classList.add('hidden');
+  // Clear any old classes
+  container.classList.remove('portrait-print','landscape-print');
+  // Detect orientation
+  const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+  container.classList.add(isLandscape ? 'landscape-print' : 'portrait-print');
+  window.print();
+  setTimeout(() => {
+    document.getElementById('top-bar').style.display = '';
+    container.classList.remove('portrait-print','landscape-print');
+  }, 0);
+});
+  
   // ── JSONP Fetch ─────────────────────────────────────────────────────
   function jsonpFetch(params, cb) {
     const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*1e4);
