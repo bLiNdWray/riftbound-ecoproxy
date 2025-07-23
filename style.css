@@ -190,31 +190,49 @@ html, body {
 }
 
 @media print {
-  /* Hide everything by default */
+  /* Page setup: exact card size, no margins */
+  @page {
+    size: 63mm 88mm;
+    margin: 0;
+  }
+
+  /* Hide everything except the card container */
   body * {
     visibility: hidden !important;
     display: none !important;
   }
-
-  /* Show only the card container and its cards */
   #card-container,
-  #card-container * {
+  #card-container .card {
     visibility: visible !important;
     display: block !important;
   }
 
-  /* Position the container at the top left */
+  /* Layout cards in a simple flow without extra lines */
   #card-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .card {
+    /* 99% of 63mm × 88mm */
+    width: 62.37mm !important;
+    height: 87.12mm !important;
+    margin: 1mm 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
-  /* Remove badges and hover bars */
+  /* Remove badges, controls, and any stray lines */
   .qty-badge,
-  .hover-bar {
-    display: none !important;
+  .hover-bar,
+  .card * {
+    box-shadow: none !important;
+    outline: none !important;
   }
 }
 
