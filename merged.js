@@ -65,7 +65,7 @@
     const qs = Object.entries(params)
       .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
       .join('&');
-    const script = document.createElement('script');
+    let script = document.createElement('script');
     script.src = `${API_BASE}?${qs}&callback=${callbackName}`;
     document.head.appendChild(script);
   }
