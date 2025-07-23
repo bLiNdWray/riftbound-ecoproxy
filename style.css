@@ -189,12 +189,15 @@ html, body {
   margin-top: 8px;
 }
 
-/* Hide everything except card container & cards when printing */
+/* Hide everything except the cards when printing */
 @media print {
+  /* Hide all page elements */
   body * {
     visibility: hidden !important;
     display: none !important;
   }
+
+  /* Unhide the card container and all descendants */
   #card-container,
   #card-container * {
     visibility: visible !important;
@@ -217,40 +220,38 @@ html, body {
     display: none !important;
   }
 
+  /* Remove page margins */
   @page {
     margin: 0;
   }
-  
-  /* Portrait layout: 3×3 grid of 62.37×87.12mm cards */
-  #card-container.portrait-print {
-    display: grid;
-    grid-template-columns: repeat(3, 62.37mm);
-    grid-template-rows: repeat(3, 87.12mm);
-    gap: 0;
-  }
-  
-  /* Landscape layout: 4×2 grid of 62.37×87.12mm cards */
-  #card-container.landscape-print {
-    display: grid;
-    grid-template-columns: repeat(4, 62.37mm);
-    grid-template-rows: repeat(2, 87.12mm);
-    gap: 0;
-  }
 
+  /* Base card styling */
   .card {
-    width: 62.37mm !important;
-    height: 87.12mm !important;
-    margin: 0 !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
     border: none !important;
     box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
-}
 
+  /* Portrait: 3×3 grid of 99% sized cards */
+  @media (orientation: portrait) {
+    #card-container {
+      display: grid;
+      grid-template-columns: repeat(3, 62.37mm);
+      grid-template-rows: repeat(3, 87.12mm);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      width: 62.37mm !important;
+      height: 87.12mm !important;
+      margin: 0 !important;
+    }
+  }
 
-  /* Landscape: 4×2 grid, 99% sizing */
-  @media print and (orientation: landscape) {
+  /* Landscape: 4×2 grid of 99% sized cards */
+  @media (orientation: landscape) {
     #card-container {
       display: grid;
       grid-template-columns: repeat(4, 62.37mm);
@@ -263,14 +264,9 @@ html, body {
       width: 62.37mm !important;
       height: 87.12mm !important;
       margin: 0 !important;
-      page-break-inside: avoid;
-      break-inside: avoid;
-      border: none !important;
-      box-shadow: none !important;
     }
   }
 }
-
 
 /* Overview modal styling */
 .overview-item {
