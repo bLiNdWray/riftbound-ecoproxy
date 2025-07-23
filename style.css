@@ -273,21 +273,112 @@ html, body {
   background: #007bff;
   color: #fff;
 }
-/* 1) Top‐level page size & zero margins */
-@page { margin: 0; }
-@media print and (orientation: portrait) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  #card-container.print-layout { display: grid; grid-template-columns: repeat(3, 62.37mm); grid-template-rows: repeat(3, 87.12mm); gap: 0; }
-  .card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
-  .card-img { display: none !important; }
+/* Print Styles /
+/ Ensure full coverage of page with no margins */
+@page {
+margin: 0;
 }
+
+/* Portrait: 9 cards per page /
+@media print and (orientation: portrait) {
+/ Hide everything by default */
+body * {
+visibility: hidden !important;
+display: none !important;
+}
+
+/* Show only card container and its children */
+#card-container,
+#card-container * {
+visibility: visible !important;
+display: block !important;
+}
+
+/* Hide UI chrome */
+.hover-bar,
+.add-btn,
+.remove-btn,
+.qty-badge,
+.topbar-btn,
+.modal-close {
+display: none !important;
+}
+
+/* Hide full-art images (proxy mode only) */
+.card-img {
+display: none !important;
+}
+
+/* Grid layout: 3 columns x 3 rows */
+#card-container.print-layout {
+display: grid;
+grid-template-columns: repeat(3, 62.37mm);
+grid-template-rows: repeat(3, 87.12mm);
+gap: 0;
+margin: 0;
+padding: 0;
+}
+
+/* Card sizing and prevent splits */
+.card {
+width: 62.37mm !important;
+height: 87.12mm !important;
+margin: 0 !important;
+border: none !important;
+box-shadow: none !important;
+page-break-inside: avoid;
+break-inside: avoid;
+}
+}
+
+/* Landscape: 8 cards per page /
 @media print and (orientation: landscape) {
-  body * { visibility: hidden !important; display: none !important; }
-  #card-container, #card-container * { visibility: visible !important; display: block !important; }
-  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
-  #card-container.print-layout { display: grid; grid-template-columns: repeat(4, 62.37mm); grid-template-rows: repeat(2, 87.12mm); gap: 0; }
-  .card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
-  .card-img { display: none !important; }
+/ Hide everything by default */
+body * {
+visibility: hidden !important;
+display: none !important;
+}
+
+/* Show only card container and its children */
+#card-container,
+#card-container * {
+visibility: visible !important;
+display: block !important;
+}
+
+/* Hide UI chrome */
+.hover-bar,
+.add-btn,
+.remove-btn,
+.qty-badge,
+.topbar-btn,
+.modal-close {
+display: none !important;
+}
+
+/* Hide full-art images (proxy mode only) */
+.card-img {
+display: none !important;
+}
+
+/* Grid layout: 4 columns x 2 rows */
+#card-container.print-layout {
+display: grid;
+grid-template-columns: repeat(4, 62.37mm);
+grid-template-rows: repeat(2, 87.12mm);
+gap: 0;
+margin: 0;
+padding: 0;
+}
+
+/* Card sizing and prevent splits */
+.card {
+width: 62.37mm !important;
+height: 87.12mm !important;
+margin: 0 !important;
+border: none !important;
+box-shadow: none !important;
+page-break-inside: avoid;
+break-inside: avoid;
+}
 }
