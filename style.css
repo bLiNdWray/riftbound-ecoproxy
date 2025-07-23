@@ -277,19 +277,63 @@ html, body {
 @page {
 margin: 0;
 }
+
+/* Print: portrait */
 @media print and (orientation: portrait) {
 body * { visibility: hidden !important; display: none !important; }
 #card-container, #card-container * { visibility: visible !important; display: block !important; }
 .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
+
+/* Hide full-art images */
 .card-img { display: none !important; }
-#card-container.print-layout { display: grid; grid-template-columns: repeat(3, 62.37mm); grid-template-rows: repeat(3, 87.12mm); gap: 0; }
-.card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
+
+/* 3×3 grid at 99% size */
+#card-container.print-layout {
+display: grid;
+grid-template-columns: repeat(3, 62.37mm);
+grid-template-rows: repeat(3, 87.12mm);
+gap: 0;
+margin: 0;
+padding: 0;
 }
+.card {
+width: 62.37mm !important;
+height: 87.12mm !important;
+margin: 0 !important;
+border: none !important;
+box-shadow: none !important;
+page-break-inside: avoid !important;
+break-inside: avoid !important;
+}
+}
+
+/* Print: landscape */
 @media print and (orientation: landscape) {
 body * { visibility: hidden !important; display: none !important; }
 #card-container, #card-container * { visibility: visible !important; display: block !important; }
 .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
+
+/* Hide full-art images */
 .card-img { display: none !important; }
-#card-container.print-layout { display: grid; grid-template-columns: repeat(4, 62.37mm); grid-template-rows: repeat(2, 87.12mm); gap: 0; }
-.card { width: 62.37mm !important; height: 87.12mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
+
+/* 4×2 grid at 99% size */
+#card-container.print-layout {
+display: grid;
+grid-template-columns: repeat(4, 62.37mm);
+grid-template-rows: repeat(2, 87.12mm);
+gap: 0;
+margin: 0;
+padding: 0;
 }
+.card {
+width: 62.37mm !important;
+height: 87.12mm !important;
+margin: 0 !important;
+border: none !important;
+box-shadow: none !important;
+page-break-inside: avoid !important;
+break-inside: avoid !important;
+}
+}
+
+
