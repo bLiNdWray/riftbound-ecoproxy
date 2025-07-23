@@ -179,13 +179,16 @@ function renderSearchResults(list) {
     })[t](c);
     el.classList.add(typeClassMap[t]);
 
+    // Prevent any parent click listener from hiding the modal
+    el.addEventListener('click', e => e.stopPropagation());
+
     // Wire up the "+" button
     const addBtn = el.querySelector('.add-btn');
     if (addBtn) {
       addBtn.addEventListener('click', e => {
         e.stopPropagation();
         window.addCard(c.variantNumber);
-        modal.classList.add('hidden');
+        // no modal hiding here
       });
     }
 
@@ -194,14 +197,12 @@ function renderSearchResults(list) {
     if (remBtn) {
       remBtn.addEventListener('click', e => {
         e.stopPropagation();
-        // remove one instance from main container
         const cardEl = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
         window.removeCard(c.variantNumber, cardEl);
-        modal.classList.add('hidden');
+        // no modal hiding here
       });
     }
 
-    // Append to the results panel
     results.appendChild(el);
   });
 }
