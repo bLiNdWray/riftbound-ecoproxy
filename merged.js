@@ -278,7 +278,7 @@ function refreshBadge(vn) {
     renderSearchResults(matches);
   });
 
- // ── Import List ───────────────────────────────────────────────────────
+// ── Import List ───────────────────────────────────────────────────────
 importBtn.addEventListener('click', () => {
   // remove existing if open
   const prev = document.getElementById('import-modal');
@@ -305,15 +305,16 @@ importBtn.addEventListener('click', () => {
     </div>`;
   document.body.appendChild(overlay);
 
-  // wire up buttons
+  const area = overlay.querySelector('#import-area');
+  const clearCheckbox = overlay.querySelector('#import-clear');
   overlay.querySelector('#close-import').onclick = () => overlay.remove();
   overlay.querySelector('#import-cancel').onclick = () => overlay.remove();
 
-  const area = overlay.querySelector('#import-area');
+  // prefill with existing counts
   area.value = Object.keys(window.cardCounts).join(' ');
 
   overlay.querySelector('#import-ok').onclick = () => {
-    if (overlay.querySelector('#import-clear').checked) {
+    if (clearCheckbox.checked) {
       container.innerHTML = '';
       window.cardCounts = {};
       updateCount();
@@ -322,6 +323,8 @@ importBtn.addEventListener('click', () => {
       const parts = tok.split('-');
       if (parts.length >= 2) window.addCard(parts[0] + '-' + parts[1]);
     });
+    // clear the textarea before closing
+    area.value = '';
     overlay.remove();
   };
 });
