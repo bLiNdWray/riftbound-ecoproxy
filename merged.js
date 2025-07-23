@@ -355,11 +355,22 @@ printBtn.addEventListener('click', () => {
   topBar.style.display = 'none';
   modal.classList.add('hidden');
 
-  // Ensure full-art images are only shown if fullProxy is true,
-  // otherwise hide them. Do not toggle the flag!
-  container.querySelectorAll('img.card-img').forEach(img => {
-    img.classList.toggle('hidden', !window.fullProxy);
-  });
+  // Add print-layout and mark which mode we're in
+  container.classList.add('print-layout');
+  if (window.fullProxy) {
+    container.classList.add('full-proxy-print');
+  } else {
+    container.classList.remove('full-proxy-print');
+  }
+
+  window.print();
+
+  // Restore everything
+  setTimeout(() => {
+    topBar.style.display = '';
+    container.classList.remove('print-layout', 'full-proxy-print');
+  }, 0);
+});
 
   container.classList.add('print-layout');
   window.print();
