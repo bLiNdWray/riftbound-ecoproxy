@@ -350,30 +350,30 @@
   });
 
   // ── Print ─────────────────────────────────────────────────────────────
- printBtn.addEventListener('click', () => {
-  // 1) hide UI
+printBtn.addEventListener('click', () => {
+  // 1) hide top bar & any modal
   document.getElementById('top-bar').style.display = 'none';
   modal.classList.add('hidden');
 
   // 2) ensure proxy art (not full art)
-  if (window.fullProxy) fullProxyBtn.click();
+  if (window.fullProxy) {
+    // reuse your existing toggle logic
+    fullProxyBtn.click();
+  }
 
-  // 3) clear any old print‐layout classes
-  container.classList.remove('portrait-print','landscape-print');
-
-  // 4) add the grid class—but we'll let CSS media queries pick which one
+  // 3) clear any old print‐layout class, add the marker
+  container.classList.remove('print-layout');
   container.classList.add('print-layout');
 
-  // 5) print
+  // 4) invoke print
   window.print();
 
-  // 6) restore UI
+  // 5) restore UI after print dialog closes
   setTimeout(() => {
     document.getElementById('top-bar').style.display = '';
     container.classList.remove('print-layout');
   }, 0);
 });
-
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
