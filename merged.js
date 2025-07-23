@@ -349,7 +349,8 @@
     };
   });
 
-  // ── Print ─────────────────────────────────────────────────────────────
+
+// ── Print ─────────────────────────────────────────────────────────────
 printBtn.addEventListener('click', () => {
   // 1) Hide the top bar and any open modal
   document.getElementById('top-bar').style.display = 'none';
@@ -363,6 +364,7 @@ printBtn.addEventListener('click', () => {
     document.getElementById('top-bar').style.display = '';
   }, 0);
 });
+
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
