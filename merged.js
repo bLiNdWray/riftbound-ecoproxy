@@ -166,22 +166,45 @@
   }
 
   // ── Rendering ───────────────────────────────────────────────────────
-  function renderSearchResults(list) {
-    results.innerHTML = '';
-    list.forEach(c => {
-      const t = (c.type||'').trim().toLowerCase();
-      if (!allowedTypes.includes(t)) return;
-      const el = ({ unit: makeUnit, spell: makeSpell, gear: makeSpell,
-                    battlefield: makeBattlefield, legend: makeLegend, rune: makeRune })[t](c);
-      el.classList.add(typeClassMap[t]);
-      el.addEventListener('click', () => {
+function renderSearchResults(list) {
+  results.innerHTML = '';
+  list.forEach(c => {
+    const t = (c.type||'').trim().toLowerCase();
+    if (!allowedTypes.includes(t)) return;
+
+    // Build the card element
+    const el = ({ 
+      unit: makeUnit, spell: makeSpell, gear: makeSpell,
+      battlefield: makeBattlefield, legend: makeLegend, rune: makeRune 
+    })[t](c);
+    el.classList.add(typeClassMap[t]);
+
+    // Wire up the "+" button
+    const addBtn = el.querySelector('.add-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', e => {
+        e.stopPropagation();
         window.addCard(c.variantNumber);
         modal.classList.add('hidden');
       });
-      results.appendChild(el);
-    });
-  }
+    }
 
+    // Wire up the "−" button
+    const remBtn = el.querySelector('.remove-btn');
+    if (remBtn) {
+      remBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        // remove one instance from main container
+        const cardEl = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
+        window.removeCard(c.variantNumber, cardEl);
+        modal.classList.add('hidden');
+      });
+    }
+
+    // Append to the results panel
+    results.appendChild(el);
+  });
+}
   function renderCards(ids, clear=true) {
     if (clear) container.innerHTML = '';
     ids.forEach(vn => {
