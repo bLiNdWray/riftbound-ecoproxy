@@ -189,15 +189,32 @@ html, body {
   margin-top: 8px;
 }
 
-/* Print Styles */
 @media print {
-  .card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    display: block;
+  /* Hide everything by default */
+  body * {
+    visibility: hidden !important;
+    display: none !important;
   }
+
+  /* Show only the card container and its cards */
+  #card-container,
+  #card-container * {
+    visibility: visible !important;
+    display: block !important;
+  }
+
+  /* Position the container at the top left */
   #card-container {
-    overflow: visible !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* Remove badges and hover bars */
+  .qty-badge,
+  .hover-bar {
+    display: none !important;
   }
 }
 
