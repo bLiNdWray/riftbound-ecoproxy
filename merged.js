@@ -351,17 +351,18 @@
 
 
 // ── Print ─────────────────────────────────────────────────────────────
- printBtn.addEventListener('click', () => {
-    document.getElementById('top-bar').style.display = 'none';
+  printBtn.addEventListener('click',()=>{
+    document.getElementById('top-bar').style.display='none';
     modal.classList.add('hidden');
-    if (window.fullProxy) fullProxyBtn.click();
+    if(window.fullProxy) fullProxyBtn.click();
     container.classList.add('print-layout');
     window.print();
-    setTimeout(() => {
-      document.getElementById('top-bar').style.display = '';
+    setTimeout(()=>{
+      document.getElementById('top-bar').style.display='';
       container.classList.remove('print-layout');
-    }, 0);
+    },0);
   });
+
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
   fullProxyBtn.addEventListener('click', () => {
