@@ -167,53 +167,62 @@
 
   // ── Rendering ───────────────────────────────────────────────────────
 function renderSearchResults(list) {
+  // Clear previous results
   results.innerHTML = '';
+
   list.forEach(c => {
-    const t = (c.type||'').trim().toLowerCase();
+    const t = (c.type || '').trim().toLowerCase();
     if (!allowedTypes.includes(t)) return;
 
     // Build the card element for the search panel
-    const el = ({ 
-      unit: makeUnit, spell: makeSpell, gear: makeSpell,
-      battlefield: makeBattlefield, legend: makeLegend, rune: makeRune 
+    const el = ({
+      unit: makeUnit,
+      spell: makeSpell,
+      gear: makeSpell,
+      battlefield: makeBattlefield,
+      legend: makeLegend,
+      rune: makeRune
     })[t](c);
     el.classList.add(typeClassMap[t]);
 
-    // Prevent wrapper clicks from bubbling
+    // Strip out any default listeners by replacing the buttons
+    const oldAdd = el.querySelector('.add-btn');
+    const newAdd = oldAdd.cloneNode(true);
+    oldAdd.replaceWith(newAdd);
+
+    const oldRem = el.querySelector('.remove-btn');
+    const newRem = oldRem.cloneNode(true);
+    oldRem.replaceWith(newRem);
+
+    // Prevent wrapper clicks from bubbling (so modal doesn’t close)
     el.addEventListener('click', e => e.stopPropagation());
 
-    // Find the badge inside this search result and sync it
+    // Sync badge count in search result
     const searchBadge = el.querySelector('.qty-badge');
     if (searchBadge) {
       searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
     }
 
-    // "+" button: add to main and update badge here
-    const addBtn = el.querySelector('.add-btn');
-    if (addBtn) {
-      addBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        window.addCard(c.variantNumber);
-        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber];
-      });
-    }
+    // Wire up the new "+" button
+    newAdd.addEventListener('click', e => {
+      e.stopPropagation();
+      window.addCard(c.variantNumber);
+      if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber];
+    });
 
-    // "−" button: remove from main, but never remove this el
-    const remBtn = el.querySelector('.remove-btn');
-    if (remBtn) {
-      remBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        // remove from main container
-        const mainCard = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
-        if (mainCard) window.removeCard(c.variantNumber, mainCard);
-        // update this search-panel badge
-        if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
-      });
-    }
+    // Wire up the new "−" button
+    newRem.addEventListener('click', e => {
+      e.stopPropagation();
+      const mainCard = container.querySelector(`.card[data-variant="${c.variantNumber}"]`);
+      if (mainCard) window.removeCard(c.variantNumber, mainCard);
+      if (searchBadge) searchBadge.textContent = window.cardCounts[c.variantNumber] || 0;
+    });
 
+    // Append into the search-results panel
     results.appendChild(el);
   });
 }
+
 
 
   function renderCards(ids, clear=true) {
