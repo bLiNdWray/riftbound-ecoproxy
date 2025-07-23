@@ -250,18 +250,36 @@ html, body {
   }
 }
 
-/* Explicit Print Control for Proxy vs Full-Art */
+/* Print: full-art vs. built proxies based on .full-proxy-print */
+
 @media print {
-  /* Hide full-art when not in print-layout */
-  #card-container:not(.print-layout) img.card-img {
-    display: none !important;
+  /* hide everything by default */
+  body * { visibility: hidden !important; display: none !important; }
+  /* show container and its cards */
+  #card-container, 
+  #card-container * { visibility: visible !important; display: block !important; }
+  .hover-bar, .add-btn, .remove-btn, .qty-badge, .topbar-btn, .modal-close { display: none !important; }
+  @page { margin: 0; }
+
+  /* layout grid */
+  #card-container.print-layout {
+    display: grid;
+    /* portrait vs landscape split as before… */
   }
-  /* Show full-art only when in print-layout */
-  #card-container.print-layout img.card-img {
+
+  /* FULL-PROXY ON: show only images */
+  #card-container.print-layout.full-proxy-print img.card-img {
     display: block !important;
   }
-  /* Hide built card HTML when showing full-art */
-  #card-container.print-layout .card > *:not(img.card-img) {
+  #card-container.print-layout.full-proxy-print .card > *:not(img.card-img) {
     display: none !important;
+  }
+
+  /* FULL-PROXY OFF: show only built card HTML */
+  #card-container.print-layout:not(.full-proxy-print) img.card-img {
+    display: none !important;
+  }
+  #card-container.print-layout:not(.full-proxy-print) .card > *:not(img.card-img) {
+    display: block !important;
   }
 }
