@@ -1,0 +1,59 @@
+#top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding: 0 16px;
+  z-index: 3000;
+}
+.topbar-btn {
+  margin-right: 8px;
+  padding: 8px 12px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.topbar-btn:hover { background: #0056b3; }
+.topbar-left, .topbar-center, .topbar-right {
+  display: flex;
+  align-items: center;
+}
+.topbar-center { flex: 1; justify-content: center; }
+.donate-btn img {
+  height: 24px;
+  margin-left: 8px;
+}
+body { padding-top: 50px; }
+/* Container for toasts, pinned under the top bar */
+#toast-container {
+  position: fixed;
+  top: 50px;
+  right: 16px;
+  z-index: 2001;
+  pointer-events: none;
+}
+.toast-notice {
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  border-radius: 4px;
+  min-width: 200px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.toast-notice.visible {
+  opacity: 1;
+}
+.toast-notice.error {
+  background: rgba(200,0,0,0.85);
+}
