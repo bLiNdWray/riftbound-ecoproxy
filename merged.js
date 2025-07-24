@@ -27,7 +27,9 @@ const featureFields = document.getElementById('feature-fields');
 const printBtn = document.getElementById('btn-print');
 if (printBtn) {
   printBtn.addEventListener('click', () => {
-    document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.add('hidden'));
+    // hide all modals first
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+    // then open print dialog once
     window.print();
   });
 }
