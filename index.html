@@ -83,17 +83,47 @@
     <h2>Report an Issue</h2>
 
     <form id="report-form">
-      <label for="issue-url">Page URL</label>
-      <input type="url" id="issue-url" name="url" placeholder="https://…" required />
+      <!-- Type selector -->
+      <label for="report-type">Type of Report</label>
+      <select id="report-type" name="type" required>
+        <option value="" disabled selected>Choose…</option>
+        <option value="Issue">Issue</option>
+        <option value="Feature Request">Feature Request</option>
+      </select>
 
-      <label for="issue-desc" style="margin-top:1em;">Description</label>
-      <textarea
-        id="issue-desc"
-        name="description"
-        rows="4"
-        placeholder="What went wrong?"
-        required
-      ></textarea>
+      <!-- ISSUE fields -->
+      <div id="issue-fields" class="report-section hidden">
+        <label for="issue-actions">What Actions Caused The Issue? <sup>*</sup></label>
+        <textarea id="issue-actions" name="actions" rows="2" required></textarea>
+
+        <label for="issue-result">Describe result of the Issue</label>
+        <textarea id="issue-result" name="result" rows="2"></textarea>
+
+        <fieldset>
+          <legend>Were you able to replicate the Issue?</legend>
+          <label><input type="checkbox" name="replicate" value="Yes"> Yes</label>
+          <label><input type="checkbox" name="replicate" value="No"> No</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Does the Issue Prevent you from using the service?</legend>
+          <label><input type="checkbox" name="blocking" value="Yes"> Yes</label>
+          <label><input type="checkbox" name="blocking" value="No"> No</label>
+        </fieldset>
+      </div>
+
+      <!-- FEATURE REQUEST fields -->
+      <div id="feature-fields" class="report-section hidden">
+        <label for="feature-desc">Describe Your Idea <sup>*</sup></label>
+        <textarea id="feature-desc" name="idea" rows="2" required></textarea>
+
+        <label for="feature-reason">Why is it a Good Idea</label>
+        <textarea id="feature-reason" name="reason" rows="2"></textarea>
+      </div>
+
+      <!-- always include current page URL -->
+      <label for="issue-url" style="margin-top:1em;">Page URL</label>
+      <input type="url" id="issue-url" name="url" placeholder="https://…" required />
 
       <button type="submit" class="modal-submit">Submit</button>
     </form>
