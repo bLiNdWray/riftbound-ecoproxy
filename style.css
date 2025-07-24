@@ -410,3 +410,58 @@ padding-top: 0px !important;
 .modal-submit:hover {
   background: #005bb5;
 }
+/* ── Report Form Layout ───────────────────────────────────────────────── */
+#report-form {
+  display: flex;
+  flex-direction: column;
+}
+#report-form label {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.95rem;
+}
+#report-form select,
+#report-form textarea {
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+#report-form textarea {
+  resize: vertical;
+}
+
+/* ── Fieldsets ────────────────────────────────────────────────────────── */
+#report-form fieldset {
+  margin: 0.75rem 0;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+}
+#report-form legend {
+  padding: 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ── Submit Button ─────────────────────────────────────────────────────── */
+.modal-submit {
+  margin: 1.5rem auto 0;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6em 1.2em;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.modal-submit:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+.modal-submit:active {
+  transform: translateY(0);
+}
