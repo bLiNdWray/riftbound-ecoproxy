@@ -127,13 +127,16 @@
   </div>
 </div>
 
- <!-- EmailJS SDK -->
-<script src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
+<!-- EmailJS v4 SDK -->
+<script
+  type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
 <script>
-  // Initialize EmailJS with your Public Key
-  (function(){
-    emailjs.init('IOJ9QxYEuV7Wirg4g');
-  })();
+  // Initialize with your Public Key (v4 format)
+  emailjs.init({
+    publicKey: 'IOJ9QxYEuV7Wirg4g'
+  });
 </script>
 <script src="merged.js"></script>
 </body>
