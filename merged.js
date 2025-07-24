@@ -548,7 +548,7 @@ closeThank.addEventListener('click', () => {
 thankModal.addEventListener('click', e => {
   if (e.target === thankModal) thankModal.classList.add('hidden');
 });
-})();
+
 
   // ── Report Modal ────────────────────────────────────────────────
 // Open Report modal
@@ -576,3 +576,4 @@ reportForm.addEventListener('submit', e => {
   reportModal.classList.add('hidden');
   reportForm.reset();
 });
+})();
