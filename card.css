@@ -405,4 +405,13 @@
   height: 100%;
 }
 
+.card .card-img {
+  position: absolute;  /* so z-index applies */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;          /* explicitly behind everything */ 
+}
 
