@@ -200,7 +200,6 @@ html, body {
   gap: 16px;
   padding: 16px;
   margin-top: 8px;
-  background: rgba(0, 0, 0, 0.4);
 }
 /* ── Donate Button Icons ───────────────────────────────────────────────── */
 .donate-buttons {
