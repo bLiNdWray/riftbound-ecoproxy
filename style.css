@@ -352,7 +352,7 @@ padding-top: 0px !important;
 /* ── Modal Content Container ────────────────────────────────────────────── */
 #thank-modal .modal-content {
   max-width: 360px;           /* constrain width */
-  margin: 2rem auto;          /* center vertically with some top/bottom space */
+  margin: 2rem auto;          /* center with top/bottom space */
   padding: 1.5rem;            /* internal padding */
   box-sizing: border-box;
 }
@@ -364,30 +364,25 @@ padding-top: 0px !important;
   text-align: center;
 }
 
-/* ── Payment Placeholders Layout ───────────────────────────────────────── */
-#thank-modal .modal-content > div[id$="-placeholder"] {
-  display: flex;
-  justify-content: center;
-  margin: 0.75rem 0;          /* vertical gap */
+/* ── Payment Button Containers (PayPal & Venmo) ────────────────────────── */
+#thank-modal #donate-button-container,
+#thank-modal a[href*="venmo.com"] {
+  width: 100%;
+  max-width: 320px;           /* same cap for both */
+  margin: 0.75rem auto;       /* center & vertical gap */
+  display: block;
 }
 
-/* ── PayPal Button Container ───────────────────────────────────────────── */
-#thank-modal #donate-button-container {
-  width: 100%;
-  max-width: 320px;           /* cap its width */
-}
-
-/* ── Venmo Button ───────────────────────────────────────────────────────── */
-#thank-modal #venmo-placeholder a {
-  display: inline-block;
-  width: 100%;
-  max-width: 200px;           /* match PayPal-ish proportions */
-  text-align: center;
-}
-#thank-modal #venmo-placeholder img {
+/* ── Venmo Image Scaling ───────────────────────────────────────────────── */
+#thank-modal a[href*="venmo.com"] img {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* ── Gap Between PayPal & Venmo ────────────────────────────────────────── */
+#thank-modal #donate-button-container + a[href*="venmo.com"] {
+  margin-top: 1.5rem;
 }
 
 /* ── Close Button Padding ───────────────────────────────────────────────── */
@@ -396,9 +391,4 @@ padding-top: 0px !important;
   right: 0.5rem;
   font-size: 1.2rem;
   padding: 0.25rem 0.5rem;
-}
-
-/* ── Optional: Add a little gap between PayPal & Venmo sections ───────── */
-#thank-modal #paypal-placeholder + #venmo-placeholder {
-  margin-top: 1.5rem;
 }
