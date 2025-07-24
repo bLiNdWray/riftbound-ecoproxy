@@ -485,6 +485,7 @@ padding-top: 0px !important;
   opacity: 0.6;
   transition: opacity 0.2s ease;
   text-align: center;               /* center the text above the img */
+ text-decoration: none;
 }
 .powered-by:hover {
   opacity: 1;
