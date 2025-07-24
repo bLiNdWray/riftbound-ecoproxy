@@ -38,6 +38,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  z-index: 2; 
 }
 
 /* === Unit / Spell / Gear Shared Styles === */
@@ -89,13 +90,13 @@
   overflow-y: auto;
   overflow-x: visible;
 }
-.card .middle .desc-wrap {
+ .middle .desc-wrap {
   display: block;                /* not a flex item */
   width: 100%;
 }
 
 /* Color indicator inside middle */
-.card .middle .color-indicator {
+ .middle .color-indicator {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -106,13 +107,13 @@
   z-index: 2;
   word-wrap: break-word;
 }
-.card .middle .color-indicator img {
+ .middle .color-indicator img {
   width: 18px;
   height: 18px;
   display: inline-block;     
   vertical-align: text-bottom;
 }
-.card .middle .color-text {
+ .middle .color-text {
   font-size: 8pt;
   font-weight: bold;
   text-transform: capitalize;
@@ -121,7 +122,7 @@
 }
 
 /* Bottom bar: type/tags only, left-justified */
-.card .bottom-bar {
+ .bottom-bar {
   padding: 4px 6px;
   border-top: 1px solid #000;
   height: 10mm;
@@ -132,7 +133,7 @@
   font-size: 8pt;
   font-weight: bold;
 }
-.card .type-line {
+ .type-line {
   white-space: nowrap;
 }
 
@@ -344,6 +345,7 @@
   width: 100%;
   display: none;
   bottom: 0px;
+  z-index: 1; 
 }
 .card .hover-bar button {
   flex: 1;
