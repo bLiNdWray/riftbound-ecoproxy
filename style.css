@@ -328,7 +328,7 @@ padding-top: 0px !important;
 
 /* optional little drink icon before the text */
 #btn-thank::before {
-  content: url('images/drink-icon.svg');
+  content: url('images/drink-icons.svg');
   display: inline-block;
   margin-right: 0.5em;
   width: 1em;
