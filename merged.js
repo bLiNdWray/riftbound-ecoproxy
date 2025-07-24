@@ -17,10 +17,14 @@
   const thankBtn    = document.getElementById('btn-thank');
 const thankModal  = document.getElementById('thank-modal');
 const closeThank  = document.getElementById('close-thank');
-const reportBtn    = document.getElementById('btn-report');
-const reportModal  = document.getElementById('report-modal');
-const closeReport  = document.getElementById('close-report');
-const reportForm   = document.getElementById('report-form');
+const reportBtn     = document.getElementById('btn-report');
+const reportModal   = document.getElementById('report-modal');
+const closeReport   = document.getElementById('close-report');
+const reportForm    = document.getElementById('report-form');
+const reportType    = document.getElementById('report-type');
+const issueFields   = document.getElementById('issue-fields');
+const featureFields = document.getElementById('feature-fields');
+
   
   window.cardCounts = {};
   window.fullProxy  = false;
@@ -551,29 +555,59 @@ thankModal.addEventListener('click', e => {
 
 
   // ── Report Modal ────────────────────────────────────────────────
-// Open Report modal
-reportBtn.addEventListener('click', () => {
-  reportModal.classList.remove('hidden');
+// Show/Hide sections based on type
+reportType.addEventListener('change', () => {
+  if (reportType.value === 'Issue') {
+    issueFields.classList.remove('hidden');
+    featureFields.classList.add('hidden');
+    // require Issue-specific fields
+    issueFields.querySelectorAll('textarea, input').forEach(el => el.required = true);
+    featureFields.querySelectorAll('textarea').forEach(el => el.required = false);
+  } else if (reportType.value === 'Feature Request') {
+    featureFields.classList.remove('hidden');
+    issueFields.classList.add('hidden');
+    // require Feature-specific fields
+    featureFields.querySelector('#feature-desc').required = true;
+    issueFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
+  }
 });
 
-// Close via × or backdrop click
+// Open/close modal
+reportBtn.addEventListener('click', () => reportModal.classList.remove('hidden'));
 closeReport.addEventListener('click', () => reportModal.classList.add('hidden'));
 reportModal.addEventListener('click', e => {
   if (e.target === reportModal) reportModal.classList.add('hidden');
 });
 
-// Handle form submit
+// Mailto-style submit
 reportForm.addEventListener('submit', e => {
   e.preventDefault();
-  const url  = reportForm.url.value;
-  const desc = reportForm.description.value;
+  const data = new FormData(reportForm);
+  const lines = [];
 
-  // TODO: replace with your submission logic (e.g. fetch to your API)
-  console.log('Issue submitted:', { url, desc });
+  lines.push(`Type: ${data.get('type')}`);
+  if (data.get('type') === 'Issue') {
+    lines.push(`Actions Caused: ${data.get('actions')}`);
+    lines.push(`Result: ${data.get('result')}`);
+    lines.push(`Replicable: ${data.getAll('replicate').join(', ') || 'N/A'}`);
+    lines.push(`Blocking: ${data.getAll('blocking').join(', ') || 'N/A'}`);
+  } else {
+    lines.push(`Feature Idea: ${data.get('idea')}`);
+    lines.push(`Why Good Idea: ${data.get('reason')}`);
+  }
+  lines.push(`Page URL: ${data.get('url')}`);
 
-  // give user feedback & close
-  alert('Thanks! Your issue has been sent.');
+  const subject = encodeURIComponent(`Site Report: ${data.get('type')}`);
+  const body    = encodeURIComponent(lines.join('\n\n'));
+  const mailto  = `mailto:wnygamingemail@gmail.com?subject=${subject}&body=${body}`;
+
+  // trigger email client
+  window.location.href = mailto;
+
+  // cleanup
   reportModal.classList.add('hidden');
   reportForm.reset();
+  issueFields.classList.add('hidden');
+  featureFields.classList.add('hidden');
 });
 })();
