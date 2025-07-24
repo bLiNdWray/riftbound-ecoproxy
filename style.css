@@ -434,10 +434,20 @@ padding-top: 0px !important;
 
 /* ── Fieldsets ────────────────────────────────────────────────────────── */
 #report-form fieldset {
-  margin: 0.75rem 0;
-  border: 1px solid #ddd;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
+  display: flex;              /* lay out labels in a row */
+  gap: 1rem;                  /* space between options */
+  align-items: center;        /* vertically center radios + text */
+  margin: 0.75rem 0;          /* keep your existing vertical spacing */
+}
+
+#report-form fieldset label {
+  display: inline-flex;
+  align-items: center;        /* ensure radio and text line up */
+  font-size: 0.95rem;
+}
+
+#report-form fieldset input[type="radio"] {
+  margin-right: 0.5rem;       /* gap between circle and label text */
 }
 #report-form legend {
   padding: 0 0.5rem;
