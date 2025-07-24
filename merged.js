@@ -584,24 +584,34 @@ reportModal.addEventListener('click', e => {
 });
 
 // Form submit → mailto
-reportForm.addEventListener('submit', e => {
+// --- REPORT FORM SUBMISSION via EmailJS ---
+reportForm.addEventListener('submit', function(e) {
   e.preventDefault();
-  const data = new FormData(reportForm);
-  const lines = [`Type: ${data.get('type')}`];
 
-  if (data.get('type') === 'Issue') {
-    lines.push(`Actions: ${data.get('actions')}`);
-    lines.push(`Result: ${data.get('result')}`);
-    lines.push(`Replicable: ${data.get('replicate')}`);
-    lines.push(`Blocking: ${data.get('blocking')}`);
-  } else {
-    lines.push(`Idea: ${data.get('idea')}`);
-    lines.push(`Why Good: ${data.get('reason')}`);
-  }
+  const submitBtn = reportForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
 
-  const subject = encodeURIComponent(`Site Report: ${data.get('type')}`);
-  const body    = encodeURIComponent(lines.join('\n\n'));
-  window.location.href = `mailto:wnygamingemail@gmail.com?subject=${subject}&body=${body}`;
+  emailjs.sendForm(
+    'service_adx0qkf',    // ← your Service ID
+    'template_it1dunc',   // ← your Template ID
+    '#report-form'        // ← the CSS selector for your form
+  )
+  .then(() => {
+    alert('Thanks! Your report has been sent.');
+    reportModal.classList.add('hidden');
+    reportForm.reset();
+    issueFields.classList.add('hidden');
+    featureFields.classList.add('hidden');
+  }, (err) => {
+    console.error('EmailJS error', err);
+    alert('Oops—there was a problem sending your report.');
+  })
+  .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit';
+  });
+});
 
   // reset
   reportModal.classList.add('hidden');
