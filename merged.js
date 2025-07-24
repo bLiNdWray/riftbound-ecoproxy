@@ -52,15 +52,24 @@ window.addEventListener('beforeprint', () => {
  */
 function applyProxyView() {
   container.querySelectorAll('.card').forEach(card => {
-    const img = card.querySelector('.card-img');
-    const others = Array.from(card.children).filter(el => el !== img);
+    const img    = card.querySelector('.card-img');
+    const hover  = card.querySelector('.hover-bar');
+    const badge  = card.querySelector('.qty-badge');
+    const built  = Array.from(card.children)
+                        .filter(el => !el.classList.contains('card-img') 
+                                   && !el.classList.contains('hover-bar')
+                                   && !el.classList.contains('qty-badge'));
 
     if (window.fullProxy) {
       img.classList.remove('hidden');
-      others.forEach(el => el.classList.add('hidden'));
+      // keep hover & badge shown
+      hover && hover.classList.remove('hidden');
+      badge && badge.classList.remove('hidden');
+      built.forEach(el => el.classList.add('hidden'));
     } else {
       img.classList.add('hidden');
-      others.forEach(el => el.classList.remove('hidden'));
+      built.forEach(el => el.classList.remove('hidden'));
+      // hover & badge will show on hover via CSS
     }
   });
 }
