@@ -77,6 +77,7 @@
 </div>
 
 <!-- Report Issue Modal (initially hidden) -->
+<!-- Report Issue Modal (initially hidden) -->
 <div id="report-modal" class="modal-overlay hidden">
   <div class="modal-content">
     <button id="close-report" class="modal-close">×</button>
@@ -101,14 +102,14 @@
 
         <fieldset>
           <legend>Were you able to replicate the Issue?</legend>
-          <label><input type="checkbox" name="replicate" value="Yes"> Yes</label>
-          <label><input type="checkbox" name="replicate" value="No"> No</label>
+          <label><input type="radio" name="replicate" value="Yes" required> Yes</label>
+          <label><input type="radio" name="replicate" value="No"> No</label>
         </fieldset>
 
         <fieldset>
           <legend>Does the Issue Prevent you from using the service?</legend>
-          <label><input type="checkbox" name="blocking" value="Yes"> Yes</label>
-          <label><input type="checkbox" name="blocking" value="No"> No</label>
+          <label><input type="radio" name="blocking" value="Yes" required> Yes</label>
+          <label><input type="radio" name="blocking" value="No"> No</label>
         </fieldset>
       </div>
 
@@ -121,15 +122,10 @@
         <textarea id="feature-reason" name="reason" rows="2"></textarea>
       </div>
 
-      <!-- always include current page URL -->
-      <label for="issue-url" style="margin-top:1em;">Page URL</label>
-      <input type="url" id="issue-url" name="url" placeholder="https://…" required />
-
       <button type="submit" class="modal-submit">Submit</button>
     </form>
   </div>
 </div>
-
   
 <script src="merged.js"></script>
 </body>
