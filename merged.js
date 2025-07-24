@@ -351,8 +351,51 @@
 
 
 // ── Print ─────────────────────────────────────────────────────────────
-printBtn.addEventListener('click',()=>{document.getElementById('top-bar').style.display='none';modal.classList.add('hidden');if(window.fullProxy)fullProxyBtn.click();container.classList.add('print-layout');window.print();setTimeout(()=>{document.getElementById('top-bar').style.display='';container.classList.remove('print-layout');},0);});
- // ── Toggle Full Proxy ────────────────────────────────────────────────
+printBtn.addEventListener('click', () => {
+  const topBar = document.getElementById('top-bar');
+  topBar.style.display = 'none';
+  modal.classList.add('hidden');
+  container.classList.add('print-layout');
+
+  // Prepare each card for printing
+  container.querySelectorAll('.card').forEach(card => {
+    const img = card.querySelector('.card-img');
+    const others = Array.from(card.children).filter(el => el !== img);
+
+    if (window.fullProxy) {
+      // Show only the full-art image
+      img.classList.remove('hidden');
+      others.forEach(el => el.classList.add('hidden'));
+    } else {
+      // Show only the standard card HTML
+      img.classList.add('hidden');
+      others.forEach(el => el.classList.remove('hidden'));
+    }
+  });
+
+  window.print();
+
+  // Restore UI immediately after print dialog
+  setTimeout(() => {
+    topBar.style.display = '';
+    container.classList.remove('print-layout');
+
+    container.querySelectorAll('.card').forEach(card => {
+      const img = card.querySelector('.card-img');
+      const others = Array.from(card.children).filter(el => el !== img);
+
+      if (window.fullProxy) {
+        img.classList.remove('hidden');
+        others.forEach(el => el.classList.add('hidden'));
+      } else {
+        img.classList.add('hidden');
+        others.forEach(el => el.classList.remove('hidden'));
+      }
+    });
+  }, 0);
+});
+
+  // ── Toggle Full Proxy ────────────────────────────────────────────────
 fullProxyBtn.addEventListener('click',()=>{window.fullProxy=!window.fullProxy;fullProxyBtn.classList.toggle('active',window.fullProxy);container.querySelectorAll('img.card-img').forEach(img=>img.classList.toggle('hidden',!window.fullProxy));});
 
 
