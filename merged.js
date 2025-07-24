@@ -35,7 +35,7 @@ if (printBtn) {
 }
 
 window.addEventListener('beforeprint', () => {
-  document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.add('hidden'));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
 });
   
   window.cardCounts = {};
