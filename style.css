@@ -309,8 +309,43 @@ padding-top: 0px !important;
 .overview-controls button:hover {
   background: #0056b3;
 }
-#paypal-placeholder,
-#venmo-placeholder {
-  text-align: center;
-  margin: 1em 0;
+
+/* ── “Thank Me with a Drink” Button Styling ───────────────────────────────── */
+#btn-thank {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ff7f50 0%, #ff6347 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6em 1.2em;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* optional little drink icon before the text */
+#btn-thank::before {
+  content: url('images/drink-icon.svg');
+  display: inline-block;
+  margin-right: 0.5em;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+}
+
+/* hover/focus states */
+#btn-thank:hover,
+#btn-thank:focus {
+  background: linear-gradient(135deg, #ff8a65 0%, #ff7043 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* active/click state */
+#btn-thank:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
