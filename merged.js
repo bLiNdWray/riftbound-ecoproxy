@@ -556,55 +556,48 @@ thankModal.addEventListener('click', e => {
 
   // ── Report Modal ────────────────────────────────────────────────
 // Show/Hide sections based on type
+// Toggle sections
 reportType.addEventListener('change', () => {
   if (reportType.value === 'Issue') {
     issueFields.classList.remove('hidden');
     featureFields.classList.add('hidden');
-    // require Issue-specific fields
     issueFields.querySelectorAll('textarea, input').forEach(el => el.required = true);
-    featureFields.querySelectorAll('textarea').forEach(el => el.required = false);
-  } else if (reportType.value === 'Feature Request') {
+  } else {
     featureFields.classList.remove('hidden');
     issueFields.classList.add('hidden');
-    // require Feature-specific fields
     featureFields.querySelector('#feature-desc').required = true;
     issueFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
   }
 });
 
-// Open/close modal
+// Modal open/close
 reportBtn.addEventListener('click', () => reportModal.classList.remove('hidden'));
 closeReport.addEventListener('click', () => reportModal.classList.add('hidden'));
 reportModal.addEventListener('click', e => {
   if (e.target === reportModal) reportModal.classList.add('hidden');
 });
 
-// Mailto-style submit
+// Form submit → mailto
 reportForm.addEventListener('submit', e => {
   e.preventDefault();
   const data = new FormData(reportForm);
-  const lines = [];
+  const lines = [`Type: ${data.get('type')}`];
 
-  lines.push(`Type: ${data.get('type')}`);
   if (data.get('type') === 'Issue') {
-    lines.push(`Actions Caused: ${data.get('actions')}`);
+    lines.push(`Actions: ${data.get('actions')}`);
     lines.push(`Result: ${data.get('result')}`);
-    lines.push(`Replicable: ${data.getAll('replicate').join(', ') || 'N/A'}`);
-    lines.push(`Blocking: ${data.getAll('blocking').join(', ') || 'N/A'}`);
+    lines.push(`Replicable: ${data.get('replicate')}`);
+    lines.push(`Blocking: ${data.get('blocking')}`);
   } else {
-    lines.push(`Feature Idea: ${data.get('idea')}`);
-    lines.push(`Why Good Idea: ${data.get('reason')}`);
+    lines.push(`Idea: ${data.get('idea')}`);
+    lines.push(`Why Good: ${data.get('reason')}`);
   }
-  lines.push(`Page URL: ${data.get('url')}`);
 
   const subject = encodeURIComponent(`Site Report: ${data.get('type')}`);
   const body    = encodeURIComponent(lines.join('\n\n'));
-  const mailto  = `mailto:wnygamingemail@gmail.com?subject=${subject}&body=${body}`;
+  window.location.href = `mailto:wnygamingemail@gmail.com?subject=${subject}&body=${body}`;
 
-  // trigger email client
-  window.location.href = mailto;
-
-  // cleanup
+  // reset
   reportModal.classList.add('hidden');
   reportForm.reset();
   issueFields.classList.add('hidden');
