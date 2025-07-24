@@ -557,34 +557,31 @@ thankModal.addEventListener('click', e => {
   // ── Report Modal ────────────────────────────────────────────────
 // Show/Hide sections based on type
 // Toggle sections
-  reportType.addEventListener('change', () => {
-  // 1. Always clear all `required` flags first
+// Toggle sections + required flags
+reportType.addEventListener('change', () => {
+  // Clear all
   issueFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
   featureFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
 
   if (reportType.value === 'Issue') {
     issueFields.classList.remove('hidden');
     featureFields.classList.add('hidden');
-
-    // Make only the ISSUE fields required
     issueFields.querySelectorAll('textarea, input').forEach(el => el.required = true);
   } else {
     featureFields.classList.remove('hidden');
     issueFields.classList.add('hidden');
-
-    // Make only the FEATURE fields required
     featureFields.querySelector('#feature-desc').required = true;
   }
 });
-// Modal open/close
-reportBtn.addEventListener('click', () => reportModal.classList.remove('hidden'));
+
+// Open / close modal
+reportBtn.addEventListener('click',  () => reportModal.classList.remove('hidden'));
 closeReport.addEventListener('click', () => reportModal.classList.add('hidden'));
 reportModal.addEventListener('click', e => {
   if (e.target === reportModal) reportModal.classList.add('hidden');
 });
 
-// Form submit → mailto
-// --- REPORT FORM SUBMISSION via EmailJS ---
+// ── REPORT FORM SUBMISSION via EmailJS ──────────────────────────
 reportForm.addEventListener('submit', function(e) {
   e.preventDefault();
 
@@ -593,9 +590,9 @@ reportForm.addEventListener('submit', function(e) {
   submitBtn.textContent = 'Sending…';
 
   emailjs.sendForm(
-    'service_adx0qkf',    // ← your Service ID
-    'template_it1dunc',   // ← your Template ID
-    '#report-form'        // ← the CSS selector for your form
+    'service_adx0qkf',    // your Service ID
+    'template_it1dunc',   // your Template ID
+    '#report-form'        // selector for your form
   )
   .then(() => {
     alert('Thanks! Your report has been sent.');
@@ -603,7 +600,8 @@ reportForm.addEventListener('submit', function(e) {
     reportForm.reset();
     issueFields.classList.add('hidden');
     featureFields.classList.add('hidden');
-  }, (err) => {
+  })
+  .catch(err => {
     console.error('EmailJS error', err);
     alert('Oops—there was a problem sending your report.');
   })
@@ -611,12 +609,5 @@ reportForm.addEventListener('submit', function(e) {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit';
   });
-});
-
-  // reset
-  reportModal.classList.add('hidden');
-  reportForm.reset();
-  issueFields.classList.add('hidden');
-  featureFields.classList.add('hidden');
 });
 })();
