@@ -42,39 +42,39 @@
   </div>
 
   
-   <!-- Thank-you Modal (initially hidden) -->
-  <div id="thank-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <button id="close-thank" class="modal-close">×</button>
-      <h2>Thank Me with a Drink</h2>
+<!-- Thank-you Modal (initially hidden) -->
+<div id="thank-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button id="close-thank" class="modal-close">×</button>
+    <h2>Thank Me with a Drink</h2>
 
-      <!-- PayPal Donate -->
-      <div id="donate-button-container">
-<div id="donate-button"></div>
-<script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
-<script>
-PayPal.Donation.Button({
-env:'production',
-hosted_button_id:'SRE4S793U5MLU',
-image: {
-src:'https://pics.paypal.com/00/s/NzUzMmFjYmQtMGE2OS00M2U0LWJiNDAtN2VlYTc4YTdkYTNm/file.PNG',
-alt:'Donate with PayPal button',
-title:'PayPal - The safer, easier way to pay online!',
-}
-}).render('#donate-button');
-</script>
-</div>
-
-      <!-- Venmo Donate -->
-              <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
-          <img
-            src="images/Venmo-Donate-button.png"
-            alt="Donate to Venmo"
-            width="64" height="32"
-          />
-        </a>
-      </div>
+    <!-- PayPal Donate -->
+    <div id="donate-button-container">
+      <div id="donate-button"></div>
+      <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+      <script>
+        PayPal.Donation.Button({
+          env: 'production',
+          hosted_button_id: 'SRE4S793U5MLU',
+          image: {
+            src: 'https://pics.paypal.com/00/s/NzUzMmFjYmQtMGE2OS00M2U0LWJiNDAtN2VlYTc4YTdkYTNm/file.PNG',
+            alt: 'Donate with PayPal button',
+            title: 'PayPal - The safer, easier way to pay online!'
+          }
+        }).render('#donate-button');
+      </script>
     </div>
+
+    <!-- Venmo Donate -->
+    <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
+      <img
+        src="images/Venmo-Donate-button.png"
+        alt="Donate to Venmo"
+        width="64" height="32"
+      />
+    </a>
+  </div>
+</div>
 
 
   
