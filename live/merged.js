@@ -23,14 +23,33 @@ const reportForm    = document.getElementById('report-form');
 const reportType    = document.getElementById('report-type');
 const issueFields   = document.getElementById('issue-fields');
 const featureFields = document.getElementById('feature-fields');
-// ── Close all modals & trigger print ────────────────────────────────────
+
+  
+  // ── Close all modals & trigger print ────────────────────────────────────
 const printBtn = document.getElementById('btn-print');
 if (printBtn) {
   printBtn.addEventListener('click', () => {
-    // hide all modals first
+    // 1. Close all open modals
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-    // then open print dialog once
+
+    // 2. Hide top bar and main modal
+    const topBar = document.getElementById('top-bar');
+    if (topBar) topBar.style.display = 'none';
+    if (typeof modal !== 'undefined') modal.classList.add('hidden');
+
+    // 3. Apply print-specific layout
+    if (typeof container !== 'undefined') container.classList.add('print-layout');
+    applyProxyView();
+
+    // 4. Trigger the print dialog
     window.print();
+
+    // 5. Restore original UI after print (or cancel)
+    setTimeout(() => {
+      if (topBar) topBar.style.display = '';
+      if (typeof container !== 'undefined') container.classList.remove('print-layout');
+      applyProxyView();
+    }, 0);
   });
 }
 
@@ -397,27 +416,6 @@ function applyProxyView() {
       overlay.remove();
     };
   });
-
-
-// ── Print ─────────────────────────────────────────────────────────────
-printBtn.addEventListener('click', () => {
-  const topBar = document.getElementById('top-bar');
-  topBar.style.display = 'none';
-  modal.classList.add('hidden');
-  container.classList.add('print-layout');
-
-  // ensure the print view matches fullProxy
-  applyProxyView();
-
-  window.print();
-
-  // restore everything
-  setTimeout(() => {
-    topBar.style.display = '';
-    container.classList.remove('print-layout');
-    applyProxyView();
-  }, 0);
-});
 
 
   // ── Toggle Full Proxy ────────────────────────────────────────────────
