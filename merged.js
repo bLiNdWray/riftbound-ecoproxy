@@ -609,4 +609,7 @@ reportForm.addEventListener('submit', function(e) {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit';
   });
+});
+
+  
 })();
