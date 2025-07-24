@@ -218,11 +218,6 @@ html, body {
     size: auto;
     margin: 0mm;
   }
- #top-bar {
-    display: none !important;
-    height: 0 !important;
-    visibility: hidden !important;
-  }
   html, body {
     margin: 0;
     padding-top: 0px !important;
@@ -244,9 +239,15 @@ html, body {
 
   /* Remove any grid gaps so cards butt up against each other */
   #card-container.layout-horizontal {
+    /* auto left/right margin centers block-level grids */
+    margin: 0 auto !important;
+    
+    /* if you want the cards in the middle vertically too, use Flexbox */
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important; /* horizontal centering */
+    align-content: center !important;    /* vertical centering */
     gap: 0 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
   }
 
   /* Remove margins on each card and prevent breaks inside cards */
