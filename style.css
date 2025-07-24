@@ -309,3 +309,8 @@ padding-top: 0px !important;
 .overview-controls button:hover {
   background: #0056b3;
 }
+#paypal-placeholder,
+#venmo-placeholder {
+  text-align: center;
+  margin: 1em 0;
+}
