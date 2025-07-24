@@ -136,7 +136,7 @@ html, body {
   margin-top: 1em;
 }
 
-/* ── Search Modal Base ─────────────────────────────────────────────────── */
+/* Search Modal Base */
 #search-modal {
   position: fixed !important;
   top: 50px !important;
@@ -148,7 +148,7 @@ html, body {
   z-index: 2000;
 }
 
-/* ── Search Header ─────────────────────────────────────────────────────── */
+/* Search Header */
 #search-modal .search-header {
   position: sticky;
   top: 0;
@@ -162,6 +162,16 @@ html, body {
   z-index: 2001;
   justify-content: center;
 }
+#search-modal .modal-content {
+  width: 100% !important;
+  max-width: none !important;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Search Input */
 #search-modal .search-header input {
   flex: 1;
   height: 48px;
@@ -170,32 +180,26 @@ html, body {
   border-radius: 24px;
   font-size: 1rem;
   outline: none;
+  transition: border-color .2s, box-shadow .2s;
   width: 80% !important;
   max-width: 800px;
   margin: 0 auto;
+  display: block;
   box-sizing: border-box;
-  transition: border-color .2s, box-shadow .2s;
 }
 #search-modal .search-header input:focus {
   border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
-}
-#search-modal .search-header .modal-close {
-  font-size: 1.5rem;
-  color: #666;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
-/* ── Search Results Grid ──────────────────────────────────────────────── */
+/* Search Panel & Results */
 #search-modal .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   padding: 16px;
   margin-top: 8px;
-  width: 100%;
-  box-sizing: border-box;
 }
-
 /* ── Donate Button Icons ───────────────────────────────────────────────── */
 .donate-buttons {
   display: inline-flex;
