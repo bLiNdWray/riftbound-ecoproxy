@@ -24,6 +24,23 @@
     for (let t of typeOrder) if (el.classList.contains(t)) return t;
     return 'unit';
   }
+  /**
+ * Show full-art images or built-HTML based on window.fullProxy
+ */
+function applyProxyView() {
+  container.querySelectorAll('.card').forEach(card => {
+    const img = card.querySelector('.card-img');
+    const others = Array.from(card.children).filter(el => el !== img);
+
+    if (window.fullProxy) {
+      img.classList.remove('hidden');
+      others.forEach(el => el.classList.add('hidden'));
+    } else {
+      img.classList.add('hidden');
+      others.forEach(el => el.classList.remove('hidden'));
+    }
+  });
+}
   function getName(el) {
     let n = el.querySelector('.name');
     if (n && n.textContent) return n.textContent.trim();
@@ -357,48 +374,26 @@ printBtn.addEventListener('click', () => {
   modal.classList.add('hidden');
   container.classList.add('print-layout');
 
-  // Prepare each card for printing
-  container.querySelectorAll('.card').forEach(card => {
-    const img = card.querySelector('.card-img');
-    const others = Array.from(card.children).filter(el => el !== img);
-
-    if (window.fullProxy) {
-      // Show only the full-art image
-      img.classList.remove('hidden');
-      others.forEach(el => el.classList.add('hidden'));
-    } else {
-      // Show only the standard card HTML
-      img.classList.add('hidden');
-      others.forEach(el => el.classList.remove('hidden'));
-    }
-  });
+  // ensure the print view matches fullProxy
+  applyProxyView();
 
   window.print();
 
-  // Restore UI immediately after print dialog
+  // restore everything
   setTimeout(() => {
     topBar.style.display = '';
     container.classList.remove('print-layout');
-
-    container.querySelectorAll('.card').forEach(card => {
-      const img = card.querySelector('.card-img');
-      const others = Array.from(card.children).filter(el => el !== img);
-
-      if (window.fullProxy) {
-        img.classList.remove('hidden');
-        others.forEach(el => el.classList.add('hidden'));
-      } else {
-        img.classList.add('hidden');
-        others.forEach(el => el.classList.remove('hidden'));
-      }
-    });
+    applyProxyView();
   }, 0);
 });
 
+
   // ── Toggle Full Proxy ────────────────────────────────────────────────
-fullProxyBtn.addEventListener('click',()=>{window.fullProxy=!window.fullProxy;fullProxyBtn.classList.toggle('active',window.fullProxy);container.querySelectorAll('img.card-img').forEach(img=>img.classList.toggle('hidden',!window.fullProxy));});
-
-
+fullProxyBtn.addEventListener('click', () => {
+  window.fullProxy = !window.fullProxy;
+  fullProxyBtn.classList.toggle('active', window.fullProxy);
+  applyProxyView();
+});
  
 
 
