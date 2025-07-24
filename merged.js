@@ -10,7 +10,6 @@
   const input        = document.getElementById('card-search-input');
   const results      = document.getElementById('search-results');
   const importBtn    = document.getElementById('btn-import');
-  const printBtn     = document.getElementById('btn-print');
   const fullProxyBtn = document.getElementById('btn-full-proxy');
   const resetBtn     = document.getElementById('btn-reset');
   const btnOverview  = document.getElementById('btn-overview');
@@ -24,7 +23,18 @@ const reportForm    = document.getElementById('report-form');
 const reportType    = document.getElementById('report-type');
 const issueFields   = document.getElementById('issue-fields');
 const featureFields = document.getElementById('feature-fields');
+// ── Close all modals & trigger print ────────────────────────────────────
+const printBtn = document.getElementById('btn-print');
+if (printBtn) {
+  printBtn.addEventListener('click', () => {
+    document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.add('hidden'));
+    window.print();
+  });
+}
 
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.add('hidden'));
+});
   
   window.cardCounts = {};
   window.fullProxy  = false;
