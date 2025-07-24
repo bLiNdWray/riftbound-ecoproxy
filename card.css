@@ -337,7 +337,15 @@
   vertical-align: text-bottom;
   display: inline-block;
 }
-
+.card .card-img {
+  position: absolute;  /* so z-index applies */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0 !important;          /* explicitly behind everything */ 
+}
 /* Hover bar styling */
 .card .hover-bar {
   position: absolute;
@@ -405,13 +413,5 @@
   height: 100%;
 }
 
-.card .card-img {
-  position: absolute;  /* so z-index applies */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0 !important;          /* explicitly behind everything */ 
-}
+
 
