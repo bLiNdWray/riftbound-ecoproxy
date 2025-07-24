@@ -212,14 +212,50 @@ html, body {
 }
 
 /* ── Print Styles ─────────────────────────────────────────────────────── */
+/* ── Print cleanup ───────────────────────────────────────────────────── */
 @media print {
-  .card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    display: block;
+  /* Remove all default page margins */
+  @page {
+    size: auto;
+    margin: 0;
   }
-  #card-container {
-    overflow: visible !important;
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Target your print‐layout container */
+  #container.print-layout {
+    /* Scale everything down slightly */
+    transform: scale(0.99);
+    transform-origin: top left;
+    /* Ensure it still fills the page */
+    width: 101%;  /* compensate for the slight shrink */
+    height: auto;
+  }
+
+  /* Remove any grid gaps so cards butt up against each other */
+  #card-container.layout-horizontal {
+    gap: 0 !important;
+  }
+
+  /* Remove margins on each card and prevent breaks inside cards */
+  .card {
+    margin: 0 !important;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Hide any elements you don’t want to print */
+  #top-bar,
+  .modal,
+  .print-btn, /* if your print button is still in the DOM */
+  .full-proxy-btn {
+    display: none !important;
   }
 }
 
