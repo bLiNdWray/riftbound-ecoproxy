@@ -49,28 +49,24 @@
       <h2>Thank Me with a Drink</h2>
 
       <!-- PayPal Donate -->
-      <div id="paypal-placeholder" style="text-align:center; margin:1em 0;">
-        <div id="donate-button-container">
-          <div id="donate-btn">
-            <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
-            <script>
-              PayPal.Donation.Button({
-                env: 'production',
-                hosted_button_id: 'SRE4S793U5MLU',
-                image: {
-                  src: 'images/paypal-donate-button.png',
-                  alt: 'Donate with PayPal button',
-                  title: 'PayPal - The safer, easier way to pay online!'
-                }
-              }).render('#donate-button');
-            </script>
-          </div>
-        </div>
-      </div>
+      <div id="donate-button-container">
+<div id="donate-button"></div>
+<script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+<script>
+PayPal.Donation.Button({
+env:'production',
+hosted_button_id:'SRE4S793U5MLU',
+image: {
+src:'https://pics.paypal.com/00/s/NzUzMmFjYmQtMGE2OS00M2U0LWJiNDAtN2VlYTc4YTdkYTNm/file.PNG',
+alt:'Donate with PayPal button',
+title:'PayPal - The safer, easier way to pay online!',
+}
+}).render('#donate-button');
+</script>
+</div>
 
       <!-- Venmo Donate -->
-      <div id="venmo-placeholder" style="text-align:center; margin:1em 0;">
-        <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
+              <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
           <img
             src="images/Venmo-Donate-button.png"
             alt="Donate to Venmo"
@@ -79,7 +75,6 @@
         </a>
       </div>
     </div>
-  </div>
 
 
   
