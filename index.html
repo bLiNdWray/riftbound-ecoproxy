@@ -20,34 +20,7 @@
       <span id="card-count">0 cards</span>
     </div>
     <div class="topbar-right">
-      <div class="donate-buttons">
-  <!-- PayPal Donate -->
-<div id="donate-button-container">
-<div id="donate-btn">
-<script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
-<script>
-PayPal.Donation.Button({
-env:'production',
-hosted_button_id:'SRE4S793U5MLU',
-image: {
-src:'images/paypal-donate-button.png',
-alt:'Donate with PayPal button',
-title:'PayPal - The safer, easier way to pay online!',
-}
-}).render('#donate-button');
-</script>
-</div>
-</div>
-
-  <!-- Venmo Donate -->
-  <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
-    <img
-      src="images/Venmo-Donate-button.png"
-      alt="Donate to Venmo"
-      width="64" height="32"
-    />
-  </a>
-</div>
+<button id="btn-thank" class="topbar-btn">Thank Me with a Drink</button>
       <button id="btn-reset" class="topbar-btn">Reset</button>
     </div>
   </nav>
