@@ -223,6 +223,9 @@ html, body {
   }
 
   /* ── Centered multi-column grid ─────────────────────────────────── */
+  body {
+padding-top: 0px !important;
+  }
   #card-container.layout-horizontal {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, 63mm) !important;
