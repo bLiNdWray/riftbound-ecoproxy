@@ -345,7 +345,7 @@
   width: 100%;
   display: none;
   bottom: 0px;
-  z-index: 1000; 
+  z-index: 1000 !important; 
 }
 .card .hover-bar button {
   flex: 1;
