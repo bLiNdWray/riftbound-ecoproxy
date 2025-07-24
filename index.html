@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -22,6 +22,7 @@
     <div class="topbar-right">
 <button id="btn-thank" class="topbar-btn">Thank Me with a Drink</button>
       <button id="btn-reset" class="topbar-btn">Reset</button>
+      <button id="btn-report" class="topbar-btn">Report Issue</button>
     </div>
   </nav>
 <div id="toast-container"></div>
@@ -75,6 +76,29 @@
   </div>
 </div>
 
+<!-- Report Issue Modal (initially hidden) -->
+<div id="report-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button id="close-report" class="modal-close">×</button>
+    <h2>Report an Issue</h2>
+
+    <form id="report-form">
+      <label for="issue-url">Page URL</label>
+      <input type="url" id="issue-url" name="url" placeholder="https://…" required />
+
+      <label for="issue-desc" style="margin-top:1em;">Description</label>
+      <textarea
+        id="issue-desc"
+        name="description"
+        rows="4"
+        placeholder="What went wrong?"
+        required
+      ></textarea>
+
+      <button type="submit" class="modal-submit">Submit</button>
+    </form>
+  </div>
+</div>
 
   
 <script src="merged.js"></script>
