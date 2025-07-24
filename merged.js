@@ -527,6 +527,9 @@ btnOverview.addEventListener('click', buildOverview);
     });
     updateCount();
   });
+
+  
+  // ── Donate Modal ────────────────────────────────────────────────
   // open the “Thank Me with a Drink” modal
 thankBtn.addEventListener('click', () => {
   thankModal.classList.remove('hidden');
