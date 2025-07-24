@@ -216,7 +216,7 @@ html, body {
   /* Remove all default page margins */
   @page {
     size: auto;
-    margin: 0;
+    margin: 0mm;
   }
 
   html, body {
@@ -234,11 +234,15 @@ html, body {
     /* Ensure it still fills the page */
     width: 101%;  /* compensate for the slight shrink */
     height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Remove any grid gaps so cards butt up against each other */
   #card-container.layout-horizontal {
     gap: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 
   /* Remove margins on each card and prevent breaks inside cards */
