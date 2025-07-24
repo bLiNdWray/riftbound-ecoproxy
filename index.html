@@ -42,21 +42,47 @@
   </div>
 
   
-  <!-- Thank-you Modal (initially hidden) -->
+   <!-- Thank-you Modal (initially hidden) -->
   <div id="thank-modal" class="modal-overlay hidden">
     <div class="modal-content">
       <button id="close-thank" class="modal-close">×</button>
       <h2>Thank Me with a Drink</h2>
-      <!-- PAYPAL PLACEHOLDER -->
-      <div id="paypal-placeholder">
-        <!-- Insert your PayPal script/render code here -->
+
+      <!-- PayPal Donate -->
+      <div id="paypal-placeholder" style="text-align:center; margin:1em 0;">
+        <div id="donate-button-container">
+          <div id="donate-btn">
+            <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+            <script>
+              PayPal.Donation.Button({
+                env: 'production',
+                hosted_button_id: 'SRE4S793U5MLU',
+                image: {
+                  src: 'images/paypal-donate-button.png',
+                  alt: 'Donate with PayPal button',
+                  title: 'PayPal - The safer, easier way to pay online!'
+                }
+              }).render('#donate-button');
+            </script>
+          </div>
+        </div>
       </div>
-      <!-- VENMO PLACEHOLDER -->
-      <div id="venmo-placeholder" style="margin-top:1em; text-align:center;">
-        <!-- e.g. <a href='…' target='_blank'><img src='images/Venmo-Donate-button.png' /></a> -->
+
+      <!-- Venmo Donate -->
+      <div id="venmo-placeholder" style="text-align:center; margin:1em 0;">
+        <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
+          <img
+            src="images/Venmo-Donate-button.png"
+            alt="Donate to Venmo"
+            width="64" height="32"
+          />
+        </a>
       </div>
     </div>
   </div>
+
+
+  
 <script src="merged.js"></script>
 </body>
 </html>
