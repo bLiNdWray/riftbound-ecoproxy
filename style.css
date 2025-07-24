@@ -495,7 +495,7 @@ padding-top: 0px !important;
   content: "Powered By:";
   display: block;
   font-size: 0.75rem;
-  color: #fff;                      /* tweak to suit your background */
+  color: #000000;                      /* tweak to suit your background */
   margin-bottom: 0.25rem;
 }
 
