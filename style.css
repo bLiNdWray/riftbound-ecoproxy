@@ -476,6 +476,7 @@ padding-top: 0px !important;
   transform: translateY(0);
 }
 /* ── Powered-By Logo ─────────────────────────────────────────────────── */
+/* Add “Powered By:” above the logo */
 .powered-by {
   position: fixed;
   bottom: 0.5rem;
@@ -483,9 +484,19 @@ padding-top: 0px !important;
   z-index: 1000;
   opacity: 0.6;
   transition: opacity 0.2s ease;
+  text-align: center;               /* center the text above the img */
 }
 .powered-by:hover {
   opacity: 1;
+}
+
+/* the label above the image */
+.powered-by::before {
+  content: "Powered By:";
+  display: block;
+  font-size: 0.75rem;
+  color: #fff;                      /* tweak to suit your background */
+  margin-bottom: 0.25rem;
 }
 
 /* size the image to something unobtrusive */
