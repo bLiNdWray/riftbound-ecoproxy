@@ -14,6 +14,9 @@
   const fullProxyBtn = document.getElementById('btn-full-proxy');
   const resetBtn     = document.getElementById('btn-reset');
   const btnOverview  = document.getElementById('btn-overview');
+  const thankBtn    = document.getElementById('btn-thank');
+const thankModal  = document.getElementById('thank-modal');
+const closeThank  = document.getElementById('close-thank');
 
   window.cardCounts = {};
   window.fullProxy  = false;
@@ -524,4 +527,18 @@ btnOverview.addEventListener('click', buildOverview);
     });
     updateCount();
   });
+  // open the “Thank Me with a Drink” modal
+thankBtn.addEventListener('click', () => {
+  thankModal.classList.remove('hidden');
+});
+
+// close it when the ✕ is clicked
+closeThank.addEventListener('click', () => {
+  thankModal.classList.add('hidden');
+});
+
+// also close if someone clicks the backdrop
+thankModal.addEventListener('click', e => {
+  if (e.target === thankModal) thankModal.classList.add('hidden');
+});
 })();
