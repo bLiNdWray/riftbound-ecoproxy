@@ -218,18 +218,18 @@ html, body {
     size: auto;
     margin: 0mm;
   }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-  }
  #top-bar {
     display: none !important;
     height: 0 !important;
     visibility: hidden !important;
   }
+  html, body {
+    margin: 0;
+    padding-top: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
   /* Target your print‐layout container */
   #container.print-layout {
     /* Scale everything down slightly */
