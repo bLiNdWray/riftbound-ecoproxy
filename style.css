@@ -329,7 +329,7 @@ padding-top: 0px !important;
 
 /* optional little drink icon before the text */
 #btn-thank::before {
-  content: url('images/drink-icons.svg');
+  content: url('images/drinks-icons.svg');
   display: inline-block;
   margin-right: 0.5em;
   width: 1em;
@@ -349,4 +349,57 @@ padding-top: 0px !important;
 #btn-thank:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+/* ── Modal Content Container ────────────────────────────────────────────── */
+#thank-modal .modal-content {
+  max-width: 360px;           /* constrain width */
+  margin: 2rem auto;          /* center vertically with some top/bottom space */
+  padding: 1.5rem;            /* internal padding */
+  box-sizing: border-box;
+}
+
+/* ── Heading ───────────────────────────────────────────────────────────── */
+#thank-modal .modal-content h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* ── Payment Placeholders Layout ───────────────────────────────────────── */
+#thank-modal .modal-content > div[id$="-placeholder"] {
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem 0;          /* vertical gap */
+}
+
+/* ── PayPal Button Container ───────────────────────────────────────────── */
+#thank-modal #donate-button-container {
+  width: 100%;
+  max-width: 320px;           /* cap its width */
+}
+
+/* ── Venmo Button ───────────────────────────────────────────────────────── */
+#thank-modal #venmo-placeholder a {
+  display: inline-block;
+  width: 100%;
+  max-width: 200px;           /* match PayPal-ish proportions */
+  text-align: center;
+}
+#thank-modal #venmo-placeholder img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Close Button Padding ───────────────────────────────────────────────── */
+#thank-modal .modal-close {
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* ── Optional: Add a little gap between PayPal & Venmo sections ───────── */
+#thank-modal #paypal-placeholder + #venmo-placeholder {
+  margin-top: 1.5rem;
 }
