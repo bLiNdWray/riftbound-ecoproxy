@@ -261,7 +261,12 @@ html, body {
   #top-bar,
   .modal,
   .print-btn, /* if your print button is still in the DOM */
-  .full-proxy-btn {
+  .full-proxy-btn,
+  .qty-badge,
+  .hover-bar,
+  .add-btn,
+  .remove-btn
+  {
     display: none !important;
   }
 }
