@@ -211,58 +211,46 @@ html, body {
   cursor: pointer;
 }
 
-/* ── Print Styles ─────────────────────────────────────────────────────── */
 @media print {
-  /* Remove all default page margins */
-  @page {
-    size: auto;
-    margin: 0mm;
-  }
-  html, body {
-    margin: 0;
-    padding-top: 0px !important;
-    width: 100%;
-    height: 100%;
-  }
-  /* Target your print‐layout container */
+  /* ── Container tweaks ───────────────────────────────────────────── */
   #container.print-layout {
-    /* Scale everything down slightly */
+    /* remove the 101% width hack */
     transform: scale(0.99);
     transform-origin: top left;
-    /* Ensure it still fills the page */
-    width: 101%;  /* compensate for the slight shrink */
-    height: auto;
+    width: 100% !important;    /* fill the printable area */
     margin: 0 !important;
     padding: 0 !important;
   }
 
- #card-container.layout-horizontal {
-    display: inline-grid !important;
+  /* ── Centered multi-column grid ─────────────────────────────────── */
+  #card-container.layout-horizontal {
+    display: grid !important;
     grid-template-columns: repeat(auto-fill, 63mm) !important;
     grid-auto-rows: 88mm !important;
     gap: 0 !important;
 
-    /* shrink-to-fit and center */
-    margin: 0 auto !important;
+    /* Center the whole grid block horizontally */
+    justify-content: center !important;
+
+    /* If you want vertical centering of the grid block within the page: */
+    align-content: start !important; /* or 'center' if you have height constraints */
   }
-  
-  /* Remove margins on each card and prevent breaks inside cards */
+
+  /* ── Card & misc cleanup ─────────────────────────────────────────── */
   .card {
     margin: 0 !important;
     page-break-inside: avoid;
     box-shadow: none !important;
   }
 
-  /* Hide any elements you don’t want to print */
   #top-bar,
   .modal,
-  .print-btn, /* if your print button is still in the DOM */
+  .print-btn,
   .full-proxy-btn,
   .qty-badge,
   .hover-bar,
   .add-btn,
-  .remove-btn
-  {
+  .remove-btn {
     display: none !important;
   }
 }
