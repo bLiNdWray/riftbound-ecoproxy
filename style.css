@@ -212,7 +212,6 @@ html, body {
 }
 
 /* ── Print Styles ─────────────────────────────────────────────────────── */
-/* ── Print cleanup ───────────────────────────────────────────────────── */
 @media print {
   /* Remove all default page margins */
   @page {
@@ -247,7 +246,6 @@ html, body {
     margin: 0 !important;
     page-break-inside: avoid;
     box-shadow: none !important;
-    border: none !important;
   }
 
   /* Hide any elements you don’t want to print */
