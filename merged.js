@@ -557,19 +557,25 @@ thankModal.addEventListener('click', e => {
   // ── Report Modal ────────────────────────────────────────────────
 // Show/Hide sections based on type
 // Toggle sections
-reportType.addEventListener('change', () => {
+  reportType.addEventListener('change', () => {
+  // 1. Always clear all `required` flags first
+  issueFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
+  featureFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
+
   if (reportType.value === 'Issue') {
     issueFields.classList.remove('hidden');
     featureFields.classList.add('hidden');
+
+    // Make only the ISSUE fields required
     issueFields.querySelectorAll('textarea, input').forEach(el => el.required = true);
   } else {
     featureFields.classList.remove('hidden');
     issueFields.classList.add('hidden');
+
+    // Make only the FEATURE fields required
     featureFields.querySelector('#feature-desc').required = true;
-    issueFields.querySelectorAll('textarea, input').forEach(el => el.required = false);
   }
 });
-
 // Modal open/close
 reportBtn.addEventListener('click', () => reportModal.classList.remove('hidden'));
 closeReport.addEventListener('click', () => reportModal.classList.add('hidden'));
