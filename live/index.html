@@ -1,1 +1,150 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Riftbound Proxy Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="card.css">
+  <link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+  <nav id="top-bar">
+    <div class="topbar-left">
+      <button id="open-search" class="topbar-btn">Add Cards</button>
+      <button id="btn-import" class="topbar-btn">Import List</button>
+      <button id="btn-print" class="topbar-btn">Print</button>
+      <button id="btn-overview" class="topbar-btn">Overview</button>
+      <button id="btn-full-proxy" class="topbar-btn">Full Image Proxy</button>
+    </div>
+    <div class="topbar-center">
+      <span id="card-count">0 cards</span>
+    </div>
+    <div class="topbar-right">
+      <button id="btn-reset" class="topbar-btn">Reset</button>
+     <button id="btn-thank" class="topbar-btn">Thank Me with a Drink</button>
+      <button id="btn-report" class="topbar-btn">Report Issue</button>
+    </div>
+  </nav>
+<div id="toast-container"></div>
+  <main id="card-container" class="layout-horizontal"></main>
 
+  <div id="search-modal" class="search-modal hidden" style="top:50px;">
+    <div class="modal-content">
+      <div class="modal-body">
+  <section class="search-panel" style="width:100%; border-right:none;">
+    <div class="search-header">
+      <button id="close-search" class="modal-close">×</button>
+      <input type="text" id="card-search-input" placeholder="Type to search by name or ID…" />
+    </div>
+          <div id="search-results" class="results-grid"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  
+<!-- Thank-you Modal (initially hidden) -->
+<div id="thank-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button id="close-thank" class="modal-close">×</button>
+    <h2>Thank Me with a Drink</h2>
+
+    <!-- PayPal Donate -->
+    <div id="donate-button-container">
+      <div id="donate-button"></div>
+      <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+      <script>
+        PayPal.Donation.Button({
+          env: 'production',
+          hosted_button_id: 'SRE4S793U5MLU',
+          image: {
+            src: 'https://pics.paypal.com/00/s/NzUzMmFjYmQtMGE2OS00M2U0LWJiNDAtN2VlYTc4YTdkYTNm/file.PNG',
+            alt: 'Donate with PayPal button',
+            title: 'PayPal - The safer, easier way to pay online!'
+          }
+        }).render('#donate-button');
+      </script>
+    </div>
+
+    <!-- Venmo Donate -->
+    <a href="https://www.venmo.com/u/James-Wray-28" title="Donate via Venmo" target="_blank">
+      <img
+        src="images/Venmo-Donate-button.png"
+        alt="Donate to Venmo"
+      />
+    </a>
+  </div>
+</div>
+
+<!-- Report Issue Modal (initially hidden) -->
+<!-- Report Issue Modal (initially hidden) -->
+<div id="report-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button id="close-report" class="modal-close">×</button>
+    <h2>Report an Issue</h2>
+
+    <form id="report-form">
+      <!-- Type selector -->
+      <label for="report-type">Type of Report</label>
+      <select id="report-type" name="type" required>
+        <option value="" disabled selected>Choose…</option>
+        <option value="Issue">Issue</option>
+        <option value="Feature Request">Feature Request</option>
+      </select>
+
+      <!-- ISSUE fields -->
+      <div id="issue-fields" class="report-section hidden">
+        <label for="issue-actions">What Actions Caused The Issue? <sup>*</sup></label>
+        <textarea id="issue-actions" name="actions" rows="2" required></textarea>
+
+        <label for="issue-result">Describe result of the Issue</label>
+        <textarea id="issue-result" name="result" rows="2"></textarea>
+
+        <fieldset>
+          <legend>Were you able to replicate the Issue?</legend>
+          <label><input type="radio" name="replicate" value="Yes" required> Yes</label>
+          <label><input type="radio" name="replicate" value="No"> No</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Does the Issue Prevent you from using the service?</legend>
+          <label><input type="radio" name="blocking" value="Yes" required> Yes</label>
+          <label><input type="radio" name="blocking" value="No"> No</label>
+        </fieldset>
+      </div>
+
+      <!-- FEATURE REQUEST fields -->
+      <div id="feature-fields" class="report-section hidden">
+        <label for="feature-desc">Describe Your Idea <sup>*</sup></label>
+        <textarea id="feature-desc" name="idea" rows="2" required></textarea>
+
+        <label for="feature-reason">Why is it a Good Idea</label>
+        <textarea id="feature-reason" name="reason" rows="2"></textarea>
+      </div>
+
+      <button type="submit" class="modal-submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<!-- EmailJS v4 SDK -->
+<script
+  type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script>
+  // Initialize with your Public Key (v4 format)
+  emailjs.init({
+    publicKey: 'IOJ9QxYEuV7Wirg4g'
+  });
+</script>
+<script src="merged.js"></script>
+ <!-- Powered By logo -->
+<a href="https://wnygaming.com" class="powered-by" title="Powered by WNY Gaming" target="_blank">
+  <img
+    src="images/WNY-Gaming-Logo-webbanner-psd.png"
+    alt="Powered by WNY Gaming"
+  />
+</a>
+</body>
+</html>
