@@ -17,7 +17,11 @@
   const thankBtn    = document.getElementById('btn-thank');
 const thankModal  = document.getElementById('thank-modal');
 const closeThank  = document.getElementById('close-thank');
-
+const reportBtn    = document.getElementById('btn-report');
+const reportModal  = document.getElementById('report-modal');
+const closeReport  = document.getElementById('close-report');
+const reportForm   = document.getElementById('report-form');
+  
   window.cardCounts = {};
   window.fullProxy  = false;
 
@@ -545,3 +549,30 @@ thankModal.addEventListener('click', e => {
   if (e.target === thankModal) thankModal.classList.add('hidden');
 });
 })();
+
+  // ── Report Modal ────────────────────────────────────────────────
+// Open Report modal
+reportBtn.addEventListener('click', () => {
+  reportModal.classList.remove('hidden');
+});
+
+// Close via × or backdrop click
+closeReport.addEventListener('click', () => reportModal.classList.add('hidden'));
+reportModal.addEventListener('click', e => {
+  if (e.target === reportModal) reportModal.classList.add('hidden');
+});
+
+// Handle form submit
+reportForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const url  = reportForm.url.value;
+  const desc = reportForm.description.value;
+
+  // TODO: replace with your submission logic (e.g. fetch to your API)
+  console.log('Issue submitted:', { url, desc });
+
+  // give user feedback & close
+  alert('Thanks! Your issue has been sent.');
+  reportModal.classList.add('hidden');
+  reportForm.reset();
+});
