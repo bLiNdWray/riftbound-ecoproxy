@@ -503,6 +503,6 @@ padding-top: 0px !important;
 /* size the image to something unobtrusive */
 .powered-by img {
   display: block;
-  width: 120px;    /* adjust as needed */
+  width: 150px;    /* adjust as needed */
   height: auto;
 }
